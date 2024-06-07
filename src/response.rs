@@ -9,6 +9,16 @@ pub struct HttpResponse {
 }
 
 impl HttpResponse {
+    /// Creates a new instance of `HttpResponse`
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::response::HttpResponse;
+    /// 
+    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    ///    let new_response = HttpResponse::new();
+    /// }
     pub fn new() -> HttpResponse {
         HttpResponse {
             debug_mode: false,
@@ -18,28 +28,30 @@ impl HttpResponse {
             body: Vec::new(),
         }
     }
+
     /// Sets the status of the response
     ///
     /// # Example
     ///
     /// ```rust
     /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
-    /// 
+    ///
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
-    ///    response.status(StatusCode::Ok); 
+    ///    response.status(StatusCode::Ok);
     /// }
     /// ```
     pub fn status(&mut self, status_code: StatusCode) -> &mut HttpResponse {
         self.status_code = status_code;
         self
     }
+
     /// Sets the body of the response. Function sets `Content-Length` automatically but needs `Content-Type` to be set manually.
     ///
     /// # Example
     ///
     /// ```rust
     /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
-    /// 
+    ///
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///     response.body(b"Hello, World!".to_vec(), "text/plain");
     /// }
@@ -47,7 +59,7 @@ impl HttpResponse {
     ///
     /// ```rust
     /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
-    /// 
+    ///
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///    response.status(StatusCode::Ok).body(b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(), "text/html");
     /// }
@@ -66,13 +78,13 @@ impl HttpResponse {
     /// ```rust
     /// use std::collections::HashMap;
     /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
-    /// 
+    ///
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///     let mut headers = HashMap::new();
-    /// 
+    ///
     ///     headers.insert("Server".to_string(), "Rust".to_string());
     ///     headers.insert("Connection".to_string(), "close".to_string());
-    /// 
+    ///
     ///     response.status(StatusCode::Ok).headers(headers);
     /// }
     /// ```
@@ -82,34 +94,50 @@ impl HttpResponse {
         self.headers.extend(headers);
         self
     }
+
     pub fn debug_msg(&mut self, msg: &str) -> &mut HttpResponse {
         if self.debug_mode {
             println!("{}", msg);
         }
         self
     }
+
+    /// Returns the response as a byte vector.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
+    /// 
+    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    ///    let response_as_bytes: Vec<u8> = response
+    ///         .status(StatusCode::Ok)
+    ///         .body(b"Hello, World!".to_vec(), "text/plain")
+    ///         .as_bytes();
+    /// }
+    /// ```
     pub fn as_bytes(&self) -> Vec<u8> {
-        let mut headers = String::new();
+        let mut headers_string = String::new();
 
         if self.headers.len() > 0 {
-            for (key, value) in &self.headers {
-                headers.push_str(&format!("{key}: {value}\r\n"));
-            }
+            self.headers.iter().for_each(|(key, value)| {
+                headers_string.push_str(&format!("{key}: {value}\r\n"));
+            });
         }
 
         if self.body.len() > 0 {
-            if !headers.contains("Content-Length") {
+            if !headers_string.contains("Content-Length") {
                 println!("Content-Length not found even though body is present");
-                headers.push_str(&format!("Content-Length: {}\r\n", self.body.len()));
+                headers_string.push_str(&format!("Content-Length: {}\r\n", self.body.len()));
             }
-            if !headers.contains("Content-Type") {
+            if !headers_string.contains("Content-Type") {
                 println!("Content-Type not found even though body is present");
-                headers.push_str("Content-Type: text/plain\r\n");
+                headers_string.push_str("Content-Type: text/plain\r\n");
             }
         }
 
-        let mut response_bytes = format!(
-            "{http_version} {status_code} {status_msg}\r\n{headers}\r\n",
+        let mut response_bytes: Vec<u8> = format!(
+            "{http_version} {status_code} {status_msg}\r\n{headers_string}\r\n",
             http_version = self.http_version,
             status_code = self.status_code.code(),
             status_msg = self.status_code.msg()
@@ -119,6 +147,7 @@ impl HttpResponse {
 
         response_bytes
     }
+
     pub fn debug_on(&mut self) -> &mut HttpResponse {
         self.debug_mode = true;
         self

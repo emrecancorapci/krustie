@@ -7,16 +7,13 @@ impl Server {
         let mut buf_reader = BufReader::new(&mut stream);
         let mut headers = Vec::new();
 
+        // Don't touch this. It's too sensitive. It will break the server.
         for line_result in buf_reader.by_ref().lines() {
-            match line_result {
-                Ok(line) => {
-                    headers.push(line);
-                }
-                Err(err) => {
-                    println!("{:?}", err);
-                    break;
-                }
+            let line = line_result.unwrap();
+            if line.is_empty() {
+                break;
             }
+            headers.push(line);
         }
 
         match Server::get_content_length(&headers) {

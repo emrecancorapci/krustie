@@ -2,6 +2,7 @@ use std::{ io::Write, net::TcpListener };
 
 use crate::{ request::HttpRequest, response::{ HttpResponse, StatusCode }, router::Router };
 
+pub mod parser;
 pub struct Server {
     router: Router,
     listener: TcpListener,

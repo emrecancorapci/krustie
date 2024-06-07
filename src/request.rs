@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-use request_line::RequestLine;
+
+use self::request_line::RequestLine;
 
 pub mod request_line;
 

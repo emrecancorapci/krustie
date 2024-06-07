@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use crate::{ request::HttpRequest, response::{ HttpResponse, StatusCode } };
 
-use http_method::HttpMethod;
-use route::Route;
+use self::http_method::HttpMethod;
+use self::route::Route;
 
 type Controller = Box<dyn Fn(&HttpRequest, &mut HttpResponse) + Send + Sync>;
 
@@ -36,6 +36,21 @@ impl Router {
         self.endpoints.insert(Route::new(path, HttpMethod::POST), Endpoint::Controller(controller));
     }
 
+    /// Adds a PUT endpoint to the router
+    pub fn put(&mut self, path: &str, controller: Controller) {
+        self.endpoints.insert(Route::new(path, HttpMethod::PUT), Endpoint::Controller(controller));
+    }
+
+    /// Adds a DELETE endpoint to the router
+    pub fn delete(&mut self, path: &str, controller: Controller) {
+        self.endpoints.insert(Route::new(path, HttpMethod::DELETE), Endpoint::Controller(controller));
+    }
+
+    /// Adds a PATCH endpoint to the router
+    pub fn patch(&mut self, path: &str, controller: Controller) {
+        self.endpoints.insert(Route::new(path, HttpMethod::PATCH), Endpoint::Controller(controller));
+    }
+
     /// Handles routing of requests
     pub fn handle(&self, request: &HttpRequest, response: &mut HttpResponse) {
         let path = &request.request.path_array;
@@ -45,8 +60,8 @@ impl Router {
                 let route = Route::new(path[0], method);
 
                 match self.endpoints.get(&route) {
-                    Some(controller) => {
-                        match controller {
+                    Some(endpoint) => {
+                        match endpoint {
                             Endpoint::Controller(controller) => {
                                 controller(request, response);
                             }

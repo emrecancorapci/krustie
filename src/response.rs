@@ -9,26 +9,6 @@ pub struct HttpResponse {
 }
 
 impl HttpResponse {
-    /// Creates a new instance of `HttpResponse`
-    /// 
-    /// # Example
-    /// 
-    /// ```rust
-    /// use krustie::response::HttpResponse;
-    /// 
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
-    ///    let new_response = HttpResponse::new();
-    /// }
-    pub fn new() -> HttpResponse {
-        HttpResponse {
-            debug_mode: false,
-            http_version: "HTTP/1.1".to_string(),
-            status_code: StatusCode::Ok,
-            headers: HashMap::new(),
-            body: Vec::new(),
-        }
-    }
-
     /// Sets the status of the response
     ///
     /// # Example
@@ -151,6 +131,29 @@ impl HttpResponse {
     pub fn debug_on(&mut self) -> &mut HttpResponse {
         self.debug_mode = true;
         self
+    }
+}
+
+impl Default for HttpResponse {
+/// Returns a default instance of HttpResponse
+/// 
+/// # Example
+/// 
+/// ```rust
+/// use krustie::response::HttpResponse;
+/// 
+/// fn main() {
+///     let response = HttpResponse::default();
+/// }
+/// ```
+    fn default() -> Self {
+        HttpResponse {
+            debug_mode: false,
+            http_version: "HTTP/1.1".to_string(),
+            status_code: StatusCode::Ok,
+            headers: HashMap::new(),
+            body: Vec::new(),
+        }
     }
 }
 

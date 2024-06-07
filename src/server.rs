@@ -38,7 +38,7 @@ impl Server {
             match stream_result {
                 Ok(mut stream) => {
                     let parsed = Server::parse_stream(&stream);
-                    let mut response = HttpResponse::new();
+                    let mut response = HttpResponse::default();
 
                     match parsed {
                         Ok((headers, body)) => {

@@ -5,13 +5,13 @@ use crate::{ request::HttpRequest, response::{ HttpResponse, StatusCode } };
 use http_method::HttpMethod;
 use route::Route;
 
-type IController = Box<dyn Fn(&HttpRequest, &mut HttpResponse) + Send + Sync>;
+type Controller = Box<dyn Fn(&HttpRequest, &mut HttpResponse) + Send + Sync>;
 
 pub mod http_method;
 pub mod route;
 
 pub struct Router {
-    endpoints: HashMap<Route, IController>,
+    endpoints: HashMap<Route, Endpoint>,
 }
 
 impl Router {
@@ -22,20 +22,18 @@ impl Router {
         }
     }
 
-    /// Serves static files from the specified path
-    pub fn serve_static(&mut self, path: &str) {
-        self.is_serves_static = true;
-        self.static_path = path.to_string();
+    pub fn add_router(&mut self, path: &str, router: Router) {
+        self.endpoints.insert(Route::new(path, HttpMethod::GET), Endpoint::Router(router));
     }
 
     /// Adds a GET endpoint to the router
-    pub fn get(&mut self, path: &str, controller: IController) {
-        self.endpoints.insert(Route::new(path, HttpMethod::GET), controller);
+    pub fn get(&mut self, path: &str, controller: Controller) {
+        self.endpoints.insert(Route::new(path, HttpMethod::GET), Endpoint::Controller(controller));
     }
 
     /// Adds a POST endpoint to the router
-    pub fn post(&mut self, path: &str, controller: IController) {
-        self.endpoints.insert(Route::new(path, HttpMethod::POST), controller);
+    pub fn post(&mut self, path: &str, controller: Controller) {
+        self.endpoints.insert(Route::new(path, HttpMethod::POST), Endpoint::Controller(controller));
     }
 
     /// Handles routing of requests
@@ -48,7 +46,14 @@ impl Router {
 
                 match self.endpoints.get(&route) {
                     Some(controller) => {
-                        return controller(request, response);
+                        match controller {
+                            Endpoint::Controller(controller) => {
+                                controller(request, response);
+                            }
+                            Endpoint::Router(router) => {
+                                router.handle(request, response);
+                            }
+                        }
                     }
                     None => {
                         response.status(StatusCode::NotFound);
@@ -63,4 +68,9 @@ impl Router {
             }
         }
     }
+}
+
+enum Endpoint {
+    Controller(Controller),
+    Router(Router),
 }

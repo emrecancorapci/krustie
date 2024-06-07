@@ -1,10 +1,10 @@
-use std::{ io::Write, net::TcpListener };
+use std::{ fs, io::Write, net::TcpListener, path::PathBuf };
 
 use crate::{ request::HttpRequest, response::{ HttpResponse, StatusCode }, router::Router };
 
 pub mod parser;
 pub struct Server {
-    router: Router,
+    request_handlers: Vec<RequestHandler>,
     listener: TcpListener,
     is_serves_static: bool,
     static_path: String,
@@ -17,8 +17,10 @@ impl Server {
         match TcpListener::bind(addr) {
             Ok(listener) => {
                 Ok(Server {
-                    router: Router::new(),
+                    request_handlers: Vec::new(),
                     listener,
+                    is_serves_static: false,
+                    static_path: String::from("./public"),
                 })
             }
             Err(err) => { Err(err.to_string()) }
@@ -35,10 +37,10 @@ impl Server {
         for stream_result in self.listener.incoming() {
             match stream_result {
                 Ok(mut stream) => {
-                    let parsing = Server::parse_stream(&stream);
+                    let parsed = Server::parse_stream(&stream);
                     let mut response = HttpResponse::new();
 
-                    match parsing {
+                    match parsed {
                         Ok((headers, body)) => {
                             let request = &HttpRequest::from(&headers, &body);
 
@@ -57,7 +59,16 @@ impl Server {
                                 }
                             }
 
-                            self.router.handle(request, &mut response);
+                            self.request_handlers.iter().for_each(|handler| {
+                                match handler {
+                                    RequestHandler::Router(router) => {
+                                        router.handle(request, &mut response);
+                                    }
+                                    RequestHandler::Middleware(middleware) => {
+                                        middleware(request, &mut response);
+                                    }
+                                }
+                            });
                         }
                         Err(error) => {
                             response.status(StatusCode::BadRequest).debug_msg(&error);
@@ -79,7 +90,11 @@ impl Server {
     }
 
     pub fn use_router(&mut self, router: Router) {
-        self.router = router;
+        self.request_handlers.push(RequestHandler::Router(router));
+    }
+
+    pub fn use_middleware(&mut self, middleware: Middleware) {
+        self.request_handlers.push(RequestHandler::Middleware(middleware));
     }
 
     fn serve_static_files(file_name: &str, folder_path: &str) -> Option<Vec<u8>> {
@@ -94,4 +109,11 @@ impl Server {
             }
         }
     }
+}
+
+type Middleware = Box<dyn Fn(&HttpRequest, &mut HttpResponse) + Send + Sync>;
+
+enum RequestHandler {
+    Router(Router),
+    Middleware(Middleware),
 }

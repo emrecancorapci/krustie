@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Debug};
+use std::{collections::HashMap, fmt::Debug, net::IpAddr};
 
 use super::{request_line::RequestLine, HttpRequest};
 
@@ -15,7 +15,7 @@ impl<'a> HttpRequest<'a> {
     /// 
     /// assert_eq!(request.request.method, HttpMethod::GET);
     /// ```
-    pub fn new(http_request: &'a Vec<String>, body: &'a str) -> HttpRequest<'a> {
+    pub fn new(http_request: &'a Vec<String>, body: &'a str, ip: IpAddr) -> HttpRequest<'a> {
         let request = (
             {
                 match http_request.first() {
@@ -35,6 +35,7 @@ impl<'a> HttpRequest<'a> {
             request,
             headers,
             body,
+            ip
         }
     }
 
@@ -60,6 +61,7 @@ impl Default for HttpRequest<'_> {
             request: RequestLine::new("GET", "/", "HTTP/1.1"),
             headers: HashMap::new(),
             body: "",
+            ip: IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1))
         }
     }
 }

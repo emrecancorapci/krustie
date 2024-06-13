@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, net::IpAddr};
 
 use self::request_line::RequestLine;
 
@@ -11,6 +11,7 @@ pub struct HttpRequest<'a> {
     pub request: RequestLine<'a>,
     pub headers: HashMap<String, String>,
     pub body: &'a str,
+    pub ip: IpAddr,
 }
 
 

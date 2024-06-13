@@ -1,4 +1,4 @@
-use std::{ fs, io::Write, net::TcpListener, path::PathBuf };
+use std::{ fs, io::Write, net::{IpAddr, TcpListener}, path::PathBuf };
 
 use self::request_handler::{ RequestHandler, Middleware };
 
@@ -63,6 +63,16 @@ impl Server {
     }
 
     pub fn listen(&self) {
+        let ip: IpAddr;
+        match self.listener.accept() {
+            Ok((_, addr)) => {
+                ip = addr.ip();
+            }
+            Err(e) => {
+                println!("error: {}", e);
+                return;
+            }
+        }
         for stream_result in self.listener.incoming() {
             match stream_result {
                 Ok(mut stream) => {
@@ -71,7 +81,7 @@ impl Server {
 
                     match parsed {
                         Ok((headers, body)) => {
-                            let request = HttpRequest::new(&headers, &body);
+                            let request = HttpRequest::new(&headers, &body, ip);
 
                             if self.is_serves_static && &request.request.method == &HttpMethod::GET {
                                 match

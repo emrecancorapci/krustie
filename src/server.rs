@@ -1,8 +1,16 @@
 use std::{ fs, io::Write, net::TcpListener, path::PathBuf };
 
-use crate::{ request::HttpRequest, response::{ HttpResponse, StatusCode }, router::Router };
+use self::request_handler::{ RequestHandler, Middleware };
 
-pub mod parser;
+use crate::{
+    request::{ HttpMethod, HttpRequest },
+    response::{ HttpResponse, StatusCode },
+    router::Router,
+};
+
+mod request_handler;
+mod parser;
+
 pub struct Server {
     request_handlers: Vec<RequestHandler>,
     listener: TcpListener,
@@ -42,9 +50,9 @@ impl Server {
 
                     match parsed {
                         Ok((headers, body)) => {
-                            let request = &HttpRequest::from(&headers, &body);
+                            let request = HttpRequest::new(&headers, &body);
 
-                            if self.is_serves_static && request.request.method == "GET" {
+                            if self.is_serves_static && &request.request.method == &HttpMethod::GET {
                                 match
                                     Server::serve_static_files(
                                         &request.request.path_array[0],
@@ -59,16 +67,9 @@ impl Server {
                                 }
                             }
 
-                            self.request_handlers.iter().for_each(|handler| {
-                                match handler {
-                                    RequestHandler::Router(router) => {
-                                        router.handle(request, &mut response);
-                                    }
-                                    RequestHandler::Middleware(middleware) => {
-                                        middleware(request, &mut response);
-                                    }
-                                }
-                            });
+                            self.request_handlers
+                                .iter()
+                                .for_each(|handler| handler.run(&request, &mut response));
                         }
                         Err(error) => {
                             response.status(StatusCode::BadRequest).debug_msg(&error);

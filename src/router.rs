@@ -1,13 +1,14 @@
 use std::collections::HashMap;
 
-use crate::{ request::HttpRequest, response::{ HttpResponse, StatusCode } };
-
-use self::http_method::HttpMethod;
 use self::route::Route;
+
+use crate::{
+    request::{ HttpMethod, HttpRequest },
+    response::{ HttpResponse, StatusCode },
+};
 
 type Controller = Box<dyn Fn(&HttpRequest, &mut HttpResponse) + Send + Sync>;
 
-pub mod http_method;
 pub mod route;
 
 pub struct Router {
@@ -23,32 +24,41 @@ impl Router {
     }
 
     pub fn add_router(&mut self, path: &str, router: Router) {
-        self.endpoints.insert(Route::new(path, HttpMethod::GET), Endpoint::Router(router));
+        self.endpoints.insert(Route::new(path, &HttpMethod::GET), Endpoint::Router(router));
     }
 
     /// Adds a GET endpoint to the router
     pub fn get(&mut self, path: &str, controller: Controller) {
-        self.endpoints.insert(Route::new(path, HttpMethod::GET), Endpoint::Controller(controller));
+        self.endpoints.insert(Route::new(path, &HttpMethod::GET), Endpoint::Controller(controller));
     }
 
     /// Adds a POST endpoint to the router
     pub fn post(&mut self, path: &str, controller: Controller) {
-        self.endpoints.insert(Route::new(path, HttpMethod::POST), Endpoint::Controller(controller));
+        self.endpoints.insert(
+            Route::new(path, &HttpMethod::POST),
+            Endpoint::Controller(controller)
+        );
     }
 
     /// Adds a PUT endpoint to the router
     pub fn put(&mut self, path: &str, controller: Controller) {
-        self.endpoints.insert(Route::new(path, HttpMethod::PUT), Endpoint::Controller(controller));
+        self.endpoints.insert(Route::new(path, &HttpMethod::PUT), Endpoint::Controller(controller));
     }
 
     /// Adds a DELETE endpoint to the router
     pub fn delete(&mut self, path: &str, controller: Controller) {
-        self.endpoints.insert(Route::new(path, HttpMethod::DELETE), Endpoint::Controller(controller));
+        self.endpoints.insert(
+            Route::new(path, &HttpMethod::DELETE),
+            Endpoint::Controller(controller)
+        );
     }
 
     /// Adds a PATCH endpoint to the router
     pub fn patch(&mut self, path: &str, controller: Controller) {
-        self.endpoints.insert(Route::new(path, HttpMethod::PATCH), Endpoint::Controller(controller));
+        self.endpoints.insert(
+            Route::new(path, &HttpMethod::PATCH),
+            Endpoint::Controller(controller)
+        );
     }
 
     /// Handles routing of requests to the appropriate endpoint

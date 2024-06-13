@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+pub mod status_code;
+
 pub struct HttpResponse {
     debug_mode: bool,
     http_version: String,
@@ -119,8 +121,8 @@ impl HttpResponse {
         let mut response_bytes: Vec<u8> = format!(
             "{http_version} {status_code} {status_msg}\r\n{headers_string}\r\n",
             http_version = self.http_version,
-            status_code = self.status_code.code(),
-            status_msg = self.status_code.msg()
+            status_code = self.status_code.to_string(),
+            status_msg = self.status_code.get_message()
         ).into_bytes();
 
         response_bytes.extend_from_slice(&self.body);
@@ -157,7 +159,7 @@ impl Default for HttpResponse {
     }
 }
 
-#[derive(Eq, Hash, PartialEq)]
+#[derive(Eq, Hash, PartialEq, Debug)]
 pub enum StatusCode {
     Ok,
     Created,
@@ -166,30 +168,4 @@ pub enum StatusCode {
     MethodNotAllowed,
     IAmATeapot,
     InternalServerError,
-}
-
-impl StatusCode {
-    pub fn code(&self) -> &str {
-        match self {
-            StatusCode::Ok => "200",
-            StatusCode::Created => "201",
-            StatusCode::BadRequest => "400",
-            StatusCode::NotFound => "404",
-            StatusCode::MethodNotAllowed => "405",
-            StatusCode::IAmATeapot => "418",
-            StatusCode::InternalServerError => "500",
-        }
-    }
-
-    pub fn msg(&self) -> &str {
-        match self {
-            StatusCode::Ok => "OK",
-            StatusCode::Created => "Created",
-            StatusCode::BadRequest => "Bad Request",
-            StatusCode::NotFound => "Not Found",
-            StatusCode::MethodNotAllowed => "Method Not Allowed",
-            StatusCode::IAmATeapot => "I'm a teapot",
-            StatusCode::InternalServerError => "Internal Server Error",
-        }
-    }
 }

@@ -51,34 +51,18 @@ impl Router {
         self.endpoints.insert(Route::new(path, HttpMethod::PATCH), Endpoint::Controller(controller));
     }
 
-    /// Handles routing of requests
+    /// Handles routing of requests to the appropriate endpoint
     pub fn handle(&self, request: &HttpRequest, response: &mut HttpResponse) {
         let path = &request.request.path_array;
 
-        match HttpMethod::new(&request.request.method) {
-            Ok(method) => {
-                let route = Route::new(path[0], method);
+        let route = Route::new(path[0], &request.request.method);
 
-                match self.endpoints.get(&route) {
-                    Some(endpoint) => {
-                        match endpoint {
-                            Endpoint::Controller(controller) => {
-                                controller(request, response);
-                            }
-                            Endpoint::Router(router) => {
-                                router.handle(request, response);
-                            }
-                        }
-                    }
-                    None => {
-                        response.status(StatusCode::NotFound);
-                        return;
-                    }
-                }
+        match self.endpoints.get(&route) {
+            Some(endpoint) => {
+                endpoint.run(request, response);
             }
-            Err(_) => {
-                let body = b"Incorrect method type".to_vec();
-                response.status(StatusCode::BadRequest).body(body, "plain/text");
+            None => {
+                response.status(StatusCode::NotFound);
                 return;
             }
         }
@@ -88,4 +72,18 @@ impl Router {
 enum Endpoint {
     Controller(Controller),
     Router(Router),
+}
+
+impl Endpoint {
+    /// Runs the endpoint depending on the type
+    pub fn run(&self, req: &HttpRequest, res: &mut HttpResponse) {
+        match self {
+            Endpoint::Controller(controller) => {
+                controller(req, res);
+            }
+            Endpoint::Router(router) => {
+                router.handle(req, res);
+            }
+        }
+    }
 }

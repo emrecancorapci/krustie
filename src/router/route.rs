@@ -1,4 +1,4 @@
-use super::http_method::HttpMethod;
+use crate::request::HttpMethod;
 
 #[derive(Eq, Hash, PartialEq)]
 pub struct Route {
@@ -7,7 +7,8 @@ pub struct Route {
 }
 
 impl Route {
-    pub fn new(path: &str, method: HttpMethod) -> Route {
+    pub fn new(path: &str, method: &HttpMethod) -> Route {
+        let method = method.clone();
         Route {
             path: path.to_string(),
             method,

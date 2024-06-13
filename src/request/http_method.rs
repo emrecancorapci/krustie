@@ -24,12 +24,12 @@ impl From<&str> for HttpMethod {
     /// Converts a string to an HttpMethod
     ///
     /// If the string is not a valid HTTP method, it defaults to GET
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::request::HttpMethod;
-    /// 
+    ///
     /// fn main() {
     ///    let method = HttpMethod::from("GET");
     /// }
@@ -45,4 +45,3 @@ impl From<&str> for HttpMethod {
         }
     }
 }
-

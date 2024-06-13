@@ -1,5 +1,4 @@
-use crate::{request::HttpRequest, response::HttpResponse, router::Router};
-
+use crate::{ request::HttpRequest, response::HttpResponse, router::Router };
 
 pub type Middleware = Box<dyn Fn(&HttpRequest, &mut HttpResponse) + Send + Sync>;
 

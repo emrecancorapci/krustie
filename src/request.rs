@@ -1,4 +1,4 @@
-use std::{collections::HashMap, net::IpAddr};
+use std::{ collections::HashMap, net::IpAddr };
 
 use self::request_line::RequestLine;
 
@@ -13,7 +13,6 @@ pub struct HttpRequest<'a> {
     pub body: &'a str,
     pub ip: IpAddr,
 }
-
 
 #[derive(Eq, Hash, PartialEq, Clone, Copy, Debug)]
 pub enum HttpMethod {
@@ -30,14 +29,14 @@ pub enum HttpMethod {
 
 impl HttpMethod {
     /// Create a new HttpMethod from a string.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::request::HttpMethod;
-    /// 
+    ///
     /// let method = HttpMethod::new("GET").expect("Method not found");
-    /// 
+    ///
     /// assert_eq!(method, HttpMethod::GET);
     /// ```
     pub fn new(method: &str) -> Result<HttpMethod, &str> {

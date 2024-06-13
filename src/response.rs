@@ -85,12 +85,12 @@ impl HttpResponse {
     }
 
     /// Returns the response as a byte vector.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
-    /// 
+    ///
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///    let response_as_bytes: Vec<u8> = response
     ///         .status(StatusCode::Ok)
@@ -137,17 +137,17 @@ impl HttpResponse {
 }
 
 impl Default for HttpResponse {
-/// Returns a default instance of HttpResponse
-/// 
-/// # Example
-/// 
-/// ```rust
-/// use krustie::response::HttpResponse;
-/// 
-/// fn main() {
-///     let response = HttpResponse::default();
-/// }
-/// ```
+    /// Returns a default instance of HttpResponse
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::response::HttpResponse;
+    ///
+    /// fn main() {
+    ///     let response = HttpResponse::default();
+    /// }
+    /// ```
     fn default() -> Self {
         HttpResponse {
             debug_mode: false,

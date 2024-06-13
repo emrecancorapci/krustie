@@ -1,4 +1,4 @@
-use std::{ fs, io::Write, net::{IpAddr, TcpListener}, path::PathBuf };
+use std::{ fs, io::Write, net::{ IpAddr, TcpListener }, path::PathBuf };
 
 use self::request_handler::{ RequestHandler, Middleware };
 
@@ -20,14 +20,14 @@ pub struct Server {
 
 impl Server {
     /// Creates a new server instance
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::server::Server;
-    /// 
+    ///
     /// let server = Server::create(8080).unwrap();
-    /// 
+    ///
     /// // server.listen();
     /// ```
     pub fn create(port: u16) -> Result<Server, String> {
@@ -47,14 +47,14 @@ impl Server {
     }
 
     /// Serves static files from the specified path
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::server::Server;
-    /// 
+    ///
     /// let mut server = Server::create(8080).unwrap();
-    /// 
+    ///
     /// server.serve_static("./public");
     /// ```
     pub fn serve_static(&mut self, path: &str) {

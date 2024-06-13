@@ -2,10 +2,7 @@ use std::collections::HashMap;
 
 use self::route::Route;
 
-use crate::{
-    request::{ HttpMethod, HttpRequest },
-    response::{ HttpResponse, StatusCode },
-};
+use crate::{ request::{ HttpMethod, HttpRequest }, response::{ HttpResponse, StatusCode } };
 
 type Controller = Box<dyn Fn(&HttpRequest, &mut HttpResponse) + Send + Sync>;
 
@@ -18,14 +15,14 @@ pub struct Router {
 
 impl Router {
     /// Creates a new router
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
-    /// 
+    ///
     /// let mut router = Router::new();
-    /// 
+    ///
     /// router.get("/", Box::new(|req, res| {
     ///   res.status(StatusCode::Ok);
     /// }));
@@ -37,15 +34,15 @@ impl Router {
     }
 
     /// Adds a router endpoint to the router
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::router::Router;
-    /// 
+    ///
     /// let mut router = Router::new();
     /// let sub_router = Router::new();
-    /// 
+    ///
     /// router.add_router("/sub", sub_router);
     /// ```
     pub fn add_router(&mut self, path: &str, router: Router) {
@@ -53,14 +50,14 @@ impl Router {
     }
 
     /// Adds a GET endpoint to the router
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
-    /// 
+    ///
     /// let mut router = Router::new();
-    /// 
+    ///
     /// router.get("/", Box::new(|req, res| {
     ///    res.status(StatusCode::Ok);
     /// }));
@@ -70,14 +67,14 @@ impl Router {
     }
 
     /// Adds a POST endpoint to the router
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
-    /// 
+    ///
     /// let mut router = Router::new();
-    /// 
+    ///
     /// router.post("/", Box::new(|req, res| {
     ///    res.status(StatusCode::Ok);
     /// }));
@@ -90,14 +87,14 @@ impl Router {
     }
 
     /// Adds a PUT endpoint to the router
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
-    /// 
+    ///
     /// let mut router = Router::new();
-    /// 
+    ///
     /// router.put("/", Box::new(|req, res| {
     ///    res.status(StatusCode::Ok);
     /// }));
@@ -107,14 +104,14 @@ impl Router {
     }
 
     /// Adds a DELETE endpoint to the router
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
-    /// 
+    ///
     /// let mut router = Router::new();
-    /// 
+    ///
     /// router.delete("/", Box::new(|req, res| {
     ///    res.status(StatusCode::Ok);
     /// }));
@@ -127,14 +124,14 @@ impl Router {
     }
 
     /// Adds a PATCH endpoint to the router
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
-    /// 
+    ///
     /// let mut router = Router::new();
-    /// 
+    ///
     /// router.patch("/", Box::new(|req, res| {
     ///    res.status(StatusCode::Ok);
     /// }));

@@ -22,18 +22,18 @@ impl Default for StatusCode {
 
 impl From<&str> for StatusCode {
     /// Converts a string to a StatusCode
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::response::StatusCode;
-    /// 
+    ///
     /// let status_code_200 = StatusCode::from("200");
     /// let status_code_418 = StatusCode::from("418");
-    /// 
+    ///
     /// assert_eq!(status_code_200, StatusCode::Ok);
     /// assert_eq!(status_code_418, StatusCode::IAmATeapot);
-    /// ``` 
+    /// ```
     fn from(code: &str) -> Self {
         match code {
             "200" => StatusCode::Ok,
@@ -50,15 +50,15 @@ impl From<&str> for StatusCode {
 
 impl From<u16> for StatusCode {
     /// Converts a u16 to a StatusCode
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::response::StatusCode;
-    /// 
+    ///
     /// let status_code_200 = StatusCode::from(200);
     /// let status_code_418 = StatusCode::from(418);
-    /// 
+    ///
     /// assert_eq!(status_code_200, StatusCode::Ok);
     /// assert_eq!(status_code_418, StatusCode::IAmATeapot);
     /// ```
@@ -78,15 +78,15 @@ impl From<u16> for StatusCode {
 
 impl From<StatusCode> for u16 {
     /// Converts a StatusCode to a u16
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::response::StatusCode;
-    /// 
+    ///
     /// let status_code_200 = StatusCode::Ok;
     /// let status_code_418 = StatusCode::IAmATeapot;
-    /// 
+    ///
     /// assert_eq!(u16::from(status_code_200), 200);
     /// assert_eq!(u16::from(status_code_418), 418);
     /// ```
@@ -110,15 +110,15 @@ impl From<StatusCode> for u16 {
 
 // impl From<StatusCode> for &str {
 //     /// Converts a StatusCode to a string
-//     /// 
+//     ///
 //     /// # Example
-//     /// 
+//     ///
 //     /// ```rust
 //     /// use krustie::response::StatusCode;
-//     /// 
+//     ///
 //     /// let status_code_200 = StatusCode::Ok;
 //     /// let status_code_418 = StatusCode::IAmATeapot;
-//     /// 
+//     ///
 //     /// assert_eq!(str::from(status_code_200), "200");
 //     /// assert_eq!(str::from(status_code_418), "418");
 //     /// ```
@@ -137,15 +137,15 @@ impl From<StatusCode> for u16 {
 
 impl ToString for StatusCode {
     /// Converts a StatusCode to a string
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::response::StatusCode;
-    /// 
+    ///
     /// let status_code_200 = StatusCode::Ok;
     /// let status_code_418 = StatusCode::IAmATeapot;
-    /// 
+    ///
     /// assert_eq!(status_code_200.to_string(), "200");
     /// assert_eq!(status_code_418.to_string(), "418");
     /// ```

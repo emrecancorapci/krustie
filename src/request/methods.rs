@@ -1,18 +1,18 @@
-use std::{collections::HashMap, fmt::Debug, net::IpAddr};
+use std::{ collections::HashMap, fmt::Debug, net::IpAddr };
 
-use super::{request_line::RequestLine, HttpRequest};
+use super::{ request_line::RequestLine, HttpRequest };
 
 impl<'a> HttpRequest<'a> {
     /// Creates a new HttpRequest
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::request::{HttpRequest, HttpMethod};
-    /// 
+    ///
     /// let header = vec!["GET / HTTP/1.1".to_string()];
     /// let request = HttpRequest::new(&header, "");
-    /// 
+    ///
     /// assert_eq!(request.request.method, HttpMethod::GET);
     /// ```
     pub fn new(http_request: &'a Vec<String>, body: &'a str, ip: IpAddr) -> HttpRequest<'a> {
@@ -35,7 +35,7 @@ impl<'a> HttpRequest<'a> {
             request,
             headers,
             body,
-            ip
+            ip,
         }
     }
 
@@ -61,7 +61,7 @@ impl Default for HttpRequest<'_> {
             request: RequestLine::new("GET", "/", "HTTP/1.1"),
             headers: HashMap::new(),
             body: "",
-            ip: IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1))
+            ip: IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)),
         }
     }
 }
@@ -72,7 +72,8 @@ impl Debug for HttpRequest<'_> {
             .iter()
             .fold(String::new(), |acc, (k, v)| format!("{acc}{k}: {v}\r\n"));
 
-        write!(f, 
+        write!(
+            f,
             "HttpRequest Line: {}\r\n Headers: {}\r\n Body: {}",
             self.request.to_string(),
             headers,

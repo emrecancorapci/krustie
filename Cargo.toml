@@ -1,6 +1,6 @@
 [package]
 name = "krustie"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Emre Can Corapci"]
 description = "A simple HTTP server"
 homepage = "https://github.com/emrecancorapci/krustie"

@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use self::request_line::RequestLine;
 
-pub mod request_line;
+pub mod http_method;
+pub mod methods;
+
+mod request_line;
 
 pub struct HttpRequest<'a> {
     pub request: RequestLine<'a>,
@@ -10,54 +13,52 @@ pub struct HttpRequest<'a> {
     pub body: &'a str,
 }
 
-impl<'a> HttpRequest<'a> {
-    pub fn from(http_request: &'a Vec<String>, body: &'a str) -> HttpRequest<'a> {
-        let request = (
-            {
-                match http_request.first() {
-                    Some(request_line) => { RequestLine::from_string(request_line) }
-                    None => { todo!("Implement none handling") }
-                }
+
+#[derive(Eq, Hash, PartialEq, Clone, Copy, Debug)]
+pub enum HttpMethod {
+    GET,
+    POST,
+    PUT,
+    PATCH,
+    DELETE,
+    // CONNTECT,
+    // HEAD,
+    // OPTIONS,
+    // TRACE,
+}
+
+impl HttpMethod {
+    /// Create a new HttpMethod from a string.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::request::HttpMethod;
+    /// 
+    /// let method = HttpMethod::new("GET").expect("Method not found");
+    /// 
+    /// assert_eq!(method, HttpMethod::GET);
+    /// ```
+    pub fn new(method: &str) -> Result<HttpMethod, &str> {
+        let binding = method.to_lowercase();
+
+        match binding.as_str() {
+            "get" => {
+                return Ok(HttpMethod::GET);
             }
-        ).expect("RequestLine not found");
-
-        let headers = http_request
-            .iter()
-            .skip(1)
-            .filter_map(HttpRequest::header_parser())
-            .collect();
-
-        HttpRequest {
-            request,
-            headers,
-            body,
-        }
-    }
-
-    fn header_parser() -> impl Fn(&String) -> Option<(String, String)> {
-        |line: &String| {
-            let header_line: Vec<&str> = line.split(':').collect();
-
-            if header_line.len() == 2 {
-                let key = header_line[0].trim().to_lowercase().to_string();
-                let value = header_line[1].trim().to_string();
-
-                Some((key, value))
-            } else {
-                None
+            "post" => {
+                return Ok(HttpMethod::POST);
             }
+            "put" => {
+                return Ok(HttpMethod::PUT);
+            }
+            "patch" => {
+                return Ok(HttpMethod::PATCH);
+            }
+            "delete" => {
+                return Ok(HttpMethod::DELETE);
+            }
+            &_ => { Err("Method not found.") }
         }
-    }
-
-    pub fn debug(&self) {
-        let headers = self.headers
-            .iter()
-            .fold(String::new(), |acc, (k, v)| format!("{acc}{k}: {v}\r\n"));
-
-        println!(
-            "HttpRequest Line: {request}\r\n Headers: {headers}\r\n Body: {body}",
-            request = self.request.to_string(),
-            body = self.body
-        );
     }
 }

@@ -19,6 +19,17 @@ pub struct Server {
 }
 
 impl Server {
+    /// Creates a new server instance
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::server::Server;
+    /// 
+    /// let server = Server::create(8080).unwrap();
+    /// 
+    /// // server.listen();
+    /// ```
     pub fn create(port: u16) -> Result<Server, String> {
         let addr = format!("127.0.0.1:{port}");
 
@@ -36,6 +47,16 @@ impl Server {
     }
 
     /// Serves static files from the specified path
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::server::Server;
+    /// 
+    /// let mut server = Server::create(8080).unwrap();
+    /// 
+    /// server.serve_static("./public");
+    /// ```
     pub fn serve_static(&mut self, path: &str) {
         self.is_serves_static = true;
         self.static_path = path.to_string();
@@ -90,10 +111,43 @@ impl Server {
         }
     }
 
+    /// Parses the incoming stream
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{server::Server, router::Router, response::StatusCode};
+    ///
+    /// let mut server = Server::create(8080).unwrap();
+    /// let mut router = Router::new();
+    ///
+    /// router.get("/", Box::new(|req, res| {
+    ///   res.status(StatusCode::Ok);
+    /// }));
+    ///
+    /// server.use_router(router);
+    /// ```
     pub fn use_router(&mut self, router: Router) {
         self.request_handlers.push(RequestHandler::Router(router));
     }
 
+    /// Parses the incoming stream
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{server::Server, router::Router, response::{HttpResponse, StatusCode}};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut server = Server::create(8080).unwrap();
+    ///
+    /// server.use_middleware(Box::new(|_, res: &mut HttpResponse| {
+    ///     let mut headers: HashMap<String, String> = HashMap::new();
+    ///     headers.insert(String::from("Server"), String::from("Rust"));
+    ///     res.status(StatusCode::Ok).headers(headers);
+    ///   })
+    /// );
+    /// ```
     pub fn use_middleware(&mut self, middleware: Middleware) {
         self.request_handlers.push(RequestHandler::Middleware(middleware));
     }
@@ -110,11 +164,4 @@ impl Server {
             }
         }
     }
-}
-
-type Middleware = Box<dyn Fn(&HttpRequest, &mut HttpResponse) + Send + Sync>;
-
-enum RequestHandler {
-    Router(Router),
-    Middleware(Middleware),
 }

@@ -3,6 +3,7 @@ use std::{ io::{ BufRead, BufReader, Read }, net::TcpStream };
 use crate::server::Server;
 
 impl Server {
+    /// Parses a TcpStream into headers and body
     pub fn parse_stream(mut stream: &TcpStream) -> Result<(Vec<String>, String), String> {
         let mut buf_reader = BufReader::new(&mut stream);
         let mut headers = Vec::new();
@@ -34,6 +35,7 @@ impl Server {
         }
     }
 
+    /// Gets the content length from the headers
     fn get_content_length(headers: &Vec<String>) -> Option<usize> {
         let mut content_length = 0;
 

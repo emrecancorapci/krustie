@@ -6,56 +6,10 @@ It is a hobby project and is intended to be a learning experience for me. I am n
 
 ## Features
 
-### Basic HTTP server
-
 - [x] Basic routing
 - [x] Basic middleware support
 - [x] Basic request and response handling
-
-### Basic Server Features
-
-- [ ] Database support
-- [ ] Authentication
-- [ ] Authorization
-- [ ] Error handling
-- [ ] File uploads
-- [ ] Websockets
-- [ ] Logging
-
-### Basic Web Server Features
-
-- [ ] Templating
-- [ ] Session management
 - [x] Static file serving
-
-### Security
-
-- [ ] Rate limiting
-- [ ] CSRF protection
-- [ ] XSS protection
-- [ ] SQL injection protection
-- [ ] Secure headers
-- [ ] Content Security Policy
-
-### Performance
-
-- [ ] Caching
-- [ ] Compression
-- [ ] Connection pooling
-- [ ] Load balancing
-- [ ] Clustering
-
-### Monitoring
-
-- [ ] Metrics
-- [ ] Tracing
-- [ ] Logging
-
-### Documentation
-
-- [ ] API documentation
-- [ ] Code documentation
-- [ ] Examples
 
 ## Getting Started
 
@@ -70,7 +24,7 @@ It is a hobby project and is intended to be a learning experience for me. I am n
 
 ```toml
 [dependencies]
-krustie = "0.1.0"
+krustie = "0.1.2"
 ```
 
 2. Start your server:
@@ -104,3 +58,56 @@ cargo run
 ## Contributing
 
 As an inexperienced developer contributions will be welcomed. Please open an issue or a pull request.
+
+## Planned Features
+
+### Basic Server Features
+
+- [ ] Database support
+- [ ] Authentication
+- [ ] Authorization
+- [ ] Error handling
+- [ ] File uploads
+- [ ] Websockets
+
+### Basic Web Server Features
+
+- [ ] Templating
+- [ ] Session management
+
+### Basic API Server Features
+
+- [ ] JSON parsing
+- [ ] XML parsing
+- [ ] Query parameter parsing
+- [ ] Request validation
+- [ ] Response formatting
+
+### Security
+
+- [ ] Rate limiting
+- [ ] CSRF protection
+- [ ] XSS protection
+- [ ] SQL injection protection
+- [ ] Secure headers
+- [ ] Content Security Policy
+
+### Performance
+
+- [ ] Caching
+- [ ] Compression
+- [ ] Connection pooling
+- [ ] Load balancing
+- [ ] Clustering
+
+### Monitoring
+
+- [ ] Metrics
+- [ ] Tracing
+- [ ] Logging
+
+### Documentation
+
+- [ ] API documentation
+- [ ] Code documentation
+- [ ] Examples

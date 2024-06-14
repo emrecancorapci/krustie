@@ -1,4 +1,10 @@
-use std::{ fs, io::Write, net::{ IpAddr, TcpListener }, path::PathBuf };
+use std::{
+    collections::HashMap,
+    fs,
+    io::Write,
+    net::{ IpAddr, TcpListener, TcpStream },
+    path::PathBuf,
+};
 
 use self::request_handler::{ RequestHandler, Middleware };
 
@@ -16,6 +22,7 @@ pub struct Server {
     listener: TcpListener,
     is_serves_static: bool,
     static_path: String,
+    listener_ip: Option<IpAddr>,
 }
 
 impl Server {
@@ -40,6 +47,7 @@ impl Server {
                     listener,
                     is_serves_static: false,
                     static_path: String::from("./public"),
+                    listener_ip: None,
                 })
             }
             Err(err) => { Err(err.to_string()) }
@@ -62,11 +70,10 @@ impl Server {
         self.static_path = path.to_string();
     }
 
-    pub fn listen(&self) {
-        let ip: IpAddr;
+    pub fn listen(&mut self) {
         match self.listener.accept() {
             Ok((_, addr)) => {
-                ip = addr.ip();
+                self.listener_ip = Some(addr.ip());
             }
             Err(e) => {
                 println!("error: {}", e);
@@ -76,49 +83,56 @@ impl Server {
         for stream_result in self.listener.incoming() {
             match stream_result {
                 Ok(mut stream) => {
-                    let parsed = Server::parse_stream(&stream);
-                    let mut response = HttpResponse::default();
-
-                    match parsed {
-                        Ok((headers, body)) => {
-                            let request = HttpRequest::new(&headers, &body, ip);
-
-                            if self.is_serves_static && &request.request.method == &HttpMethod::GET {
-                                match
-                                    Server::serve_static_files(
-                                        &request.request.path_array[0],
-                                        self.static_path.as_str()
-                                    )
-                                {
-                                    Some(content) => {
-                                        response.status(StatusCode::Ok).body(content, "html/text");
-                                        return;
-                                    }
-                                    None => {}
-                                }
-                            }
-
-                            self.request_handlers
-                                .iter()
-                                .for_each(|handler| handler.run(&request, &mut response));
-                        }
-                        Err(error) => {
-                            response.status(StatusCode::BadRequest).debug_msg(&error);
-                        }
-                    }
-
-                    match stream.write_all(&response.as_bytes()[..]) {
-                        Ok(_) => {}
-                        Err(e) => {
-                            println!("error: {}", e);
-                        }
-                    }
+                    self.handle_stream(&mut stream);
                 }
                 Err(e) => {
                     println!("error: {}", e);
                 }
             }
         }
+    }
+
+    fn handle_stream(&self, stream: &mut TcpStream) {
+        let parsed = Server::parse_stream(&stream);
+        let mut response = HttpResponse::default();
+
+        match parsed {
+            Ok((headers, body)) => {
+                self.handle_request(headers, body, &mut response);
+            }
+            Err(error) => {
+                response.status(StatusCode::BadRequest).debug_msg(&error);
+            }
+        }
+
+        match stream.write_all(&response.as_bytes()[..]) {
+            Ok(_) => {}
+            Err(e) => {
+                println!("error: {}", e);
+            }
+        }
+    }
+
+    fn handle_request(&self, headers: Vec<String>, body: String, response: &mut HttpResponse) {
+        let request = HttpRequest::new(&headers, &body, self.listener_ip.unwrap());
+        let mut data_object = DataObject::Null;
+        if self.is_serves_static && &request.request.method == &HttpMethod::GET {
+            match
+                Server::serve_static_files(
+                    &request.request.path_array[0],
+                    self.static_path.as_str()
+                )
+            {
+                Some(content) => {
+                    response.status(StatusCode::Ok).body(content, "html/text");
+                    return;
+                }
+                None => {}
+            }
+        }
+        self.request_handlers
+            .iter()
+            .for_each(|handler| handler.run(&request, response, &mut data_object));
     }
 
     /// Parses the incoming stream
@@ -174,4 +188,14 @@ impl Server {
             }
         }
     }
+}
+
+pub enum DataObject {
+    Array(Vec<DataObject>),
+    Object(HashMap<String, DataObject>),
+    String(String),
+    Int(isize),
+    Float(f64),
+    Boolean(bool),
+    Null,
 }

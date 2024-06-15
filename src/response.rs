@@ -152,7 +152,7 @@ impl Default for HttpResponse {
         HttpResponse {
             debug_mode: false,
             http_version: "HTTP/1.1".to_string(),
-            status_code: StatusCode::Ok,
+            status_code: StatusCode::NotFound,
             headers: HashMap::new(),
             body: Vec::new(),
         }

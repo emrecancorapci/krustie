@@ -6,9 +6,9 @@ It is a hobby project and is intended to be a learning experience for me. I am n
 
 ## Features
 
-- [x] Basic routing
-- [x] Basic middleware support
 - [x] Basic request and response handling
+- [x] Stacked Router
+- [x] Server Middleware support (Router Middleware support will be added soon)
 - [x] Static file serving
 
 ## Getting Started

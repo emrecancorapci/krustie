@@ -24,28 +24,37 @@ It is a hobby project and is intended to be a learning experience for me. I am n
 
 ```toml
 [dependencies]
-krustie = "0.1.2"
+krustie = "0.1.3"
 ```
 
 2. Start your server:
 
 ```rust
-use krustie::{ server::Server, router::Router, response::StatusCode };
+use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::Middleware };
+use std::collections::HashMap;
 
 fn main() {
-    match Server::create(4221) {
-        Ok(mut server) => {
-            let mut router = Router::new();
+    let mut server = Server::create(8080).unwrap();
+    let mut router = Router::new("home");
 
-            router.get("", |req, res| {
-                res.status(StatusCode::Ok);
-            });
-            
-            server.use_router(router);
-            server.listen()
-        }
-        Err(err) => { println!("Server cannot created. {}", err) }
-    }
+    router
+        .get(|_, res| {
+            res.status(StatusCode::Ok);
+        })
+        .post(|_, res| {
+            res.status(StatusCode::Ok);
+        });
+
+    let middleware = Middleware::new(|_, res: &mut HttpResponse| {
+        let mut headers: HashMap<String, String> = HashMap::new();
+        headers.insert(String::from("Server"), String::from("Rust"));
+        res.headers(headers);
+    });
+    
+    server.use_handler(router);
+    server.use_handler(middleware);
+
+    server.listen();
 }
 ```
 

@@ -11,11 +11,11 @@ mod parser;
 /// ```rust
 /// use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::Middleware };
 /// use std::collections::HashMap;
-/// 
+///
 /// fn main() {
 ///     let mut server = Server::create(8080).unwrap();
 ///     let mut router = Router::new("home");
-/// 
+///
 ///     router
 ///         .get(|_, res| {
 ///             res.status(StatusCode::Ok);
@@ -23,13 +23,13 @@ mod parser;
 ///         .post(|_, res| {
 ///             res.status(StatusCode::Ok);
 ///         });
-/// 
+///
 ///     let middleware = Middleware::new(|_, res: &mut HttpResponse| {
 ///         let mut headers: HashMap<String, String> = HashMap::new();
 ///         headers.insert(String::from("Server"), String::from("Rust"));
 ///         res.headers(headers);
 ///     });
-///     
+///
 ///     server.use_handler(router);
 ///     server.use_handler(middleware);
 /// }
@@ -37,7 +37,7 @@ mod parser;
 pub struct Server {
     request_handlers: Vec<Box<dyn Handler>>,
     listener: TcpListener,
-    listener_ip: Option<IpAddr>,
+    // listener_ip: Option<IpAddr>,
     // Static file serving
     static_path: String,
     is_serves_static: bool,
@@ -65,7 +65,7 @@ impl Server {
                     listener,
                     is_serves_static: false,
                     static_path: String::from("./public"),
-                    listener_ip: None,
+                    // listener_ip: None,
                 })
             }
             Err(err) => { Err(err.to_string()) }
@@ -89,15 +89,15 @@ impl Server {
     }
 
     pub fn listen(&mut self) {
-        match self.listener.accept() {
-            Ok((_, addr)) => {
-                self.listener_ip = Some(addr.ip());
-            }
-            Err(e) => {
-                println!("error: {}", e);
-                return;
-            }
-        }
+        // match self.listener.accept() {
+        //     Ok((_, addr)) => {
+        //         self.listener_ip = Some(addr.ip());
+        //     }
+        //     Err(e) => {
+        //         println!("error: {}", e);
+        //         return;
+        //     }
+        // }
         for stream_result in self.listener.incoming() {
             match stream_result {
                 Ok(mut stream) => {

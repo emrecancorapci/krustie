@@ -1,17 +1,20 @@
 use std::collections::HashMap;
 
-use self::route::Route;
-
-use crate::{ request::{ HttpMethod, HttpRequest }, response::{ HttpResponse, StatusCode } };
-
-type Controller = Box<dyn Fn(&HttpRequest, &mut HttpResponse) + Send + Sync>;
+use crate::{
+    request::{ HttpMethod, HttpRequest },
+    response::HttpResponse,
+    server::Handler,
+};
 
 pub mod methods;
-pub mod route;
+
+type Controller = fn(&HttpRequest, &mut HttpResponse);
 
 /// A router for handling requests
 pub struct Router {
-    endpoints: HashMap<Route, Endpoint>,
+    base: String,
+    endpoints: HashMap<HttpMethod, Controller>,
+    subroutes: Vec<Router>,
 }
 
 impl Router {
@@ -22,15 +25,17 @@ impl Router {
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
     ///
-    /// let mut router = Router::new();
+    /// let mut router = Router::new("home");
     ///
-    /// router.get("/", Box::new(|req, res| {
+    /// router.get(|req, res| {
     ///   res.status(StatusCode::Ok);
-    /// }));
+    /// });
     /// ```
-    pub fn new() -> Router {
+    pub fn new(base: &str) -> Router {
         Router {
+            base: base.to_string(),
             endpoints: HashMap::new(),
+            subroutes: Vec::new(),
         }
     }
 
@@ -41,48 +46,56 @@ impl Router {
     /// ```rust
     /// use krustie::router::Router;
     ///
-    /// let mut router = Router::new();
-    /// let sub_router = Router::new();
+    /// let mut router = Router::new("home");
+    /// let sub_router = Router::new("user");
     ///
-    /// router.add_router("/sub", sub_router);
+    /// router.add_subrouter(sub_router);
     /// ```
-    pub fn add_router(&mut self, path: &str, router: Router) {
-        self.endpoints.insert(Route::new(path, &HttpMethod::GET), Endpoint::Router(router));
+    pub fn add_subrouter(&mut self, router: Router) {
+        self.subroutes.push(router);
     }
 
-    /// Handles routing of requests to the appropriate endpoint
-    pub fn handle(&self, request: &HttpRequest, response: &mut HttpResponse) {
-        let path = &request.request.path_array;
+    fn get_route(&self, path: &Vec<&str>) -> Result<&Router, &str> {
+        let mut current_router = self;
 
-        let route = Route::new(path[0], &request.request.method);
+        if current_router.base == path[0] {
+            return Ok(current_router);
+        }
 
-        match self.endpoints.get(&route) {
-            Some(endpoint) => {
-                endpoint.run(request, response);
-            }
-            None => {
-                response.status(StatusCode::NotFound);
-                return;
+        for route in path {
+            match current_router.subroutes.iter().find(|r| r.base == *route) {
+                Some(router) => {
+                    current_router = router;
+                }
+                None => {
+                    return Err("Route not found");
+                }
             }
         }
+
+        Ok(current_router)
+    }
+
+    fn get_endpoint(&self, method: HttpMethod) -> Option<&Controller> {
+        self.endpoints.get(&method)
     }
 }
 
-enum Endpoint {
-    Controller(Controller),
-    Router(Router),
-}
+impl Handler for Router {
+    /// Handles routing of requests to the appropriate endpoint
+    fn handle(&self, request: &HttpRequest, response: &mut HttpResponse) {
+        let path = &request.request.path_array;
 
-impl Endpoint {
-    /// Runs the endpoint depending on the type
-    pub fn run(&self, req: &HttpRequest, res: &mut HttpResponse) {
-        match self {
-            Endpoint::Controller(controller) => {
-                controller(req, res);
+        match self.get_route(path) {
+            Ok(router) => {
+                match router.get_endpoint(request.request.method) {
+                    Some(endpoint) => {
+                        endpoint(request, response);
+                    }
+                    None => {}
+                }
             }
-            Endpoint::Router(router) => {
-                router.handle(req, res);
-            }
+            Err(_) => {}
         }
     }
 }

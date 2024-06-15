@@ -1,28 +1,46 @@
-use std::{
-    collections::HashMap,
-    fs,
-    io::Write,
-    net::{ IpAddr, TcpListener, TcpStream },
-    path::PathBuf,
-};
+use std::{ fs, io::Write, net::{ IpAddr, TcpListener, TcpStream }, path::PathBuf };
 
-use self::request_handler::{ RequestHandler, Middleware };
+use crate::{ request::{ HttpMethod, HttpRequest }, response::{ HttpResponse, StatusCode } };
 
-use crate::{
-    request::{ HttpMethod, HttpRequest },
-    response::{ HttpResponse, StatusCode },
-    router::Router,
-};
-
-mod request_handler;
 mod parser;
 
+/// A server for handling requests
+///
+/// # Example
+///
+/// ```rust
+/// use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::Middleware };
+/// use std::collections::HashMap;
+/// 
+/// fn main() {
+///     let mut server = Server::create(8080).unwrap();
+///     let mut router = Router::new("home");
+/// 
+///     router
+///         .get(|_, res| {
+///             res.status(StatusCode::Ok);
+///         })
+///         .post(|_, res| {
+///             res.status(StatusCode::Ok);
+///         });
+/// 
+///     let middleware = Middleware::new(|_, res: &mut HttpResponse| {
+///         let mut headers: HashMap<String, String> = HashMap::new();
+///         headers.insert(String::from("Server"), String::from("Rust"));
+///         res.headers(headers);
+///     });
+///     
+///     server.use_handler(router);
+///     server.use_handler(middleware);
+/// }
+/// ```
 pub struct Server {
-    request_handlers: Vec<RequestHandler>,
+    request_handlers: Vec<Box<dyn Handler>>,
     listener: TcpListener,
-    is_serves_static: bool,
-    static_path: String,
     listener_ip: Option<IpAddr>,
+    // Static file serving
+    static_path: String,
+    is_serves_static: bool,
 }
 
 impl Server {
@@ -129,50 +147,28 @@ impl Server {
                 None => {}
             }
         }
-        self.request_handlers
-            .iter()
-            .for_each(|handler| handler.run(&request, response));
+        self.request_handlers.iter().for_each(|handler| handler.handle(&request, response));
     }
 
-    /// Parses the incoming stream
-    ///
-    /// # Example
-    ///
+    /// Adds a middleware or router to the server
     /// ```rust
-    /// use krustie::{server::Server, router::Router, response::StatusCode};
-    ///
-    /// let mut server = Server::create(8080).unwrap();
-    /// let mut router = Router::new();
-    ///
-    /// router.get("/", Box::new(|req, res| {
-    ///   res.status(StatusCode::Ok);
-    /// }));
-    ///
-    /// server.use_router(router);
-    /// ```
-    pub fn use_router(&mut self, router: Router) {
-        self.request_handlers.push(RequestHandler::Router(router));
-    }
-
-    /// Parses the incoming stream
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::{server::Server, router::Router, response::{HttpResponse, StatusCode}};
+    /// use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::Middleware };
     /// use std::collections::HashMap;
     ///
     /// let mut server = Server::create(8080).unwrap();
+    /// let mut router = Router::new("home");
     ///
-    /// server.use_middleware(Box::new(|_, res: &mut HttpResponse| {
+    /// let middleware = Middleware::new(|_, res: &mut HttpResponse| {
     ///     let mut headers: HashMap<String, String> = HashMap::new();
     ///     headers.insert(String::from("Server"), String::from("Rust"));
-    ///     res.status(StatusCode::Ok).headers(headers);
-    ///   })
-    /// );
+    ///     res.headers(headers);
+    /// });
+    ///
+    /// server.use_handler(router);
+    /// server.use_handler(middleware);
     /// ```
-    pub fn use_middleware(&mut self, middleware: Middleware) {
-        self.request_handlers.push(RequestHandler::Middleware(middleware));
+    pub fn use_handler<F>(&mut self, handler: F) where F: Handler + 'static {
+        self.request_handlers.push(Box::new(handler));
     }
 
     fn serve_static_files(file_name: &str, folder_path: &str) -> Option<Vec<u8>> {
@@ -189,12 +185,6 @@ impl Server {
     }
 }
 
-pub enum DataObject {
-    Array(Vec<DataObject>),
-    Object(HashMap<String, DataObject>),
-    String(String),
-    Int(isize),
-    Float(f64),
-    Boolean(bool),
-    Null,
+pub trait Handler {
+    fn handle(&self, request: &HttpRequest, response: &mut HttpResponse);
 }

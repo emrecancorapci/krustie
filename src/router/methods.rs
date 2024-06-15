@@ -1,4 +1,4 @@
-use super::{ Controller, Endpoint, HttpMethod, Route, Router };
+use super::{ Controller, HttpMethod, Router };
 
 impl Router {
     /// Adds a GET endpoint to the router
@@ -8,14 +8,15 @@ impl Router {
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
     ///
-    /// let mut router = Router::new();
+    /// let mut router = Router::new("home");
     ///
-    /// router.get("/", Box::new(|req, res| {
+    /// router.get(|req, res| {
     ///    res.status(StatusCode::Ok);
-    /// }));
+    /// });
     /// ```
-        pub fn get(&mut self, path: &str, controller: Controller) {
-        self.endpoints.insert(Route::new(path, &HttpMethod::GET), Endpoint::Controller(controller));
+    pub fn get(&mut self, controller: Controller) -> &mut Self {
+        self.endpoints.insert(HttpMethod::GET, controller);
+        self
     }
 
     /// Adds a POST endpoint to the router
@@ -25,17 +26,15 @@ impl Router {
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
     ///
-    /// let mut router = Router::new();
+    /// let mut router = Router::new("home");
     ///
-    /// router.post("/", Box::new(|req, res| {
+    /// router.post(|req, res| {
     ///    res.status(StatusCode::Ok);
-    /// }));
+    /// });
     /// ```
-    pub fn post(&mut self, path: &str, controller: Controller) {
-        self.endpoints.insert(
-            Route::new(path, &HttpMethod::POST),
-            Endpoint::Controller(controller)
-        );
+    pub fn post(&mut self, controller: Controller) -> &mut Self {
+        self.endpoints.insert(HttpMethod::POST, controller);
+        self
     }
 
     /// Adds a PUT endpoint to the router
@@ -45,14 +44,15 @@ impl Router {
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
     ///
-    /// let mut router = Router::new();
+    /// let mut router = Router::new("/home");
     ///
-    /// router.put("/", Box::new(|req, res| {
+    /// router.put(|req, res| {
     ///    res.status(StatusCode::Ok);
-    /// }));
+    /// });
     /// ```
-    pub fn put(&mut self, path: &str, controller: Controller) {
-        self.endpoints.insert(Route::new(path, &HttpMethod::PUT), Endpoint::Controller(controller));
+    pub fn put(&mut self, controller: Controller) -> &mut Self {
+        self.endpoints.insert(HttpMethod::PUT, controller);
+        self
     }
 
     /// Adds a DELETE endpoint to the router
@@ -62,17 +62,15 @@ impl Router {
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
     ///
-    /// let mut router = Router::new();
+    /// let mut router = Router::new("home");
     ///
-    /// router.delete("/", Box::new(|req, res| {
+    /// router.delete( |req, res| {
     ///    res.status(StatusCode::Ok);
-    /// }));
+    /// });
     /// ```
-    pub fn delete(&mut self, path: &str, controller: Controller) {
-        self.endpoints.insert(
-            Route::new(path, &HttpMethod::DELETE),
-            Endpoint::Controller(controller)
-        );
+    pub fn delete(&mut self, controller: Controller) -> &mut Self {
+        self.endpoints.insert(HttpMethod::DELETE, controller);
+        self
     }
 
     /// Adds a PATCH endpoint to the router
@@ -82,16 +80,14 @@ impl Router {
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
     ///
-    /// let mut router = Router::new();
+    /// let mut router = Router::new("home");
     ///
-    /// router.patch("/", Box::new(|req, res| {
+    /// router.patch( |req, res| {
     ///    res.status(StatusCode::Ok);
-    /// }));
+    /// });
     /// ```
-    pub fn patch(&mut self, path: &str, controller: Controller) {
-        self.endpoints.insert(
-            Route::new(path, &HttpMethod::PATCH),
-            Endpoint::Controller(controller)
-        );
+    pub fn patch(&mut self, controller: Controller) -> &mut Self {
+        self.endpoints.insert(HttpMethod::PATCH, controller);
+        self
     }
 }

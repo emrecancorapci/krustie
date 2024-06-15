@@ -114,8 +114,7 @@ impl Server {
     }
 
     fn handle_request(&self, headers: Vec<String>, body: String, response: &mut HttpResponse) {
-        let request = HttpRequest::new(&headers, &body, self.listener_ip.unwrap());
-        let mut data_object = DataObject::Null;
+        let request = HttpRequest::new(&headers, &body);
         if self.is_serves_static && &request.request.method == &HttpMethod::GET {
             match
                 Server::serve_static_files(
@@ -132,7 +131,7 @@ impl Server {
         }
         self.request_handlers
             .iter()
-            .for_each(|handler| handler.run(&request, response, &mut data_object));
+            .for_each(|handler| handler.run(&request, response));
     }
 
     /// Parses the incoming stream

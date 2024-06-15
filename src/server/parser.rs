@@ -37,28 +37,21 @@ impl Server {
 
     /// Gets the content length from the headers
     fn get_content_length(headers: &Vec<String>) -> Option<usize> {
-        let mut content_length = 0;
-
         for line in headers.iter() {
             if line.starts_with("Content-Length") {
                 let parts = line.split(':').collect::<Vec<&str>>();
 
                 match parts[1].trim().parse::<usize>() {
                     Ok(parsed) => {
-                        content_length = parsed;
+                        return Some(parsed);
                     }
                     Err(_) => {
-                        content_length = 0;
+                        return None;
                     }
                 }
-                break;
             }
         }
 
-        if content_length == 0 {
-            return None;
-        }
-
-        Some(content_length)
+        return None;
     }
 }

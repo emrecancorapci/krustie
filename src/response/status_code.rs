@@ -78,13 +78,52 @@ impl From<&u16> for StatusCode {
     /// ```rust
     /// use krustie::response::StatusCode;
     ///
+    /// let status_code_200 = StatusCode::from(&200);
+    /// let status_code_418 = StatusCode::from(&418);
+    ///
+    /// assert_eq!(status_code_200, StatusCode::Ok);
+    /// assert_eq!(status_code_418, StatusCode::IAmATeapot);
+    /// ```
+    fn from(code: &u16) -> Self {
+        match code {
+            200 => StatusCode::Ok,
+            201 => StatusCode::Created,
+            202 => StatusCode::Accepted,
+            204 => StatusCode::NoContent,
+            400 => StatusCode::BadRequest,
+            401 => StatusCode::Unauthorized,
+            403 => StatusCode::Forbidden,
+            404 => StatusCode::NotFound,
+            405 => StatusCode::MethodNotAllowed,
+            408 => StatusCode::RequestTimeout,
+            411 => StatusCode::LengthRequired,
+            415 => StatusCode::UnsupportedMediaType,
+            418 => StatusCode::IAmATeapot,
+            500 => StatusCode::InternalServerError,
+            501 => StatusCode::NotImplemented,
+            503 => StatusCode::ServiceUnavailable,
+            504 => StatusCode::GatewayTimeout,
+            505 => StatusCode::HttpVersionNotSupported,
+            _ => StatusCode::Ok,
+        }
+    }
+}
+
+impl From<u16> for StatusCode {
+    /// Converts a u16 to a StatusCode
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::response::StatusCode;
+    ///
     /// let status_code_200 = StatusCode::from(200);
     /// let status_code_418 = StatusCode::from(418);
     ///
     /// assert_eq!(status_code_200, StatusCode::Ok);
     /// assert_eq!(status_code_418, StatusCode::IAmATeapot);
     /// ```
-    fn from(code: &u16) -> Self {
+    fn from(code: u16) -> Self {
         match code {
             200 => StatusCode::Ok,
             201 => StatusCode::Created,
@@ -120,8 +159,8 @@ impl From<&StatusCode> for u16 {
     /// let status_code_200 = StatusCode::Ok;
     /// let status_code_418 = StatusCode::IAmATeapot;
     ///
-    /// assert_eq!(u16::from(status_code_200), 200);
-    /// assert_eq!(u16::from(status_code_418), 418);
+    /// assert_eq!(u16::from(&status_code_200), 200);
+    /// assert_eq!(u16::from(&status_code_418), 418);
     /// ```
     fn from(code: &StatusCode) -> u16 {
         match code {

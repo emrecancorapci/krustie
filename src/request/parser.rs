@@ -1,10 +1,10 @@
 use std::{ io::{ BufRead, BufReader, Read }, net::TcpStream };
 
-use crate::server::Server;
+use super::HttpRequest;
 
-impl Server {
-    /// Parses a TcpStream into headers and body
-    pub fn parse_stream(mut stream: &TcpStream) -> Result<(Vec<String>, String), String> {
+impl HttpRequest {
+    /// Parses a TcpStream into HttpRequest
+    pub fn parse_stream(mut stream: &TcpStream) -> Result<HttpRequest, String> {
         let mut buf_reader = BufReader::new(&mut stream);
         let mut headers = Vec::new();
 
@@ -17,21 +17,21 @@ impl Server {
             headers.push(line);
         }
 
-        match Server::get_content_length(&headers) {
+        match HttpRequest::get_content_length(&headers) {
             Some(content_length) => {
                 let mut body = Vec::with_capacity(content_length);
 
                 match buf_reader.take(content_length as u64).read_to_end(&mut body) {
                     Ok(_) => {
                         match String::from_utf8(body) {
-                            Ok(body) => { Ok((headers, body)) }
-                            Err(_) => { Err("Error parsing body".to_string()) }
+                            Ok(body) => { Ok(HttpRequest::new(&headers, body.as_str())) }
+                            Err(_) => { Err("Error while parsing body".to_string()) }
                         }
                     }
-                    Err(error) => { Err(format!("Error reading body: {}", error.to_string())) }
+                    Err(error) => { Err(format!("Error while reading body: {}", error.to_string())) }
                 }
             }
-            None => { Ok((headers, String::from(""))) }
+            None => { Ok(HttpRequest::new(&headers, "")) }
         }
     }
 

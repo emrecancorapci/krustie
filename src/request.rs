@@ -4,6 +4,7 @@ use self::request_line::RequestLine;
 
 pub mod http_method;
 mod request_line;
+mod parser;
 
 pub struct HttpRequest {
     pub request: RequestLine,

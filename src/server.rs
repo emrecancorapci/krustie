@@ -2,8 +2,6 @@ use std::{ fs, io::Write, net::{ IpAddr, TcpListener, TcpStream }, path::PathBuf
 
 use crate::{ request::{ HttpMethod, HttpRequest }, response::{ HttpResponse, StatusCode } };
 
-mod parser;
-
 /// A server for handling requests
 ///
 /// # Example
@@ -110,46 +108,6 @@ impl Server {
         }
     }
 
-    fn handle_stream(&self, stream: &mut TcpStream) {
-        let parsed = Server::parse_stream(&stream);
-        let mut response = HttpResponse::default();
-
-        match parsed {
-            Ok((headers, body)) => {
-                self.handle_request(headers, body, &mut response);
-            }
-            Err(error) => {
-                response.status(StatusCode::BadRequest).debug_msg(&error);
-            }
-        }
-
-        match stream.write_all(&response.as_bytes()[..]) {
-            Ok(_) => {}
-            Err(e) => {
-                println!("error: {}", e);
-            }
-        }
-    }
-
-    fn handle_request(&self, headers: Vec<String>, body: String, response: &mut HttpResponse) {
-        let request = HttpRequest::new(&headers, &body);
-        if self.is_serves_static && &request.request.method == &HttpMethod::GET {
-            match
-                Server::serve_static_files(
-                    &request.request.path_array[0],
-                    self.static_path.as_str()
-                )
-            {
-                Some(content) => {
-                    response.status(StatusCode::Ok).body(content, "html/text");
-                    return;
-                }
-                None => {}
-            }
-        }
-        self.request_handlers.iter().for_each(|handler| handler.handle(&request, response));
-    }
-
     /// Adds a middleware or router to the server
     /// ```rust
     /// use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::Middleware };
@@ -169,6 +127,44 @@ impl Server {
     /// ```
     pub fn use_handler<F>(&mut self, handler: F) where F: Handler + 'static {
         self.request_handlers.push(Box::new(handler));
+    }
+
+    fn handle_stream(&self, stream: &mut TcpStream) {
+        let mut response = HttpResponse::default();
+
+        match HttpRequest::parse_stream(&stream) {
+            Ok(request) => {
+                if self.is_serves_static && &request.request.method == &HttpMethod::GET {
+                    match
+                        Server::serve_static_files(
+                            &request.request.path_array[0],
+                            self.static_path.as_str()
+                        )
+                    {
+                        Some(content) => {
+                            response.status(StatusCode::Ok).body(content, "html/text");
+                            return;
+                        }
+                        None => {}
+                    }
+                }
+                self.request_handlers
+                    .iter()
+                    .for_each(|handler| handler.handle(&request, &mut response));
+            }
+            Err(error) => {
+                response.status(StatusCode::BadRequest).debug_msg(&error);
+            }
+        }
+
+        let response_stream: Vec<u8> = response.into();
+
+        match stream.write_all(&response_stream) {
+            Ok(_) => {}
+            Err(e) => {
+                println!("error: {}", e);
+            }
+        }
     }
 
     fn serve_static_files(file_name: &str, folder_path: &str) -> Option<Vec<u8>> {

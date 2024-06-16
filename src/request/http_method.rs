@@ -1,6 +1,12 @@
-use std::fmt::{ Display, Error, Formatter };
+use std::fmt::{ Display, Error, Formatter, Result as fResult };
 
 use super::HttpMethod;
+
+impl Default for HttpMethod {
+    fn default() -> Self {
+        HttpMethod::GET
+    }
+}
 
 impl Display for HttpMethod {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
@@ -14,16 +20,9 @@ impl Display for HttpMethod {
     }
 }
 
-impl Default for HttpMethod {
-    fn default() -> Self {
-        HttpMethod::GET
-    }
-}
-
-impl From<&str> for HttpMethod {
+impl TryFrom<&str> for HttpMethod {
+    type Error = ParseHttpMethodError;
     /// Converts a string to an HttpMethod
-    ///
-    /// If the string is not a valid HTTP method, it defaults to GET
     ///
     /// # Example
     ///
@@ -31,17 +30,30 @@ impl From<&str> for HttpMethod {
     /// use krustie::request::HttpMethod;
     ///
     /// fn main() {
-    ///    let method = HttpMethod::from("GET");
+    ///   match HttpMethod::try_from("GET") {
+    ///     Ok(method) => assert_eq!(method, HttpMethod::GET),
+    ///     Err(_) => panic!("Failed to parse HTTP method"),
+    ///   }
     /// }
-    fn from(method: &str) -> Self {
+    /// ```
+    fn try_from(method: &str) -> Result<Self, Self::Error> {
         let method = method.to_uppercase();
         match method.as_str() {
-            "GET" => HttpMethod::GET,
-            "POST" => HttpMethod::POST,
-            "PUT" => HttpMethod::PUT,
-            "PATCH" => HttpMethod::PATCH,
-            "DELETE" => HttpMethod::DELETE,
-            _ => HttpMethod::GET,
+            "GET" => Ok(HttpMethod::GET),
+            "POST" => Ok(HttpMethod::POST),
+            "PUT" => Ok(HttpMethod::PUT),
+            "PATCH" => Ok(HttpMethod::PATCH),
+            "DELETE" => Ok(HttpMethod::DELETE),
+            _ => Err(ParseHttpMethodError),
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct ParseHttpMethodError;
+
+impl Display for ParseHttpMethodError {
+    fn fmt(&self, f: &mut Formatter) -> fResult {
+        write!(f, "invalid method for HTTP request")
     }
 }

@@ -1,36 +1,52 @@
+use std::fmt::{Display, Formatter, Result as fResult};
+
 use super::HttpMethod;
 
-pub struct RequestLine<'a> {
+pub struct RequestLine {
     pub method: HttpMethod,
-    pub path: &'a str,
-    pub version: &'a str,
-    pub path_array: Vec<&'a str>,
+    pub path: String,
+    pub version: String,
+    pub path_array: Vec<String>,
 }
 
-impl<'a> RequestLine<'a> {
-    pub fn new(method: &'a str, path: &'a str, version: &'a str) -> RequestLine<'a> {
-        let path_array: Vec<&str> = path[1..].split('/').collect();
-        let method = HttpMethod::new(method).expect("Method not found");
+impl RequestLine {
+    pub fn new(method: &str, path: &str, version: &str) -> RequestLine {
+        let path_array: Vec<String> = path[1..].split('/').map(|str| str.to_string()).collect();
+        let method = HttpMethod::try_from(method).unwrap();
 
         RequestLine {
             method,
-            path,
-            version,
+            path: path.to_string(),
+            version: version.to_string(),
             path_array,
         }
     }
+}
 
-    pub fn new_from_str(request_line: &str) -> Result<RequestLine, &'static str> {
+impl Display for RequestLine {
+    fn fmt(&self, f: &mut Formatter) -> fResult {
+        write!(f, "{} {} {}", self.method, self.path, self.version)
+    }
+}
+
+impl TryFrom<&str> for RequestLine {
+    type Error = ParseRequestLineError;
+    fn try_from(request_line: &str) -> Result<Self, Self::Error> {
         let request_line: Vec<&str> = request_line.split(' ').collect();
 
         if request_line.len() < 3 {
-            return Err("request_line does not have 3 parts");
+            return Err(ParseRequestLineError);
         }
 
-        Ok(RequestLine::new(&request_line[0], &request_line[1], &request_line[2]))
+        return Ok(RequestLine::new(request_line[0], request_line[1], request_line[2]));
     }
+}
 
-    pub fn to_string(&self) -> String {
-        format!("{} {} {}", self.method, self.path, self.version)
+#[derive(Debug)]
+pub struct ParseRequestLineError;
+
+impl Display for ParseRequestLineError {
+    fn fmt(&self, f: &mut Formatter) -> fResult {
+        write!(f, "invalid request line")
     }
 }

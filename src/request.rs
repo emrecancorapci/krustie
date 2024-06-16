@@ -1,18 +1,17 @@
-use std::{ collections::HashMap, fmt::Debug };
+use std::{ collections::HashMap, fmt::{ Debug, Formatter, Result as fResult } };
 
 use self::request_line::RequestLine;
 
 pub mod http_method;
-
 mod request_line;
 
-pub struct HttpRequest<'a> {
-    pub request: RequestLine<'a>,
+pub struct HttpRequest {
+    pub request: RequestLine,
     pub headers: HashMap<String, String>,
-    pub body: &'a str,
+    pub body: Vec<u8>,
 }
 
-impl<'a> HttpRequest<'a> {
+impl HttpRequest {
     /// Creates a new HttpRequest
     ///
     /// # Example
@@ -25,11 +24,11 @@ impl<'a> HttpRequest<'a> {
     ///
     /// assert_eq!(request.request.method, HttpMethod::GET);
     /// ```
-    pub fn new(http_request: &'a Vec<String>, body: &'a str) -> HttpRequest<'a> {
+    pub fn new(http_request: &Vec<String>, body: &str) -> HttpRequest {
         let request = (
             {
                 match http_request.first() {
-                    Some(request_line) => { RequestLine::new_from_str(request_line) }
+                    Some(request_line) => { RequestLine::try_from(request_line.as_str()) }
                     None => { todo!("Implement none handling") }
                 }
             }
@@ -40,6 +39,8 @@ impl<'a> HttpRequest<'a> {
             .skip(1)
             .filter_map(HttpRequest::header_parser())
             .collect();
+
+        let body = body.as_bytes().to_vec();
 
         HttpRequest {
             request,
@@ -64,32 +65,36 @@ impl<'a> HttpRequest<'a> {
     }
 }
 
-impl Default for HttpRequest<'_> {
+impl Default for HttpRequest {
     fn default() -> Self {
         HttpRequest {
             request: RequestLine::new("GET", "/", "HTTP/1.1"),
             headers: HashMap::new(),
-            body: ""
+            body: Vec::new(),
         }
     }
 }
 
-impl Debug for HttpRequest<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Debug for HttpRequest {
+    fn fmt(&self, f: &mut Formatter) -> fResult {
         let headers = self.headers
             .iter()
             .fold(String::new(), |acc, (k, v)| format!("{acc}{k}: {v}\r\n"));
+
+        let body = self.body
+            .iter()
+            .map(|byte| *byte as char)
+            .collect::<String>();
 
         write!(
             f,
             "HttpRequest Line: {}\r\n Headers: {}\r\n Body: {}",
             self.request.to_string(),
             headers,
-            self.body
+            body
         )
     }
 }
-
 
 #[derive(Eq, Hash, PartialEq, Clone, Copy, Debug)]
 pub enum HttpMethod {
@@ -102,40 +107,4 @@ pub enum HttpMethod {
     // HEAD,
     // OPTIONS,
     // TRACE,
-}
-
-impl HttpMethod {
-    /// Create a new HttpMethod from a string.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::request::HttpMethod;
-    ///
-    /// let method = HttpMethod::new("GET").expect("Method not found");
-    ///
-    /// assert_eq!(method, HttpMethod::GET);
-    /// ```
-    pub fn new(method: &str) -> Result<HttpMethod, &str> {
-        let binding = method.to_lowercase();
-
-        match binding.as_str() {
-            "get" => {
-                return Ok(HttpMethod::GET);
-            }
-            "post" => {
-                return Ok(HttpMethod::POST);
-            }
-            "put" => {
-                return Ok(HttpMethod::PUT);
-            }
-            "patch" => {
-                return Ok(HttpMethod::PATCH);
-            }
-            "delete" => {
-                return Ok(HttpMethod::DELETE);
-            }
-            &_ => { Err("Method not found.") }
-        }
-    }
 }

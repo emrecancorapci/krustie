@@ -83,7 +83,9 @@ impl HttpResponse {
         }
         self
     }
+}
 
+impl Into<Vec<u8>> for HttpResponse {
     /// Returns the response as a byte vector.
     ///
     /// # Example
@@ -95,10 +97,10 @@ impl HttpResponse {
     ///    let response_as_bytes: Vec<u8> = response
     ///         .status(StatusCode::Ok)
     ///         .body(b"Hello, World!".to_vec(), "text/plain")
-    ///         .as_bytes();
+    ///         .into();
     /// }
     /// ```
-    pub fn as_bytes(&self) -> Vec<u8> {
+    fn into(self) -> Vec<u8> {
         let mut headers_string = String::new();
 
         if self.headers.len() > 0 {
@@ -128,11 +130,6 @@ impl HttpResponse {
         response_bytes.extend_from_slice(&self.body);
 
         response_bytes
-    }
-
-    pub fn debug_on(&mut self) -> &mut HttpResponse {
-        self.debug_mode = true;
-        self
     }
 }
 

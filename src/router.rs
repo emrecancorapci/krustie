@@ -55,14 +55,14 @@ impl Router {
         self.subroutes.push(router);
     }
 
-    fn get_route(&self, path: &Vec<&str>) -> Result<&Router, &str> {
+    fn get_route(&self, path: &Vec<String>) -> Result<&Router, &str> {
         let mut current_router = self;
 
         if current_router.base == path[0] {
             return Ok(current_router);
         }
 
-        for route in path {
+        for route in path.iter() {
             match current_router.subroutes.iter().find(|r| r.base == *route) {
                 Some(router) => {
                     current_router = router;

@@ -42,11 +42,14 @@ impl TryFrom<&u16> for StatusCode {
     /// ```rust
     /// use krustie::response::StatusCode;
     ///
-    /// let status_code_200 = StatusCode::from(&200);
-    /// let status_code_418 = StatusCode::from(&418);
-    ///
-    /// assert_eq!(status_code_200, StatusCode::Ok);
-    /// assert_eq!(status_code_418, StatusCode::IAmATeapot);
+    /// match StatusCode::try_from(&200) {
+    ///   Ok(status_code) => assert_eq!(status_code, StatusCode::Ok),
+    ///   Err(_) => panic!("Invalid status code"),
+    /// }
+    /// match StatusCode::try_from(&418) {
+    ///   Ok(status_code) => assert_eq!(status_code, StatusCode::IAmATeapot),
+    ///   Err(_) => panic!("Invalid status code"),
+    /// }
     /// ```
     fn try_from(code: &u16) -> Result<Self, Self::Error> {
         match code {
@@ -82,11 +85,14 @@ impl TryFrom<&str> for StatusCode {
     /// ```rust
     /// use krustie::response::StatusCode;
     ///
-    /// let status_code_200 = StatusCode::from("200");
-    /// let status_code_418 = StatusCode::from("418");
-    ///
-    /// assert_eq!(status_code_200, StatusCode::Ok);
-    /// assert_eq!(status_code_418, StatusCode::IAmATeapot);
+    /// match StatusCode::try_from("200") {
+    ///   Ok(status_code) => assert_eq!(status_code, StatusCode::Ok),
+    ///   Err(_) => panic!("Invalid status code"),
+    /// }
+    /// match StatusCode::try_from("418") {
+    ///    Ok(status_code) => assert_eq!(status_code, StatusCode::IAmATeapot),
+    ///   Err(_) => panic!("Invalid status code"),
+    /// }
     /// ```
     fn try_from(code: &str) -> Result<Self, Self::Error> {
         let num = code.parse().unwrap_or(0);
@@ -103,11 +109,15 @@ impl TryFrom<u16> for StatusCode {
     /// ```rust
     /// use krustie::response::StatusCode;
     ///
-    /// let status_code_200 = StatusCode::from(200);
-    /// let status_code_418 = StatusCode::from(418);
+    /// match StatusCode::try_from(200) {
+    ///   Ok(status_code) => assert_eq!(status_code, StatusCode::Ok),
+    ///   Err(_) => panic!("Invalid status code"),
+    /// }
+    /// match StatusCode::try_from(418) {
+    ///   Ok(status_code) => assert_eq!(status_code, StatusCode::IAmATeapot),
+    ///   Err(_) => panic!("Invalid status code"),
+    /// }
     ///
-    /// assert_eq!(status_code_200, StatusCode::Ok);
-    /// assert_eq!(status_code_418, StatusCode::IAmATeapot);
     /// ```
     fn try_from(code: u16) -> Result<Self, Self::Error> {
         StatusCode::try_from(&code)

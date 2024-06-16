@@ -93,11 +93,8 @@ impl Into<Vec<u8>> for HttpResponse {
     /// ```rust
     /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
     ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
-    ///    let response_as_bytes: Vec<u8> = response
-    ///         .status(StatusCode::Ok)
-    ///         .body(b"Hello, World!".to_vec(), "text/plain")
-    ///         .into();
+    /// fn get(request: &HttpRequest, response: HttpResponse) {
+    ///   let response_bytes: Vec<u8> = response.into();
     /// }
     /// ```
     fn into(self) -> Vec<u8> {

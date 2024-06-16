@@ -31,30 +31,30 @@ krustie = "0.1.3"
 
 ```rust
 use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::Middleware };
-use std::collections::HashMap;
+use std::{collections::HashMap, net::Ipv4Addr};
 
 fn main() {
-    let mut server = Server::create(8080).unwrap();
-    let mut router = Router::new("home");
+  let mut server = Server::create(Ipv4Addr::new(127, 0, 0, 1), 8080).unwrap();
+  let mut router = Router::new("home");
 
-    router
-        .get(|_, res| {
-            res.status(StatusCode::Ok);
-        })
-        .post(|_, res| {
-            res.status(StatusCode::Ok);
-        });
-
-    let middleware = Middleware::new(|_, res: &mut HttpResponse| {
-        let mut headers: HashMap<String, String> = HashMap::new();
-        headers.insert(String::from("Server"), String::from("Rust"));
-        res.headers(headers);
+  router
+    .get(|_, res| {
+      res.status(StatusCode::Ok);
+    })
+    .post(|_, res| {
+      res.status(StatusCode::Ok);
     });
-    
-    server.use_handler(router);
-    server.use_handler(middleware);
 
-    server.listen();
+  let middleware = Middleware::new(|_, res: &mut HttpResponse| {
+    let mut headers: HashMap<String, String> = HashMap::new();
+    headers.insert(String::from("Server"), String::from("Rust"));
+    res.headers(headers);
+  });
+  
+  server.use_handler(router);
+  server.use_handler(middleware);
+
+  server.listen();
 }
 ```
 

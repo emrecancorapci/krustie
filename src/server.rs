@@ -12,15 +12,18 @@ use crate::{ request::{ HttpMethod, HttpRequest }, response::{ HttpResponse, Sta
 ///
 /// fn main() {
 ///   let mut server = Server::create_local(8080).unwrap();
-///   let mut router = Router::new("home");
+///   let mut router = Router::new();
+///   let mut sub_router = Router::new();
 ///
-///   router
+///   sub_router
 ///     .get(|_, res| {
 ///         res.status(StatusCode::Ok);
 ///     })
 ///     .post(|_, res| {
 ///         res.status(StatusCode::Ok);
 ///     });
+/// 
+///   router.use_router("home", sub_router);
 ///
 ///   let middleware = Middleware::new(|_, res: &mut HttpResponse| {
 ///     let mut headers: HashMap<String, String> = HashMap::new();
@@ -119,7 +122,7 @@ impl Server {
     /// use std::collections::HashMap;
     ///
     /// let mut server = Server::create_local(8080).unwrap();
-    /// let mut router = Router::new("home");
+    /// let mut router = Router::new();
     ///
     /// let middleware = Middleware::new(|_, res: &mut HttpResponse| {
     ///     let mut headers: HashMap<String, String> = HashMap::new();

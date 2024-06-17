@@ -8,7 +8,7 @@ impl Router {
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
     ///
-    /// let mut router = Router::new("home");
+    /// let mut router = Router::new();
     ///
     /// router.get(|req, res| {
     ///    res.status(StatusCode::Ok);
@@ -26,7 +26,7 @@ impl Router {
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
     ///
-    /// let mut router = Router::new("home");
+    /// let mut router = Router::new();
     ///
     /// router.post(|req, res| {
     ///    res.status(StatusCode::Ok);
@@ -44,7 +44,7 @@ impl Router {
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
     ///
-    /// let mut router = Router::new("/home");
+    /// let mut router = Router::new();
     ///
     /// router.put(|req, res| {
     ///    res.status(StatusCode::Ok);
@@ -62,7 +62,7 @@ impl Router {
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
     ///
-    /// let mut router = Router::new("home");
+    /// let mut router = Router::new();
     ///
     /// router.delete( |req, res| {
     ///    res.status(StatusCode::Ok);
@@ -80,7 +80,7 @@ impl Router {
     /// ```rust
     /// use krustie::{router::Router, response::StatusCode};
     ///
-    /// let mut router = Router::new("home");
+    /// let mut router = Router::new();
     ///
     /// router.patch( |req, res| {
     ///    res.status(StatusCode::Ok);

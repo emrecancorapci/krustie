@@ -8,7 +8,8 @@ It is a hobby project and is intended to be a learning experience for me. I am n
 
 - [x] Basic request and response handling
 - [x] Stacked Router
-- [x] Server Middleware support (Router Middleware support will be added soon)
+- [x] Server Middleware support
+- [x] Router Middleware support
 - [x] Static file serving
 
 ## Getting Started
@@ -24,7 +25,7 @@ It is a hobby project and is intended to be a learning experience for me. I am n
 
 ```toml
 [dependencies]
-krustie = "0.1.3"
+krustie = "0.1.4"
 ```
 
 2. Start your server:
@@ -35,9 +36,10 @@ use std::{collections::HashMap, net::Ipv4Addr};
 
 fn main() {
   let mut server = Server::create(Ipv4Addr::new(127, 0, 0, 1), 8080).unwrap();
-  let mut router = Router::new("home");
+  let mut router = Router::new();
+  let mut sub_router = Router::new();
 
-  router
+  sub_router
     .get(|_, res| {
       res.status(StatusCode::Ok);
     })

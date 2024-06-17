@@ -35,7 +35,7 @@ use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusC
 use std::{collections::HashMap, net::Ipv4Addr};
 
 fn main() {
-  let mut server = Server::create(Ipv4Addr::new(127, 0, 0, 1), 8080).unwrap();
+  let mut server = Server::create(Ipv4Addr::new(127, 0, 0, 1), 8080);
   let mut router = Router::new();
   let mut sub_router = Router::new();
 

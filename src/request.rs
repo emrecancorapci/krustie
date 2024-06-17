@@ -1,5 +1,4 @@
 use std::{ collections::HashMap, fmt::{ Debug, Formatter, Result as fResult } };
-
 use self::request_line::RequestLine;
 
 pub mod http_method;
@@ -14,18 +13,7 @@ pub struct HttpRequest {
 
 impl HttpRequest {
     /// Creates a new HttpRequest
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::request::{HttpRequest, HttpMethod};
-    ///
-    /// let header = vec!["GET / HTTP/1.1".to_string()];
-    /// let request = HttpRequest::new(&header, "");
-    ///
-    /// assert_eq!(request.request.method, HttpMethod::GET);
-    /// ```
-    pub fn new(http_request: &Vec<String>, body: &str) -> HttpRequest {
+    fn new(http_request: &Vec<String>, body: &str) -> HttpRequest {
         let request = (
             {
                 match http_request.first() {
@@ -69,7 +57,7 @@ impl HttpRequest {
 impl Default for HttpRequest {
     fn default() -> Self {
         HttpRequest {
-            request: RequestLine::new("GET", "/", "HTTP/1.1"),
+            request: RequestLine::new("GET", "/", "HTTP/1.1").expect("Failed to create default RequestLine"),
             headers: HashMap::new(),
             body: Vec::new(),
         }

@@ -11,7 +11,7 @@ use crate::{ request::{ HttpMethod, HttpRequest }, response::{ HttpResponse, Sta
 /// use std::collections::HashMap;
 ///
 /// fn main() {
-///   let mut server = Server::create_local(8080).unwrap();
+///   let mut server = Server::create_local(8080);
 ///   let mut router = Router::new();
 ///   let mut sub_router = Router::new();
 ///
@@ -22,7 +22,7 @@ use crate::{ request::{ HttpMethod, HttpRequest }, response::{ HttpResponse, Sta
 ///     .post(|_, res| {
 ///         res.status(StatusCode::Ok);
 ///     });
-/// 
+///
 ///   router.use_router("home", sub_router);
 ///
 ///   let middleware = Middleware::new(|_, res: &mut HttpResponse| {
@@ -53,28 +53,28 @@ impl Server {
     /// use krustie::server::Server;
     /// use std::net::Ipv4Addr;
     ///
-    /// let server = Server::create(Ipv4Addr::new(127, 0, 0, 1), 8080).unwrap();
+    /// let server = Server::create(Ipv4Addr::new(127, 0, 0, 1), 8080);
     ///
     /// // server.listen();
     /// ```
-    pub fn create(ip: Ipv4Addr, port: u16) -> Result<Server, String> {
+    pub fn create(ip: Ipv4Addr, port: u16) -> Server {
         let addr = format!("{ip}:{port}");
 
         match TcpListener::bind(addr) {
             Ok(listener) => {
-                Ok(Server {
+                Server {
                     request_handlers: Vec::new(),
                     listener,
                     is_serves_static: false,
                     static_path: String::from("./public"),
                     // listener_ip: None,
-                })
+                }
             }
-            Err(err) => { Err(err.to_string()) }
+            Err(err) => { panic!("{}", err) }
         }
     }
 
-    pub fn create_local(port: u16) -> Result<Server, String> {
+    pub fn create_local(port: u16) -> Server {
         Server::create(Ipv4Addr::new(127, 0, 0, 1), port)
     }
 
@@ -85,7 +85,7 @@ impl Server {
     /// ```rust
     /// use krustie::server::Server;
     ///
-    /// let mut server = Server::create_local(8080).unwrap();
+    /// let mut server = Server::create_local(8080);
     ///
     /// server.serve_static("./public");
     /// ```
@@ -121,7 +121,7 @@ impl Server {
     /// use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::Middleware };
     /// use std::collections::HashMap;
     ///
-    /// let mut server = Server::create_local(8080).unwrap();
+    /// let mut server = Server::create_local(8080);
     /// let mut router = Router::new();
     ///
     /// let middleware = Middleware::new(|_, res: &mut HttpResponse| {
@@ -142,10 +142,10 @@ impl Server {
 
         match HttpRequest::parse_stream(&stream) {
             Ok(request) => {
-                if self.is_serves_static && &request.request.method == &HttpMethod::GET {
+                if self.is_serves_static && request.request.get_method() == &HttpMethod::GET {
                     match
                         Server::serve_static_files(
-                            &request.request.path_array[0],
+                            &request.request.get_path_array()[0],
                             self.static_path.as_str()
                         )
                     {

@@ -20,7 +20,7 @@ type Controller = fn(&HttpRequest, &mut HttpResponse);
 /// let mut main_router = Router::new();
 /// let mut sub_router = Router::new();
 /// let mut sub_sub_router = Router::new();
-/// 
+///
 /// sub_sub_router
 ///   .get(|req, res| {
 ///     res.status(StatusCode::Ok);
@@ -31,7 +31,7 @@ type Controller = fn(&HttpRequest, &mut HttpResponse);
 ///
 /// sub_router.use_router("suber", sub_sub_router);
 /// main_router.use_router("sub", sub_router);
-    /// ```
+/// ```
 pub struct Router {
     endpoints: HashMap<HttpMethod, Controller>,
     subroutes: HashMap<String, Router>,
@@ -77,7 +77,7 @@ impl Router {
     /// let mut main_router = Router::new();
     /// let mut sub_router = Router::new();
     /// let mut sub_sub_router = Router::new();
-    /// 
+    ///
     /// sub_sub_router.post(|req, res| {
     ///  res.status(StatusCode::Ok);
     /// });
@@ -85,15 +85,10 @@ impl Router {
     /// sub_router.use_router("suber", sub_sub_router);
     /// main_router.use_router("sub", sub_router);
     /// ```
-    pub fn use_router(&mut self, path: &str, router: Router) -> Result<(), String> {
+    pub fn use_router(&mut self, path: &str, router: Router) {
         let path = if path.starts_with("/") { &path[1..] } else { path };
 
-        if self.subroutes.contains_key(path) {
-            return Err("Path already exists".to_string());
-        }
-
-        self.subroutes.insert(path.to_string(), router);
-        return Ok(());
+        self.subroutes.entry(path.to_string()).or_insert(router);
     }
 
     pub fn add_middleware(&mut self, middleware: MiddlewareType) {
@@ -107,7 +102,7 @@ impl Router {
         }
     }
 
-    pub fn handle_route(
+    fn handle_route(
         &self,
         request: &HttpRequest,
         response: &mut HttpResponse,
@@ -118,7 +113,7 @@ impl Router {
         }
 
         if path.len() == 1 {
-            if let Some(endpoint) = self.endpoints.get(&request.request.method) {
+            if let Some(endpoint) = self.endpoints.get(request.request.get_method()) {
                 endpoint(request, response);
             }
         } else {
@@ -148,9 +143,9 @@ impl Router {
 impl Handler for Router {
     /// Handles routing of requests to the appropriate endpoint
     fn handle(&self, request: &HttpRequest, response: &mut HttpResponse) {
-        let path = &request.request.path_array;
+        let path = &request.request.get_path_array();
 
-        if request.request.path_array.len() > 0 {
+        if path.len() > 0 {
             for (key, router) in &self.subroutes {
                 if key == &path[0] {
                     router.handle_route(request, response, path);

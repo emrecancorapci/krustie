@@ -23,19 +23,19 @@ use crate::{
 ///         res.status(StatusCode::Ok);
 ///     })
 ///     .post(|_, res| {
-///         res.status(StatusCode::Ok);
+///         res.status(StatusCode::from(201));
 ///     });
 ///
 ///   router.use_router("home", sub_router);
 ///
 ///   let middleware = Middleware::new(|_, res: &mut HttpResponse| {
-///     let mut headers: HashMap<String, String> = HashMap::new();
-///     headers.insert(String::from("Server"), String::from("Rust"));
+///     headers.insert_header("Server", "Krustie");
 ///     res.headers(headers);
 ///   });
 ///
 ///   server.use_handler(router);
 ///   server.use_handler(middleware);
+///   server.use_handler(Gzip::middleware());
 /// }
 /// ```
 pub struct Server {
@@ -120,6 +120,9 @@ impl Server {
     }
 
     /// Adds a middleware or router to the server
+    /// 
+    /// # Example
+    /// 
     /// ```rust
     /// use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::Middleware };
     /// use std::collections::HashMap;

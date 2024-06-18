@@ -13,10 +13,7 @@ pub struct HttpRequest {
 
 impl HttpRequest {
     /// Creates a new HttpRequest
-    fn new(
-        http_request: &Vec<String>,
-        body: Option<&str>
-    ) -> Result<Self, ParseHttpRequestError> {
+    fn new(http_request: &Vec<String>, body: Option<&str>) -> Result<Self, ParseHttpRequestError> {
         if http_request.is_empty() {
             return Err(ParseHttpRequestError);
         }
@@ -45,6 +42,46 @@ impl HttpRequest {
         }
     }
 
+    /// Returns the reference of the HTTPRequest headers as a HashMap
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{ request::HttpRequest, response::HttpResponse};
+    ///
+    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    ///   let headers = request.get_headers();
+    ///   let content_type = headers.get("content-type");
+    /// }
+    /// ```
+    pub fn get_headers(&self) -> &HashMap<String, String> {
+        &self.headers
+    }
+
+    /// Returns the value of the header key
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{ request::HttpRequest, response::HttpResponse};
+    ///
+    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    ///   let content_type = request.get_header("content-type");
+    /// }
+    pub fn get_header(&self, key: &str) -> Option<&String> {
+        self.headers.get(key)
+    }
+
+    /// Returns the method of the HTTP request
+    pub(crate) fn get_method(&self) -> &HttpMethod {
+        &self.request.get_method()
+    }
+
+    /// Returns the path of the HTTP request
+    pub(crate) fn get_path_array(&self) -> &Vec<String> {
+        &self.request.get_path_array()
+    }
+
     fn header_parser() -> impl Fn(&String) -> Option<(String, String)> {
         |line: &String| {
             let header_line: Vec<&str> = line.split(':').collect();
@@ -58,14 +95,6 @@ impl HttpRequest {
                 None
             }
         }
-    }
-
-    pub(crate) fn get_method(&self) -> &HttpMethod {
-        &self.request.get_method()
-    }
-    
-    pub(crate) fn get_path_array(&self) -> &Vec<String> {
-        &self.request.get_path_array()
     }
 }
 
@@ -92,13 +121,7 @@ impl Debug for HttpRequest {
             None => String::new(),
         };
 
-        write!(
-            f,
-            "Request Line: {}\r\n Headers: {}\r\n Body: {}",
-            self.request,
-            headers,
-            body
-        )
+        write!(f, "Request Line: {}\r\n Headers: {}\r\n Body: {}", self.request, headers, body)
     }
 }
 

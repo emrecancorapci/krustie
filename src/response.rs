@@ -64,7 +64,7 @@ impl HttpResponse {
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///     let mut headers = HashMap::new();
     ///
-    ///     headers.insert("Server".to_string(), "Rust".to_string());
+    ///     headers.insert("Server".to_string(), "Krustie".to_string());
     ///     headers.insert("Connection".to_string(), "close".to_string());
     ///
     ///     response.status(StatusCode::Ok).headers(headers);
@@ -75,6 +75,68 @@ impl HttpResponse {
     pub fn headers(&mut self, headers: HashMap<String, String>) -> &mut Self {
         self.headers.extend(headers);
         self
+    }
+
+    /// Adds a single header to the response
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
+    ///
+    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    ///    response.insert_header("Server", "Krustie");
+    /// }
+    /// ```
+    pub fn insert_header(&mut self, key: &str, value: &str) -> &mut Self {
+        self.headers.insert(key.to_string(), value.to_string());
+        self
+    }
+
+    /// Gets the headers of the response
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
+    ///
+    /// fn get(request: &HttpRequest, response: HttpResponse) {
+    ///   let headers = response.get_headers();
+    ///
+    ///   for (key, value) in headers.iter() {
+    ///    println!("{}: {}", key, value);
+    ///   }
+    /// }
+    pub fn get_headers(&self) -> &HashMap<String, String> {
+        &self.headers
+    }
+
+    /// Gets the body of the response as a byte vector reference
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
+    ///
+    /// fn get(request: &HttpRequest, response: HttpResponse) {
+    ///  let body = response.get_body();
+    /// }
+    pub fn get_body(&mut self) -> &Vec<u8> {
+        &mut self.body
+    }
+
+    /// Gets the body of the response as a **mutable** byte vector reference
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
+    ///
+    /// fn get(request: &HttpRequest, response: HttpResponse) {
+    ///  let body = response.get_body();
+    /// }
+    pub fn get_body_mut(&mut self) -> &mut Vec<u8> {
+        &mut self.body
     }
 
     /// Allows to set the debug mode for the response. If debug mode is set to true, all debug messages will be printed to the console.

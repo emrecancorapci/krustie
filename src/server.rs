@@ -34,7 +34,7 @@ use crate::{
 ///
 ///   server.use_handler(router);
 ///   server.use_handler(middleware);
-///   server.use_handler(Gzip::middleware());
+///   server.use_handler(Gzip::get_middleware());
 /// }
 /// ```
 pub struct Server {
@@ -123,20 +123,15 @@ impl Server {
     /// # Example
     /// 
     /// ```rust
-    /// use krustie::{ server::Server, router::{ Router, methods::Endpoints }, response::{ HttpResponse, StatusCode }, middleware::{ Middleware, gzip::Gzip } };
+    /// use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::{ Middleware, gzip::Gzip } };
     /// use std::collections::HashMap;
     ///
     /// let mut server = Server::create_local(8080);
     /// let mut router = Router::new();
     ///
-    /// let middleware = Middleware::new(|_, res: &mut HttpResponse| {
-    ///     let mut headers: HashMap<String, String> = HashMap::new();
-    ///     headers.insert(String::from("Server"), String::from("Rust"));
-    ///     res.headers(headers);
-    /// });
     ///
     /// server.use_handler(router);
-    /// server.use_handler(middleware);
+    /// server.use_handler(Gzip::get_middleware());
     /// ```
     pub fn use_handler<F>(&mut self, handler: F) where F: Handler + 'static {
         self.request_handlers.push(Box::new(handler));

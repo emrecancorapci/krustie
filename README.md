@@ -11,6 +11,7 @@ It is a hobby project and is intended to be a learning experience for me. I am n
 - [x] Server Middleware support
 - [x] Router Middleware support
 - [x] Static file serving
+- [x] Compression (gzip)
 
 ## Getting Started
 
@@ -28,10 +29,16 @@ It is a hobby project and is intended to be a learning experience for me. I am n
 krustie = "0.1.4"
 ```
 
+or use `cargo add` in your terminal:
+
+```bash
+cargo add krustie
+```
+
 2. Start your server:
 
 ```rust
-use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::Middleware };
+use krustie::{ server::Server, router::{ Router, methods::Endpoints}, response::{ HttpResponse, StatusCode }, middleware::{ Middleware, gzip::Gzip } };
 use std::{collections::HashMap, net::Ipv4Addr};
 
 fn main() {
@@ -44,17 +51,17 @@ fn main() {
       res.status(StatusCode::Ok);
     })
     .post(|_, res| {
-      res.status(StatusCode::Ok);
+      res.status(StatusCode::from(418));
     });
 
   let middleware = Middleware::new(|_, res: &mut HttpResponse| {
-    let mut headers: HashMap<String, String> = HashMap::new();
-    headers.insert(String::from("Server"), String::from("Rust"));
-    res.headers(headers);
+
+    res.insert_header("Server", "Krustie");
   });
   
   server.use_handler(router);
   server.use_handler(middleware);
+  server.use_handler(Gzip::get_middleware());
 
   server.listen();
 }
@@ -106,7 +113,6 @@ As an inexperienced developer contributions will be welcomed. Please open an iss
 ### Performance
 
 - [ ] Caching
-- [ ] Compression
 - [ ] Connection pooling
 - [ ] Load balancing
 - [ ] Clustering

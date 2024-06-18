@@ -1,6 +1,15 @@
 use super::{ Controller, HttpMethod, Router };
 
-impl Router {
+pub trait Endpoints<TController> {
+    fn get(&mut self, controller: TController) -> &mut Self;
+    fn post(&mut self, controller: TController) -> &mut Self;
+    fn put(&mut self, controller: TController) -> &mut Self;
+    fn delete(&mut self, controller: TController) -> &mut Self;
+    fn patch(&mut self, controller: TController) -> &mut Self;
+
+}
+
+impl Endpoints<Controller> for Router {
     /// Adds a GET endpoint to the router
     ///
     /// # Example
@@ -14,7 +23,7 @@ impl Router {
     ///    res.status(StatusCode::Ok);
     /// });
     /// ```
-    pub fn get(&mut self, controller: Controller) -> &mut Self {
+    fn get(&mut self, controller: Controller) -> &mut Self {
         self.endpoints.insert(HttpMethod::GET, controller);
         self
     }
@@ -32,7 +41,7 @@ impl Router {
     ///    res.status(StatusCode::Ok);
     /// });
     /// ```
-    pub fn post(&mut self, controller: Controller) -> &mut Self {
+    fn post(&mut self, controller: Controller) -> &mut Self {
         self.endpoints.insert(HttpMethod::POST, controller);
         self
     }
@@ -50,7 +59,7 @@ impl Router {
     ///    res.status(StatusCode::Ok);
     /// });
     /// ```
-    pub fn put(&mut self, controller: Controller) -> &mut Self {
+    fn put(&mut self, controller: Controller) -> &mut Self {
         self.endpoints.insert(HttpMethod::PUT, controller);
         self
     }
@@ -68,7 +77,7 @@ impl Router {
     ///    res.status(StatusCode::Ok);
     /// });
     /// ```
-    pub fn delete(&mut self, controller: Controller) -> &mut Self {
+    fn delete(&mut self, controller: Controller) -> &mut Self {
         self.endpoints.insert(HttpMethod::DELETE, controller);
         self
     }
@@ -86,7 +95,7 @@ impl Router {
     ///    res.status(StatusCode::Ok);
     /// });
     /// ```
-    pub fn patch(&mut self, controller: Controller) -> &mut Self {
+    fn patch(&mut self, controller: Controller) -> &mut Self {
         self.endpoints.insert(HttpMethod::PATCH, controller);
         self
     }

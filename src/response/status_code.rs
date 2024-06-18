@@ -5,24 +5,24 @@ use super::StatusCode;
 impl StatusCode {
     pub(super) fn get_message(&self) -> &str {
         match self {
-            StatusCode::Ok => "OK",
-            StatusCode::Created => "Created",
-            StatusCode::Accepted => "Accepted",
-            StatusCode::NoContent => "No Content",
-            StatusCode::BadRequest => "Bad Request",
-            StatusCode::Unauthorized => "Unauthorized",
-            StatusCode::Forbidden => "Forbidden",
-            StatusCode::NotFound => "Not Found",
-            StatusCode::MethodNotAllowed => "Method Not Allowed",
-            StatusCode::RequestTimeout => "Request Timeout",
-            StatusCode::LengthRequired => "Length Required",
-            StatusCode::UnsupportedMediaType => "Unsupported Media Type",
-            StatusCode::IAmATeapot => "I'm A Teapot",
-            StatusCode::InternalServerError => "Internal Server Error",
-            StatusCode::NotImplemented => "Not Implemented",
-            StatusCode::ServiceUnavailable => "Service Unavailable",
-            StatusCode::GatewayTimeout => "Gateway Timeout",
-            StatusCode::HttpVersionNotSupported => "HTTP Version Not Supported",
+            Self::Ok => "OK",
+            Self::Created => "Created",
+            Self::Accepted => "Accepted",
+            Self::NoContent => "No Content",
+            Self::BadRequest => "Bad Request",
+            Self::Unauthorized => "Unauthorized",
+            Self::Forbidden => "Forbidden",
+            Self::NotFound => "Not Found",
+            Self::MethodNotAllowed => "Method Not Allowed",
+            Self::RequestTimeout => "Request Timeout",
+            Self::LengthRequired => "Length Required",
+            Self::UnsupportedMediaType => "Unsupported Media Type",
+            Self::IAmATeapot => "I'm A Teapot",
+            Self::InternalServerError => "Internal Server Error",
+            Self::NotImplemented => "Not Implemented",
+            Self::ServiceUnavailable => "Service Unavailable",
+            Self::GatewayTimeout => "Gateway Timeout",
+            Self::HttpVersionNotSupported => "HTTP Version Not Supported",
         }
     }
 }
@@ -139,26 +139,7 @@ impl From<&StatusCode> for u16 {
     /// assert_eq!(u16::from(&status_code_418), 418);
     /// ```
     fn from(code: &StatusCode) -> u16 {
-        match code {
-            StatusCode::Ok => 200,
-            StatusCode::Created => 201,
-            StatusCode::Accepted => 202,
-            StatusCode::NoContent => 204,
-            StatusCode::BadRequest => 400,
-            StatusCode::Unauthorized => 401,
-            StatusCode::Forbidden => 403,
-            StatusCode::NotFound => 404,
-            StatusCode::MethodNotAllowed => 405,
-            StatusCode::RequestTimeout => 408,
-            StatusCode::LengthRequired => 411,
-            StatusCode::UnsupportedMediaType => 415,
-            StatusCode::IAmATeapot => 418,
-            StatusCode::InternalServerError => 500,
-            StatusCode::NotImplemented => 501,
-            StatusCode::ServiceUnavailable => 503,
-            StatusCode::GatewayTimeout => 504,
-            StatusCode::HttpVersionNotSupported => 505,
-        }
+        *code as u16
     }
 }
 
@@ -177,28 +158,7 @@ impl Display for StatusCode {
     /// assert_eq!(status_code_418.to_string(), "418");
     /// ```
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let str = match self {
-            StatusCode::Ok => "200",
-            StatusCode::Created => "201",
-            StatusCode::Accepted => "202",
-            StatusCode::NoContent => "204",
-            StatusCode::BadRequest => "400",
-            StatusCode::Unauthorized => "401",
-            StatusCode::Forbidden => "403",
-            StatusCode::NotFound => "404",
-            StatusCode::MethodNotAllowed => "405",
-            StatusCode::RequestTimeout => "408",
-            StatusCode::LengthRequired => "411",
-            StatusCode::UnsupportedMediaType => "415",
-            StatusCode::IAmATeapot => "418",
-            StatusCode::InternalServerError => "500",
-            StatusCode::NotImplemented => "501",
-            StatusCode::ServiceUnavailable => "503",
-            StatusCode::GatewayTimeout => "504",
-            StatusCode::HttpVersionNotSupported => "505",
-        };
-
-        write!(f, "{}", str)
+        write!(f, "{}", *self as u16)
     }
 }
 

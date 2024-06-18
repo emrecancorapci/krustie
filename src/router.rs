@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use crate::{
-    middleware::Middleware,
+    middleware::MiddlewareHandler,
     request::{ HttpMethod, HttpRequest },
     response::{ HttpResponse, StatusCode },
     server::Handler,
@@ -35,8 +35,8 @@ type Controller = fn(&HttpRequest, &mut HttpResponse);
 pub struct Router {
     endpoints: HashMap<HttpMethod, Controller>,
     subroutes: HashMap<String, Router>,
-    request_middleware: Vec<Middleware>,
-    response_middleware: Vec<Middleware>,
+    request_middleware: Vec<MiddlewareHandler>,
+    response_middleware: Vec<MiddlewareHandler>,
 }
 
 impl Router {
@@ -157,6 +157,6 @@ impl Handler for Router {
 }
 
 pub enum MiddlewareType {
-    Request(Middleware),
-    Response(Middleware),
+    Request(MiddlewareHandler),
+    Response(MiddlewareHandler),
 }

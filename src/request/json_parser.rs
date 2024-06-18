@@ -1,15 +1,17 @@
 use super::HttpRequest;
-use serde::de::{self, Error};
-use serde_json::Result;
+use serde::de::Error;
+use serde_json::{ Result as JsonResult, Error as JsonError, from_slice as json_from_slice };
+
+pub use serde::de::Deserialize;
 
 impl HttpRequest {
-    pub fn body_to_json<'a, T>(&'a self) -> Result<T> where T: de::Deserialize<'a> {
+    pub fn body_as_json<'a, T>(&'a self) -> JsonResult<T> where T: Deserialize<'a> {
         match self.body.as_ref() {
             None => {
-                return Err(serde_json::Error::custom("No body"));
+                return Err(JsonError::custom("No body"));
             }
             Some(body) => {
-                let json: T = serde_json::from_slice(body.as_slice())?;
+                let json: T = json_from_slice(body.as_slice())?;
                 Ok(json)
             }
         }

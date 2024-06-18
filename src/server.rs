@@ -10,7 +10,7 @@ use crate::{
 /// # Example
 ///
 /// ```rust
-/// use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::Middleware };
+/// use krustie::{ server::Server, router::{ Router, methods::Endpoints }, response::{ HttpResponse, StatusCode }, middleware::{ MiddlewareHandler, Middleware, gzip::Gzip } };
 /// use std::collections::HashMap;
 ///
 /// fn main() {
@@ -23,14 +23,13 @@ use crate::{
 ///         res.status(StatusCode::Ok);
 ///     })
 ///     .post(|_, res| {
-///         res.status(StatusCode::from(201));
+///         res.status(StatusCode::try_from(201).unwrap());
 ///     });
 ///
 ///   router.use_router("home", sub_router);
 ///
-///   let middleware = Middleware::new(|_, res: &mut HttpResponse| {
-///     headers.insert_header("Server", "Krustie");
-///     res.headers(headers);
+///   let middleware = MiddlewareHandler::new(|_, res: &mut HttpResponse| {
+///     res.insert_header("Server", "Krustie");
 ///   });
 ///
 ///   server.use_handler(router);
@@ -124,7 +123,7 @@ impl Server {
     /// # Example
     /// 
     /// ```rust
-    /// use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::Middleware };
+    /// use krustie::{ server::Server, router::{ Router, methods::Endpoints }, response::{ HttpResponse, StatusCode }, middleware::{ Middleware, gzip::Gzip } };
     /// use std::collections::HashMap;
     ///
     /// let mut server = Server::create_local(8080);

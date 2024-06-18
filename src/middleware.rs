@@ -6,7 +6,7 @@ type MiddlewareFn = fn(&HttpRequest, &mut HttpResponse);
 
 pub trait Middleware {
     fn middleware(req: &HttpRequest, res: &mut HttpResponse);
-    fn get() -> MiddlewareHandler {
+    fn get_middleware() -> MiddlewareHandler {
         MiddlewareHandler::new(Self::middleware)
     }
 }

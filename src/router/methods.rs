@@ -15,7 +15,7 @@ impl Endpoints<Controller> for Router {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{router::Router, response::StatusCode};
+    /// use krustie::{router::{ Router, methods::Endpoints }, response::StatusCode};
     ///
     /// let mut router = Router::new();
     ///
@@ -33,12 +33,12 @@ impl Endpoints<Controller> for Router {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{router::Router, response::StatusCode};
+    /// use krustie::{router::{ Router, methods::Endpoints }, response::StatusCode};
     ///
     /// let mut router = Router::new();
     ///
     /// router.post(|req, res| {
-    ///    res.status(StatusCode::Ok);
+    ///   res.status(StatusCode::Ok);
     /// });
     /// ```
     fn post(&mut self, controller: Controller) -> &mut Self {
@@ -51,12 +51,12 @@ impl Endpoints<Controller> for Router {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{router::Router, response::StatusCode};
+    /// use krustie::{router::{ Router, methods::Endpoints }, response::StatusCode};
     ///
     /// let mut router = Router::new();
     ///
     /// router.put(|req, res| {
-    ///    res.status(StatusCode::Ok);
+    ///   res.status(StatusCode::Ok);
     /// });
     /// ```
     fn put(&mut self, controller: Controller) -> &mut Self {
@@ -69,12 +69,12 @@ impl Endpoints<Controller> for Router {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{router::Router, response::StatusCode};
+    /// use krustie::{router::{ Router, methods::Endpoints }, response::StatusCode};
     ///
     /// let mut router = Router::new();
     ///
-    /// router.delete( |req, res| {
-    ///    res.status(StatusCode::Ok);
+    /// router.delete(|req, res| {
+    ///   res.status(StatusCode::Ok);
     /// });
     /// ```
     fn delete(&mut self, controller: Controller) -> &mut Self {
@@ -87,12 +87,12 @@ impl Endpoints<Controller> for Router {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{router::Router, response::StatusCode};
+    /// use krustie::{router::{ Router, methods::Endpoints }, response::StatusCode};
     ///
     /// let mut router = Router::new();
     ///
-    /// router.patch( |req, res| {
-    ///    res.status(StatusCode::Ok);
+    /// router.patch(|req, res| {
+    ///   res.status(StatusCode::Ok);
     /// });
     /// ```
     fn patch(&mut self, controller: Controller) -> &mut Self {

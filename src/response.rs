@@ -118,7 +118,7 @@ impl HttpResponse {
     /// ```rust
     /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
     ///
-    /// fn get(request: &HttpRequest, response: HttpResponse) {
+    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///  let body = response.get_body();
     /// }
     pub fn get_body(&mut self) -> &Vec<u8> {
@@ -132,7 +132,7 @@ impl HttpResponse {
     /// ```rust
     /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
     ///
-    /// fn get(request: &HttpRequest, response: HttpResponse) {
+    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///  let body = response.get_body();
     /// }
     pub fn get_body_mut(&mut self) -> &mut Vec<u8> {

@@ -44,6 +44,7 @@ name = "krustie"
 version = "0.1.4"
 dependencies = [
  "flate2",
+ "serde",
  "serde_json",
 ]
 

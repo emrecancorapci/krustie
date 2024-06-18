@@ -1,6 +1,9 @@
 use std::{ fs, io::Write, net::{ Ipv4Addr, TcpListener, TcpStream }, path::PathBuf };
 
-use crate::{ request::{ HttpMethod, HttpRequest }, response::{ HttpResponse, StatusCode } };
+use crate::{
+    request::{ parser::Parse, HttpMethod, HttpRequest },
+    response::{ HttpResponse, StatusCode },
+};
 
 /// A server for handling requests
 ///
@@ -140,7 +143,7 @@ impl Server {
     fn handle_stream(&self, stream: &mut TcpStream) {
         let mut response = HttpResponse::default();
 
-        match HttpRequest::parse_stream(&stream) {
+        match HttpRequest::parse(&stream) {
             Ok(request) => {
                 if self.is_serves_static && request.get_method() == &HttpMethod::GET {
                     match

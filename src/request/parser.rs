@@ -2,9 +2,13 @@ use std::{ io::{ BufRead, BufReader, Read }, net::TcpStream };
 
 use super::HttpRequest;
 
-impl HttpRequest {
+pub(crate) trait Parse {
+    fn parse(stream: &TcpStream) -> Result<HttpRequest, String>;
+}
+
+impl Parse for HttpRequest {
     /// Parses a TcpStream into HttpRequest
-    pub fn parse_stream(mut stream: &TcpStream) -> Result<HttpRequest, String> {
+    fn parse(mut stream: &TcpStream) -> Result<Self, String> {
         let mut buf_reader = BufReader::new(&mut stream);
         let mut headers = Vec::new();
 
@@ -17,7 +21,9 @@ impl HttpRequest {
             headers.push(line);
         }
 
-        match HttpRequest::get_content_length(&headers) {
+        match parse_length(&headers) {
+            None => { Self::new(&headers, None).map_err(|err| err.to_string()) }
+            Some(0) => { Self::new(&headers, None).map_err(|err| err.to_string()) }
             Some(content_length) => {
                 let mut body = Vec::with_capacity(content_length);
 
@@ -39,27 +45,23 @@ impl HttpRequest {
                     Err(_) => { Err("Error while parsing body".to_string()) }
                 }
             }
-            None => { HttpRequest::new(&headers, None).map_err(|err| err.to_string()) }
         }
     }
+}
 
-    /// Gets the content length from the headers
-    fn get_content_length(headers: &Vec<String>) -> Option<usize> {
-        for line in headers.iter() {
-            if line.starts_with("Content-Length") {
-                let parts = line.split(':').collect::<Vec<&str>>();
-
-                match parts[1].trim().parse::<usize>() {
-                    Ok(parsed) => {
-                        return Some(parsed);
-                    }
-                    Err(_) => {
-                        return None;
-                    }
+/// Gets the content length from the headers
+fn parse_length(headers: &Vec<String>) -> Option<usize> {
+    for line in headers.iter() {
+        if line.starts_with("Content-Length") {
+            match line.find(":") {
+                Some(index) => {
+                    return Some(line[index + 1..].trim().parse::<usize>().unwrap_or(0));
+                }
+                None => {
+                    return None;
                 }
             }
         }
-
-        return None;
     }
+    return None;
 }

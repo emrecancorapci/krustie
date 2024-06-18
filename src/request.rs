@@ -3,7 +3,7 @@ use self::request_line::RequestLine;
 
 pub mod http_method;
 mod request_line;
-pub(crate) mod parser;
+pub(crate) mod request_parser;
 
 pub struct HttpRequest {
     request: RequestLine,

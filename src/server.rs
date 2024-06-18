@@ -133,7 +133,7 @@ impl Server {
     /// server.use_handler(router);
     /// server.use_handler(Gzip::get_middleware());
     /// ```
-    pub fn use_handler<F>(&mut self, handler: F) where F: Handler + 'static {
+    pub fn use_handler(&mut self, handler: impl Handler + 'static) {
         self.request_handlers.push(Box::new(handler));
     }
 

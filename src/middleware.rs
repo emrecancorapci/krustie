@@ -2,25 +2,17 @@ use crate::{ request::HttpRequest, response::HttpResponse, server::Handler };
 
 pub mod gzip;
 
-type MiddlewareFn = fn(&HttpRequest, &mut HttpResponse);
-
 pub trait Middleware {
     fn middleware(req: &HttpRequest, res: &mut HttpResponse);
     fn get_middleware() -> MiddlewareHandler {
-        MiddlewareHandler::new(Self::middleware)
+        MiddlewareHandler {
+            middleware: Self::middleware,
+        }
     }
 }
 
 pub struct MiddlewareHandler {
-    middleware: MiddlewareFn,
-}
-
-impl MiddlewareHandler {
-    pub fn new(middleware: MiddlewareFn) -> Self {
-        Self {
-            middleware,
-        }
-    }
+    middleware: fn(&HttpRequest, &mut HttpResponse),
 }
 
 impl Handler for MiddlewareHandler {

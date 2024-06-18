@@ -57,12 +57,12 @@ impl Server {
     ///
     /// // server.listen();
     /// ```
-    pub fn create(ip: Ipv4Addr, port: u16) -> Server {
+    pub fn create(ip: Ipv4Addr, port: u16) -> Self {
         let addr = format!("{ip}:{port}");
 
         match TcpListener::bind(addr) {
             Ok(listener) => {
-                Server {
+                Self {
                     request_handlers: Vec::new(),
                     listener,
                     is_serves_static: false,
@@ -74,8 +74,8 @@ impl Server {
         }
     }
 
-    pub fn create_local(port: u16) -> Server {
-        Server::create(Ipv4Addr::new(127, 0, 0, 1), port)
+    pub fn create_local(port: u16) -> Self {
+        Self::create(Ipv4Addr::new(127, 0, 0, 1), port)
     }
 
     /// Serves static files from the specified path
@@ -142,10 +142,10 @@ impl Server {
 
         match HttpRequest::parse_stream(&stream) {
             Ok(request) => {
-                if self.is_serves_static && request.request.get_method() == &HttpMethod::GET {
+                if self.is_serves_static && request.get_method() == &HttpMethod::GET {
                     match
-                        Server::serve_static_files(
-                            &request.request.get_path_array()[0],
+                        Self::serve_static_files(
+                            &request.get_path_array()[0],
                             self.static_path.as_str()
                         )
                     {

@@ -3,7 +3,7 @@ use std::fmt::{self, Display, Formatter};
 use super::StatusCode;
 
 impl StatusCode {
-    pub fn get_message(&self) -> &str {
+    pub(super) fn get_message(&self) -> &str {
         match self {
             StatusCode::Ok => "OK",
             StatusCode::Created => "Created",
@@ -29,7 +29,7 @@ impl StatusCode {
 
 impl Default for StatusCode {
     fn default() -> Self {
-        StatusCode::Ok
+        Self::Ok
     }
 }
 
@@ -53,24 +53,24 @@ impl TryFrom<&u16> for StatusCode {
     /// ```
     fn try_from(code: &u16) -> Result<Self, Self::Error> {
         match code {
-            200 => Ok(StatusCode::Ok),
-            201 => Ok(StatusCode::Created),
-            202 => Ok(StatusCode::Accepted),
-            204 => Ok(StatusCode::NoContent),
-            400 => Ok(StatusCode::BadRequest),
-            401 => Ok(StatusCode::Unauthorized),
-            403 => Ok(StatusCode::Forbidden),
-            404 => Ok(StatusCode::NotFound),
-            405 => Ok(StatusCode::MethodNotAllowed),
-            408 => Ok(StatusCode::RequestTimeout),
-            411 => Ok(StatusCode::LengthRequired),
-            415 => Ok(StatusCode::UnsupportedMediaType),
-            418 => Ok(StatusCode::IAmATeapot),
-            500 => Ok(StatusCode::InternalServerError),
-            501 => Ok(StatusCode::NotImplemented),
-            503 => Ok(StatusCode::ServiceUnavailable),
-            504 => Ok(StatusCode::GatewayTimeout),
-            505 => Ok(StatusCode::HttpVersionNotSupported),
+            200 => Ok(Self::Ok),
+            201 => Ok(Self::Created),
+            202 => Ok(Self::Accepted),
+            204 => Ok(Self::NoContent),
+            400 => Ok(Self::BadRequest),
+            401 => Ok(Self::Unauthorized),
+            403 => Ok(Self::Forbidden),
+            404 => Ok(Self::NotFound),
+            405 => Ok(Self::MethodNotAllowed),
+            408 => Ok(Self::RequestTimeout),
+            411 => Ok(Self::LengthRequired),
+            415 => Ok(Self::UnsupportedMediaType),
+            418 => Ok(Self::IAmATeapot),
+            500 => Ok(Self::InternalServerError),
+            501 => Ok(Self::NotImplemented),
+            503 => Ok(Self::ServiceUnavailable),
+            504 => Ok(Self::GatewayTimeout),
+            505 => Ok(Self::HttpVersionNotSupported),
             _ => Err(ParseStatusCodeError),
         }
     }
@@ -96,7 +96,7 @@ impl TryFrom<&str> for StatusCode {
     /// ```
     fn try_from(code: &str) -> Result<Self, Self::Error> {
         let num = code.parse().unwrap_or(0);
-        StatusCode::try_from(num)
+        Self::try_from(num)
     }
 }
 
@@ -120,7 +120,7 @@ impl TryFrom<u16> for StatusCode {
     ///
     /// ```
     fn try_from(code: u16) -> Result<Self, Self::Error> {
-        StatusCode::try_from(&code)
+        Self::try_from(&code)
     }
 }
 

@@ -3,12 +3,12 @@ use self::request_line::RequestLine;
 
 pub mod http_method;
 mod request_line;
-mod parser;
+pub(crate) mod parser;
 
 pub struct HttpRequest {
-    pub request: RequestLine,
-    pub headers: HashMap<String, String>,
-    pub body: Option<Vec<u8>>,
+    request: RequestLine,
+    headers: HashMap<String, String>,
+    body: Option<Vec<u8>>,
 }
 
 impl HttpRequest {
@@ -16,7 +16,7 @@ impl HttpRequest {
     fn new(
         http_request: &Vec<String>,
         body: Option<&str>
-    ) -> Result<HttpRequest, ParseHttpRequestError> {
+    ) -> Result<Self, ParseHttpRequestError> {
         if http_request.is_empty() {
             return Err(ParseHttpRequestError);
         }
@@ -59,11 +59,19 @@ impl HttpRequest {
             }
         }
     }
+
+    pub(crate) fn get_method(&self) -> &HttpMethod {
+        &self.request.get_method()
+    }
+    
+    pub(crate) fn get_path_array(&self) -> &Vec<String> {
+        &self.request.get_path_array()
+    }
 }
 
 impl Default for HttpRequest {
     fn default() -> Self {
-        HttpRequest {
+        Self {
             request: RequestLine::new("GET", "/", "HTTP/1.1").expect(
                 "Failed to create default RequestLine"
             ),
@@ -86,8 +94,8 @@ impl Debug for HttpRequest {
 
         write!(
             f,
-            "HttpRequest Line: {}\r\n Headers: {}\r\n Body: {}",
-            self.request.to_string(),
+            "Request Line: {}\r\n Headers: {}\r\n Body: {}",
+            self.request,
             headers,
             body
         )

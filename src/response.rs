@@ -22,7 +22,7 @@ impl HttpResponse {
     ///    response.status(StatusCode::Ok);
     /// }
     /// ```
-    pub fn status(&mut self, status_code: StatusCode) -> &mut HttpResponse {
+    pub fn status(&mut self, status_code: StatusCode) -> &mut Self {
         self.status_code = status_code;
         self
     }
@@ -46,7 +46,7 @@ impl HttpResponse {
     ///    response.status(StatusCode::Ok).body(b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(), "text/html");
     /// }
     /// ```
-    pub fn body(&mut self, body: Vec<u8>, content_type: &str) -> &mut HttpResponse {
+    pub fn body(&mut self, body: Vec<u8>, content_type: &str) -> &mut Self {
         self.body = body.clone();
         self.headers.insert(String::from("Content-Length"), body.len().to_string());
         self.headers.insert(String::from("Content-Type"), content_type.to_string());
@@ -72,12 +72,13 @@ impl HttpResponse {
     /// ```
     ///
     /// Code above will add `Server: Rust` and `Connection: close` headers to the response.
-    pub fn headers(&mut self, headers: HashMap<String, String>) -> &mut HttpResponse {
+    pub fn headers(&mut self, headers: HashMap<String, String>) -> &mut Self {
         self.headers.extend(headers);
         self
     }
 
-    pub fn debug_msg(&mut self, msg: &str) -> &mut HttpResponse {
+    /// Allows to set the debug mode for the response. If debug mode is set to true, all debug messages will be printed to the console.
+    pub(crate) fn debug_msg(&mut self, msg: &str) -> &mut Self {
         if self.debug_mode {
             println!("{}", msg);
         }
@@ -143,7 +144,7 @@ impl Default for HttpResponse {
     /// }
     /// ```
     fn default() -> Self {
-        HttpResponse {
+        Self {
             debug_mode: false,
             http_version: "HTTP/1.1".to_string(),
             status_code: StatusCode::NotFound,

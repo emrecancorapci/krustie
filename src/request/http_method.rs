@@ -4,18 +4,18 @@ use super::HttpMethod;
 
 impl Default for HttpMethod {
     fn default() -> Self {
-        HttpMethod::GET
+        Self::GET
     }
 }
 
 impl Display for HttpMethod {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         match self {
-            HttpMethod::GET => write!(f, "GET"),
-            HttpMethod::POST => write!(f, "POST"),
-            HttpMethod::PUT => write!(f, "PUT"),
-            HttpMethod::PATCH => write!(f, "PATCH"),
-            HttpMethod::DELETE => write!(f, "DELETE"),
+            Self::GET => write!(f, "GET"),
+            Self::POST => write!(f, "POST"),
+            Self::PUT => write!(f, "PUT"),
+            Self::PATCH => write!(f, "PATCH"),
+            Self::DELETE => write!(f, "DELETE"),
         }
     }
 }
@@ -39,11 +39,11 @@ impl TryFrom<&str> for HttpMethod {
     fn try_from(method: &str) -> Result<Self, Self::Error> {
         let method = method.to_uppercase();
         match method.as_str() {
-            "GET" => Ok(HttpMethod::GET),
-            "POST" => Ok(HttpMethod::POST),
-            "PUT" => Ok(HttpMethod::PUT),
-            "PATCH" => Ok(HttpMethod::PATCH),
-            "DELETE" => Ok(HttpMethod::DELETE),
+            "GET" => Ok(Self::GET),
+            "POST" => Ok(Self::POST),
+            "PUT" => Ok(Self::PUT),
+            "PATCH" => Ok(Self::PATCH),
+            "DELETE" => Ok(Self::DELETE),
             _ => Err(ParseHttpMethodError),
         }
     }

@@ -56,8 +56,8 @@ impl Router {
     /// });
     ///
     /// ```
-    pub fn new() -> Router {
-        Router {
+    pub fn new() -> Self {
+        Self {
             endpoints: HashMap::new(),
             subroutes: HashMap::new(),
             request_middleware: Vec::new(),
@@ -113,7 +113,7 @@ impl Router {
         }
 
         if path.len() == 1 {
-            if let Some(endpoint) = self.endpoints.get(request.request.get_method()) {
+            if let Some(endpoint) = self.endpoints.get(request.get_method()) {
                 endpoint(request, response);
             }
         } else {
@@ -143,7 +143,7 @@ impl Router {
 impl Handler for Router {
     /// Handles routing of requests to the appropriate endpoint
     fn handle(&self, request: &HttpRequest, response: &mut HttpResponse) {
-        let path = &request.request.get_path_array();
+        let path = &request.get_path_array();
 
         if path.len() > 0 {
             for (key, router) in &self.subroutes {

@@ -10,18 +10,18 @@ pub struct RequestLine {
 }
 
 impl RequestLine {
-    pub fn new(
+    pub(super) fn new(
         method: &str,
         path: &str,
         version: &str
-    ) -> Result<RequestLine, ParseRequestLineError> {
+    ) -> Result<Self, ParseRequestLineError> {
         let path_array: Vec<String> = path[1..]
             .split('/')
             .map(|str| str.to_string())
             .collect();
         match HttpMethod::try_from(method) {
             Ok(method) => {
-                Ok(RequestLine {
+                Ok(Self {
                     method,
                     path: path.to_string(),
                     version: version.to_string(),
@@ -34,15 +34,11 @@ impl RequestLine {
         }
     }
 
-    pub fn get_method(&self) -> &HttpMethod {
+    pub(super) fn get_method(&self) -> &HttpMethod {
         &self.method
     }
 
-    pub fn get_path(&self) -> &str {
-        &self.path
-    }
-
-    pub fn get_path_array(&self) -> &Vec<String> {
+    pub(super) fn get_path_array(&self) -> &Vec<String> {
         &self.path_array
     }
 }
@@ -62,7 +58,7 @@ impl TryFrom<&str> for RequestLine {
             return Err(ParseRequestLineError);
         }
 
-        match RequestLine::new(request_line[0], request_line[1], request_line[2]) {
+        match Self::new(request_line[0], request_line[1], request_line[2]) {
             Ok(request_line) => Ok(request_line),
             Err(_) => Err(ParseRequestLineError),
         }

@@ -1,4 +1,4 @@
-use std::{ collections::HashMap, fmt::{ Debug, Formatter, Result as fResult } };
+use std::{ collections::HashMap, fmt::{ Debug, Display, Formatter, Result as fResult } };
 use self::request_line::RequestLine;
 
 pub mod http_method;
@@ -8,20 +8,20 @@ mod parser;
 pub struct HttpRequest {
     pub request: RequestLine,
     pub headers: HashMap<String, String>,
-    pub body: Vec<u8>,
+    pub body: Option<Vec<u8>>,
 }
 
 impl HttpRequest {
     /// Creates a new HttpRequest
-    fn new(http_request: &Vec<String>, body: &str) -> HttpRequest {
-        let request = (
-            {
-                match http_request.first() {
-                    Some(request_line) => { RequestLine::try_from(request_line.as_str()) }
-                    None => { todo!("Implement none handling") }
-                }
-            }
-        ).expect("RequestLine not found");
+    fn new(
+        http_request: &Vec<String>,
+        body: Option<&str>
+    ) -> Result<HttpRequest, ParseHttpRequestError> {
+        if http_request.is_empty() {
+            return Err(ParseHttpRequestError);
+        }
+
+        let request = RequestLine::try_from(http_request[0].as_str());
 
         let headers = http_request
             .iter()
@@ -29,12 +29,19 @@ impl HttpRequest {
             .filter_map(HttpRequest::header_parser())
             .collect();
 
-        let body = body.as_bytes().to_vec();
+        let body = match body {
+            Some(body) => Some(body.as_bytes().to_vec()),
+            None => None,
+        };
 
-        HttpRequest {
-            request,
-            headers,
-            body,
+        match request {
+            Ok(request) =>
+                Ok(HttpRequest {
+                    request,
+                    headers,
+                    body,
+                }),
+            Err(_) => Err(ParseHttpRequestError),
         }
     }
 
@@ -57,9 +64,11 @@ impl HttpRequest {
 impl Default for HttpRequest {
     fn default() -> Self {
         HttpRequest {
-            request: RequestLine::new("GET", "/", "HTTP/1.1").expect("Failed to create default RequestLine"),
+            request: RequestLine::new("GET", "/", "HTTP/1.1").expect(
+                "Failed to create default RequestLine"
+            ),
             headers: HashMap::new(),
-            body: Vec::new(),
+            body: None,
         }
     }
 }
@@ -70,10 +79,10 @@ impl Debug for HttpRequest {
             .iter()
             .fold(String::new(), |acc, (k, v)| format!("{acc}{k}: {v}\r\n"));
 
-        let body = self.body
-            .iter()
-            .map(|byte| *byte as char)
-            .collect::<String>();
+        let body = match &self.body {
+            Some(body) => format!("{:?}", body),
+            None => String::new(),
+        };
 
         write!(
             f,
@@ -96,4 +105,13 @@ pub enum HttpMethod {
     // HEAD,
     // OPTIONS,
     // TRACE,
+}
+
+#[derive(Debug)]
+pub struct ParseHttpRequestError;
+
+impl Display for ParseHttpRequestError {
+    fn fmt(&self, f: &mut Formatter) -> fResult {
+        write!(f, "Failed to parse HTTP request")
+    }
 }

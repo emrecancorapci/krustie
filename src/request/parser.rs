@@ -8,7 +8,7 @@ impl HttpRequest {
         let mut buf_reader = BufReader::new(&mut stream);
         let mut headers = Vec::new();
 
-        // Don't touch this. It's too sensitive. It will break the server.
+        // Don't touch this. It's too sensitive :(((.
         for line_result in buf_reader.by_ref().lines() {
             let line = line_result.unwrap();
             if line.is_empty() {
@@ -21,17 +21,25 @@ impl HttpRequest {
             Some(content_length) => {
                 let mut body = Vec::with_capacity(content_length);
 
-                match buf_reader.take(content_length as u64).read_to_end(&mut body) {
-                    Ok(_) => {
-                        match String::from_utf8(body) {
-                            Ok(body) => { Ok(HttpRequest::new(&headers, body.as_str())) }
-                            Err(_) => { Err("Error while parsing body".to_string()) }
-                        }
+                if
+                    buf_reader
+                        .take(content_length as u64)
+                        .read_to_end(&mut body)
+                        .is_err()
+                {
+                    return Err("Error while reading body".to_string());
+                }
+
+                match String::from_utf8(body) {
+                    Ok(body) => {
+                        HttpRequest::new(&headers, Some(body.as_str())).map_err(|err|
+                            err.to_string()
+                        )
                     }
-                    Err(error) => { Err(format!("Error while reading body: {}", error.to_string())) }
+                    Err(_) => { Err("Error while parsing body".to_string()) }
                 }
             }
-            None => { Ok(HttpRequest::new(&headers, "")) }
+            None => { HttpRequest::new(&headers, None).map_err(|err| err.to_string()) }
         }
     }
 

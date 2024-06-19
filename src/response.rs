@@ -181,14 +181,13 @@ impl Into<Vec<u8>> for HttpResponse {
         }
 
         let mut response_bytes: Vec<u8> = format!(
-            "{http_version} {status_code} {status_msg}\r\n{headers_string}",
+            "{http_version} {status_code} {status_msg}\r\n{headers_string}\r\n",
             http_version = self.http_version,
             status_code = self.status_code.to_string(),
             status_msg = self.status_code.get_message()
         ).into_bytes();
 
         if self.body.len() > 0 {
-            response_bytes.extend("\r\n".as_bytes());
             response_bytes.extend_from_slice(&self.body);
         }
 

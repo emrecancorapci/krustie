@@ -43,8 +43,8 @@ use crate::{
 ///   router.use_router("home", sub_router);
 ///
 ///   server.use_handler(router);
-///   server.use_handler(AddKrustieHeader::get_middleware());
-///   server.use_handler(Gzip::get_middleware());
+///   server.use_handler(AddKrustieHeader);
+///   server.use_handler(Gzip);
 /// }
 /// ```
 pub struct Server {
@@ -141,7 +141,7 @@ impl Server {
     ///
     ///
     /// server.use_handler(router);
-    /// server.use_handler(Gzip::get_middleware());
+    /// server.use_handler(Gzip);
     /// ```
     pub fn use_handler(&mut self, handler: impl Handler + 'static) {
         self.request_handlers.push(Box::new(handler));

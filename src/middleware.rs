@@ -2,6 +2,27 @@ use crate::{ request::HttpRequest, response::HttpResponse, server::Handler };
 
 pub mod gzip;
 
+/// Middleware trait to be implemented for creating middleware
+/// 
+/// # Example
+/// 
+/// ```rust
+/// use krustie::{ request::HttpRequest, response::HttpResponse, middleware::Middleware };
+/// 
+/// struct AddKrustieHeader;
+/// 
+/// impl AddKrustieHeader {
+///   fn add_header(res: &mut HttpResponse) {
+///     res.insert_header("Server", "Krustie");
+///   }
+/// }
+/// 
+/// impl Middleware for AddKrustieHeader {
+///   fn middleware(req: &HttpRequest, res: &mut HttpResponse) {
+///     AddKrustieHeader::add_header(res);
+///   }
+/// }
+///
 pub trait Middleware {
     fn middleware(req: &HttpRequest, res: &mut HttpResponse) where Self: Sized;
 }

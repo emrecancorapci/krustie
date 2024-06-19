@@ -71,8 +71,8 @@ fn main() {
   router.use_router("home", sub_router);
 
   server.use_handler(router);
-  server.use_handler(AddKrustieHeader::get_middleware());
-  server.use_handler(Gzip::get_middleware());
+  server.use_handler(AddKrustieHeader);
+  server.use_handler(Gzip);
 
   server.listen();
 }

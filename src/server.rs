@@ -10,30 +10,40 @@ use crate::{
 /// # Example
 ///
 /// ```rust
-/// use krustie::{ server::Server, router::{ Router, methods::Endpoints }, response::{ HttpResponse, StatusCode }, middleware::{ MiddlewareHandler, Middleware, gzip::Gzip } };
+/// use krustie::{
+///   server::Server,
+///   router::{ Router, methods::Endpoints },
+///   response::{ HttpResponse, StatusCode },
+///   request::HttpRequest,
+///   middleware::{ MiddlewareHandler, Middleware, gzip::Gzip } };
 /// use std::collections::HashMap;
+/// use std::net::Ipv4Addr;
+/// 
+/// struct AddKrustieHeader;
+/// 
+/// impl Middleware for AddKrustieHeader {
+///   fn middleware(req: &HttpRequest, res: &mut HttpResponse) {
+///     res.insert_header("Server", "Krustie");
+///   }
+/// }
 ///
 /// fn main() {
-///   let mut server = Server::create_local(8080);
+///   let mut server = Server::create(Ipv4Addr::new(127, 0, 0, 1), 8080);
 ///   let mut router = Router::new();
 ///   let mut sub_router = Router::new();
 ///
 ///   sub_router
 ///     .get(|_, res| {
-///         res.status(StatusCode::Ok);
+///       res.status(StatusCode::Ok);
 ///     })
 ///     .post(|_, res| {
-///         res.status(StatusCode::try_from(201).unwrap());
+///       res.status(StatusCode::try_from(201).unwrap());
 ///     });
 ///
 ///   router.use_router("home", sub_router);
 ///
-///   let middleware = MiddlewareHandler::new(|_, res: &mut HttpResponse| {
-///     res.insert_header("Server", "Krustie");
-///   });
-///
 ///   server.use_handler(router);
-///   server.use_handler(middleware);
+///   server.use_handler(AddKrustieHeader::get_middleware());
 ///   server.use_handler(Gzip::get_middleware());
 /// }
 /// ```

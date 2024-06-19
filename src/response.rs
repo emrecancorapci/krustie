@@ -187,7 +187,10 @@ impl Into<Vec<u8>> for HttpResponse {
             status_msg = self.status_code.get_message()
         ).into_bytes();
 
-        response_bytes.extend_from_slice(&self.body);
+        if self.body.len() > 0 {
+            response_bytes.extend_from_slice(&self.body);
+        }
+
 
         response_bytes
     }

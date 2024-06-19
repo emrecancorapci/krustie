@@ -35,8 +35,8 @@ type Controller = fn(&HttpRequest, &mut HttpResponse);
 pub struct Router {
     endpoints: HashMap<HttpMethod, Controller>,
     subroutes: HashMap<String, Router>,
-    request_middleware: Vec<MiddlewareHandler>,
-    response_middleware: Vec<MiddlewareHandler>,
+    request_middleware: Vec<Box<dyn MiddlewareHandler>>,
+    response_middleware: Vec<Box<dyn MiddlewareHandler>>,
 }
 
 impl Router {
@@ -91,23 +91,15 @@ impl Router {
         self.subroutes.entry(path.to_string()).or_insert(router);
     }
 
-    pub fn add_middleware(&mut self, middleware: MiddlewareType) {
-        match middleware {
-            MiddlewareType::Request(middleware) => {
-                self.request_middleware.push(middleware);
-            }
-            MiddlewareType::Response(middleware) => {
-                self.response_middleware.push(middleware);
-            }
-        }
+    pub fn add_request_middleware<T>(&mut self, middleware: T) where T: MiddlewareHandler + 'static {
+        self.request_middleware.push(Box::new(middleware));
     }
 
-    fn handle_route(
-        &self,
-        request: &HttpRequest,
-        response: &mut HttpResponse,
-        path: &Vec<String>
-    ) {
+    pub fn add_response_middleware<T>(&mut self, middleware: T) where T: MiddlewareHandler + 'static {
+        self.response_middleware.push(Box::new(middleware));
+    }
+
+    fn handle_route(&self, request: &HttpRequest, response: &mut HttpResponse, path: &Vec<String>) {
         for middleware in &self.request_middleware {
             middleware.handle(request, response);
         }
@@ -154,9 +146,4 @@ impl Handler for Router {
             }
         }
     }
-}
-
-pub enum MiddlewareType {
-    Request(MiddlewareHandler),
-    Response(MiddlewareHandler),
 }

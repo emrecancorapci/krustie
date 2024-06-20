@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 pub mod status_code;
+pub mod body;
 
 pub struct HttpResponse {
     debug_mode: bool,
@@ -24,32 +25,6 @@ impl HttpResponse {
     /// ```
     pub fn status(&mut self, status_code: StatusCode) -> &mut Self {
         self.status_code = status_code;
-        self
-    }
-
-    /// Sets the body of the response. Function sets `Content-Length` automatically but needs `Content-Type` to be set manually.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
-    ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
-    ///     response.body(b"Hello, World!".to_vec(), "text/plain");
-    /// }
-    /// ```
-    ///
-    /// ```rust
-    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
-    ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
-    ///    response.status(StatusCode::Ok).body(b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(), "text/html");
-    /// }
-    /// ```
-    pub fn body(&mut self, body: Vec<u8>, content_type: &str) -> &mut Self {
-        self.body = body.clone();
-        self.headers.insert(String::from("Content-Length"), body.len().to_string());
-        self.headers.insert(String::from("Content-Type"), content_type.to_string());
         self
     }
 
@@ -109,34 +84,6 @@ impl HttpResponse {
     /// }
     pub fn get_headers(&self) -> &HashMap<String, String> {
         &self.headers
-    }
-
-    /// Gets the body of the response as a byte vector reference
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
-    ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
-    ///  let body = response.get_body();
-    /// }
-    pub fn get_body(&mut self) -> &Vec<u8> {
-        &mut self.body
-    }
-
-    /// Gets the body of the response as a **mutable** byte vector reference
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
-    ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
-    ///  let body = response.get_body();
-    /// }
-    pub fn get_body_mut(&mut self) -> &mut Vec<u8> {
-        &mut self.body
     }
 
     /// Allows to set the debug mode for the response. If debug mode is set to true, all debug messages will be printed to the console.

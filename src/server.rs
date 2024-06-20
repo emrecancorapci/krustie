@@ -1,7 +1,7 @@
 use std::{ fs, io::Write, net::{ Ipv4Addr, TcpListener, TcpStream }, path::PathBuf };
 
 use crate::{
-    request::{ parser::Parse, HttpMethod, HttpRequest },
+    request::{ request_parser::Parse, HttpMethod, HttpRequest },
     response::{ HttpResponse, StatusCode },
 };
 

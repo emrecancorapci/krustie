@@ -2,8 +2,9 @@ use std::{ collections::HashMap, fmt::{ Debug, Display, Formatter, Result as fRe
 use self::request_line::RequestLine;
 
 pub mod http_method;
+pub mod json;
+pub(crate) mod request_parser;
 mod request_line;
-pub(crate) mod parser;
 
 pub struct HttpRequest {
     request: RequestLine,

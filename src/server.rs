@@ -15,7 +15,9 @@ use crate::{
 ///   router::{ Router, methods::Endpoints },
 ///   response::{ HttpResponse, StatusCode },
 ///   request::HttpRequest,
-///   middleware::{ MiddlewareHandler, Middleware, gzip::Gzip } };
+///   middleware::{ MiddlewareHandler, Middleware, gzip::Gzip },
+///   json::{ json, get_string_from_json },
+/// };
 /// use std::collections::HashMap;
 /// use std::net::Ipv4Addr;
 /// 
@@ -34,17 +36,31 @@ use crate::{
 ///
 ///   sub_router
 ///     .get(|_, res| {
-///       res.status(StatusCode::Ok);
+///       let body = json!({"message": "Hello, World!"});
+///       res.status(StatusCode::Ok).json_body(body);
 ///     })
-///     .post(|_, res| {
-///       res.status(StatusCode::try_from(201).unwrap());
-///     });
+///     .post(post_req);
 ///
 ///   router.use_router("home", sub_router);
 ///
 ///   server.use_handler(router);
 ///   server.use_handler(AddKrustieHeader);
 ///   server.use_handler(Gzip);
+/// }
+/// 
+/// fn post_req(req: &HttpRequest, res: &mut HttpResponse) {
+///   match req.get_body_as_json() {
+///     Ok(body) => {
+///       if get_string_from_json(body.get("server")).unwrap() == "Krustie" {
+///         res.status(StatusCode::Ok).json_body(body);
+///       } else {
+///         res.status(StatusCode::try_from(201).unwrap()).json_body(json!({"error": "Invalid server"}));
+///       }
+///     }
+///     Err(_) => {
+///       res.status(StatusCode::BadRequest).json_body(json!({"error": "Invalid JSON"}));
+///     }
+///   }
 /// }
 /// ```
 pub struct Server {

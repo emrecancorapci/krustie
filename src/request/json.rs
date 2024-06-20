@@ -17,12 +17,4 @@ impl super::HttpRequest {
             }
         }
     }
-
-    pub fn get_string_from_json(json_key: Option<&Value>) -> Option<String> {
-        json_key.map(|value| Self::trim_json_string(value.to_string()))
-    }
-
-    pub fn trim_json_string(string: String) -> String {
-        string.replace("\"", "")
-    }
 }

@@ -1,10 +1,9 @@
 use super::HttpResponse;
-
-pub use serde::Serialize;
+use serde_json::Value as JsonValue;
 
 impl HttpResponse {
     /// Sets the body of the response. Function sets `Content-Length` automatically but needs `Content-Type` to be set manually.
-    /// 
+    ///
     /// If `Content-Type` is not set, it defaults to `text/plain`.
     ///
     /// # Example
@@ -32,7 +31,17 @@ impl HttpResponse {
         self
     }
 
-    pub fn json_body<T: Serialize>(&mut self, data: T) -> &mut Self {
+        /// Sets the body of the response to a JSON value.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::{response::{HttpResponse, StatusCode, json::json_body}, request::HttpRequest, json};
+    /// 
+    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    ///    response.json_body(json!({"message": "Hello, World!"}));
+    /// }
+    pub fn json_body(&mut self, data: JsonValue) -> &mut Self {
         let json = serde_json::to_string(&data).unwrap();
         self.body(json.as_bytes().to_vec(), "application/json");
         self

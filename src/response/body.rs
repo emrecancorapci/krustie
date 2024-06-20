@@ -31,12 +31,12 @@ impl HttpResponse {
         self
     }
 
-        /// Sets the body of the response to a JSON value.
+    /// Sets the body of the response to a JSON value.
     /// 
     /// # Example
     /// 
     /// ```rust
-    /// use krustie::{response::{HttpResponse, StatusCode, json::json_body}, request::HttpRequest, json};
+    /// use krustie::{ response::{ HttpResponse, StatusCode }, request::HttpRequest, json::json };
     /// 
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///    response.json_body(json!({"message": "Hello, World!"}));

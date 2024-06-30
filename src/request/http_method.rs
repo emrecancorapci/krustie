@@ -1,6 +1,17 @@
 use std::fmt::{ Display, Error, Formatter, Result as fResult };
 
-use super::HttpMethod;
+#[derive(Eq, Hash, PartialEq, Clone, Copy, Debug)]
+pub enum HttpMethod {
+    GET,
+    POST,
+    PUT,
+    PATCH,
+    DELETE,
+    // CONNTECT,
+    // HEAD,
+    // OPTIONS,
+    // TRACE,
+}
 
 impl Default for HttpMethod {
     fn default() -> Self {
@@ -49,11 +60,13 @@ impl TryFrom<&str> for HttpMethod {
     }
 }
 
+
+/// Error for parsing an HTTP method
 #[derive(Debug)]
 pub struct ParseHttpMethodError;
 
 impl Display for ParseHttpMethodError {
     fn fmt(&self, f: &mut Formatter) -> fResult {
-        write!(f, "invalid method for HTTP request")
+        write!(f, "Invalid method for HTTP request")
     }
 }

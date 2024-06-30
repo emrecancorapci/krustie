@@ -6,6 +6,20 @@ use crate::{ request::HttpRequest, response::HttpResponse };
 
 use super::Middleware;
 
+/// A middleware for compressing response body with Gzip
+/// 
+/// # Example
+/// 
+/// ```rust
+/// use krustie::{server::Server, middleware::gzip::Gzip};
+/// 
+/// fn main() {
+///   let mut server = Server::create();
+///   
+///   server.use_handler(Gzip);
+/// }
+/// 
+#[derive(Debug)]
 pub struct Gzip;
 
 impl Gzip {

@@ -1,8 +1,9 @@
 use std::{ collections::HashMap, fmt::{ Debug, Display, Formatter, Result as fResult } };
-use self::request_line::RequestLine;
+use self::{ http_method::HttpMethod, request_line::RequestLine };
 
 pub mod http_method;
 pub mod json;
+
 pub(crate) mod request_parser;
 mod request_line;
 
@@ -124,19 +125,6 @@ impl Debug for HttpRequest {
 
         write!(f, "Request Line: {}\r\n Headers: {}\r\n Body: {}", self.request, headers, body)
     }
-}
-
-#[derive(Eq, Hash, PartialEq, Clone, Copy, Debug)]
-pub enum HttpMethod {
-    GET,
-    POST,
-    PUT,
-    PATCH,
-    DELETE,
-    // CONNTECT,
-    // HEAD,
-    // OPTIONS,
-    // TRACE,
 }
 
 #[derive(Debug)]

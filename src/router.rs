@@ -1,9 +1,9 @@
-use std::collections::HashMap;
+use std::{ collections::HashMap, fmt::{ self, Debug, Formatter } };
 use crate::{
-    middleware::MiddlewareHandler,
     request::{ http_method::HttpMethod, HttpRequest },
-    response::{ HttpResponse, status_code::StatusCode },
-    server::Handler,
+    response::{ status_code::StatusCode, HttpResponse },
+    server::route_handler::{ RouteHandler, HandlerResult },
+    Middleware,
 };
 
 pub mod methods;
@@ -35,8 +35,8 @@ type Controller = fn(&HttpRequest, &mut HttpResponse);
 pub struct Router {
     endpoints: HashMap<HttpMethod, Controller>,
     subroutes: HashMap<String, Router>,
-    request_middleware: Vec<Box<dyn MiddlewareHandler>>,
-    response_middleware: Vec<Box<dyn MiddlewareHandler>>,
+    request_middlewares: Vec<Box<dyn Middleware>>,
+    response_middlewares: Vec<Box<dyn Middleware>>,
 }
 
 impl Router {
@@ -60,8 +60,8 @@ impl Router {
         Self {
             endpoints: HashMap::new(),
             subroutes: HashMap::new(),
-            request_middleware: Vec::new(),
-            response_middleware: Vec::new(),
+            request_middlewares: Vec::new(),
+            response_middlewares: Vec::new(),
         }
     }
 
@@ -90,35 +90,12 @@ impl Router {
 
         self.subroutes.entry(path.to_string()).or_insert(router);
     }
-
-    pub fn add_request_middleware<T>(&mut self, middleware: T) where T: MiddlewareHandler + 'static {
-        self.request_middleware.push(Box::new(middleware));
+    pub fn use_request_middleware<T>(&mut self, middleware: T) where T: Middleware + 'static {
+        self.request_middlewares.push(Box::new(middleware));
     }
 
-    pub fn add_response_middleware<T>(&mut self, middleware: T) where T: MiddlewareHandler + 'static {
-        self.response_middleware.push(Box::new(middleware));
-    }
-
-    fn handle_route(&self, request: &HttpRequest, response: &mut HttpResponse, path: &Vec<String>) {
-        for middleware in &self.request_middleware {
-            middleware.handle(request, response);
-        }
-
-        if path.len() == 1 {
-            if let Some(endpoint) = self.endpoints.get(request.get_method()) {
-                endpoint(request, response);
-            }
-        } else {
-            if let Ok(router) = self.get_route(&path[1]) {
-                router.handle_route(request, response, &path[1..].to_vec());
-            } else {
-                response.status(StatusCode::NotFound);
-            }
-        }
-
-        for middleware in &self.response_middleware {
-            middleware.handle(request, response);
-        }
+    pub fn use_response_middleware<T>(&mut self, middleware: T) where T: Middleware + 'static {
+        self.response_middlewares.push(Box::new(middleware));
     }
 
     fn get_route(&self, path: &str) -> Result<&Router, &str> {
@@ -130,20 +107,76 @@ impl Router {
 
         return Err("Route not found");
     }
-}
 
-impl Handler for Router {
-    /// Handles routing of requests to the appropriate endpoint
-    fn handle(&self, request: &HttpRequest, response: &mut HttpResponse) {
-        let path = &request.get_path_array();
-
-        if path.len() > 0 {
-            for (key, router) in &self.subroutes {
-                if key == &path[0] {
-                    router.handle_route(request, response, path);
-                    return;
+    fn handle_router(
+        &self,
+        request: &HttpRequest,
+        response: &mut HttpResponse,
+        path: &Vec<String>
+    ) -> HandlerResult {
+        if path.len() == 1 {
+            match self.endpoints.get(request.get_method()) {
+                Some(endpoint) => {
+                    endpoint(request, response);
+                }
+                None => {
+                    response.status(StatusCode::MethodNotAllowed);
+                    return HandlerResult::End;
+                }
+            }
+        } else {
+            match self.get_route(&path[1]) {
+                Ok(router) => {
+                    router.handle(request, response, &path[1..].to_vec());
+                }
+                Err(_) => {
+                    response.status(StatusCode::NotFound);
+                    return HandlerResult::End;
                 }
             }
         }
+        return HandlerResult::Next;
+    }
+}
+
+impl Debug for Router {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "Router {{ endpoints: {:?}, subroutes: {:?} }}", self.endpoints, self.subroutes)
+    }
+}
+
+impl RouteHandler for Router {
+    fn handle(
+        &self,
+        request: &HttpRequest,
+        response: &mut HttpResponse,
+        path: &Vec<String>
+    ) -> HandlerResult {
+        for middleware in &self.request_middlewares {
+            match middleware.middleware(request, response) {
+                HandlerResult::End => {
+                    return HandlerResult::End;
+                }
+                HandlerResult::Next => (),
+            }
+        }
+
+        match self.handle_router(request, response, path) {
+            HandlerResult::End => {
+                return HandlerResult::End;
+            }
+            HandlerResult::Next => (),
+        }
+
+        for middleware in &self.response_middlewares {
+            match middleware.middleware(request, response) {
+                HandlerResult::End => {
+                    return HandlerResult::End;
+                }
+                HandlerResult::Next => (),
+            }
+        }
+
+        return HandlerResult::Next;
     }
 }

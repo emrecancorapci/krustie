@@ -1,15 +1,13 @@
-use std::{
-    fmt::{ Debug, Formatter },
-    fs,
-    io::Write,
-    net::{ TcpListener, TcpStream },
-    path::PathBuf,
-};
+use std::{ fmt::{ Debug, Formatter }, io::Write, net::{ TcpListener, TcpStream } };
+
+use route_handler::{ HandlerResult, RouteHandler };
 
 use crate::{
-    request::{ request_parser::Parse, http_method::HttpMethod, HttpRequest },
-    response::{ HttpResponse, status_code::StatusCode },
+    request::{ request_parser::Parse, HttpRequest },
+    response::{ status_code::StatusCode, HttpResponse },
 };
+
+pub mod route_handler;
 
 /// A server for handling requests
 ///
@@ -71,12 +69,9 @@ use crate::{
 /// }
 /// ```
 pub struct Server {
-    request_handlers: Vec<Box<dyn Handler>>,
+    route_handlers: Vec<Box<dyn RouteHandler>>,
     address: String,
     // listener_ip: Option<IpAddr>,
-    // Static file serving
-    static_path: String,
-    is_serves_static: bool,
 }
 
 impl Server {
@@ -94,27 +89,9 @@ impl Server {
     /// ```
     pub fn create() -> Self {
         Self {
+            route_handlers: Vec::new(),
             address: String::from(""),
-            request_handlers: Vec::new(),
-            is_serves_static: false,
-            static_path: String::from("./public"),
         }
-    }
-
-    /// Serves static files from the specified path
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::Server;
-    ///
-    /// let mut server = Server::create();
-    ///
-    /// server.serve_static("./public");
-    /// ```
-    pub fn serve_static(&mut self, path: &str) {
-        self.is_serves_static = true;
-        self.static_path = path.to_string();
     }
 
     /// Listens for incoming requests on the specified IP and port
@@ -163,8 +140,8 @@ impl Server {
     /// server.use_handler(router);
     /// server.use_handler(Gzip);
     /// ```
-    pub fn use_handler(&mut self, handler: impl Handler + 'static) {
-        self.request_handlers.push(Box::new(handler));
+    pub fn use_handler(&mut self, handler: impl RouteHandler + 'static) {
+        self.route_handlers.push(Box::new(handler));
     }
 
     fn handle_stream(&self, stream: &mut TcpStream) {
@@ -172,23 +149,16 @@ impl Server {
 
         match HttpRequest::parse(&stream) {
             Ok(request) => {
-                if self.is_serves_static && request.get_method() == &HttpMethod::GET {
-                    match
-                        Self::serve_static_files(
-                            &request.get_path_array()[0],
-                            self.static_path.as_str()
-                        )
-                    {
-                        Some(content) => {
-                            response.status(StatusCode::Ok).body(content, "html/text");
-                            return;
+                for handler in &self.route_handlers {
+                    match handler.handle(&request, &mut response, &request.get_path_array()) {
+                        HandlerResult::End => {
+                            break;
                         }
-                        None => {}
+                        HandlerResult::Next => {
+                            continue;
+                        }
                     }
                 }
-                self.request_handlers
-                    .iter()
-                    .for_each(|handler| handler.handle(&request, &mut response));
             }
             Err(error) => {
                 response.status(StatusCode::BadRequest).debug_msg(&error);
@@ -204,33 +174,10 @@ impl Server {
             }
         }
     }
-
-    fn serve_static_files(file_name: &str, folder_path: &str) -> Option<Vec<u8>> {
-        let path = PathBuf::from(folder_path).join(file_name);
-
-        match fs::read(path) {
-            Ok(content) => {
-                return Some(content);
-            }
-            Err(_) => {
-                return None;
-            }
-        }
-    }
 }
 
 impl Debug for Server {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
-        write!(
-            f,
-            "Server {{ Address: {}, \r\nStatic: {}, Static Path: {}}}",
-            self.address,
-            if self.is_serves_static {
-                "Enabled"
-            } else {
-                "Disabled"
-            },
-            self.static_path
-        )
+        write!(f, "Server {{ Address: {} }}", self.address)
     }
 }

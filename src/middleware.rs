@@ -5,8 +5,9 @@ use crate::{
 };
 
 pub mod gzip;
+pub mod statics;
 
-pub use gzip::GzipEncoder;
+pub use self::{ gzip::GzipEncoder, statics::ServeStaticFiles };
 
 /// Middleware trait to be implemented for creating middleware
 ///

@@ -6,7 +6,7 @@ use crate::{
 
 pub mod gzip;
 
-pub use gzip::Gzip;
+pub use gzip::GzipEncoder;
 
 /// Middleware trait to be implemented for creating middleware
 ///

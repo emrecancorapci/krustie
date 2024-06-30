@@ -1,28 +1,26 @@
 use std::io::Write;
-
 use flate2::{ write::GzEncoder, Compression };
 
-use crate::{ request::HttpRequest, response::HttpResponse };
-
+use crate::{ request::HttpRequest, response::HttpResponse, server::route_handler::HandlerResult };
 use super::Middleware;
 
-/// A middleware for compressing response body with Gzip
-/// 
+/// A middleware for compressing response body using gzip
+///
 /// # Example
-/// 
+///
 /// ```rust
-/// use krustie::{server::Server, middleware::gzip::Gzip};
-/// 
+/// use krustie::{server::Server, middleware::gzip::GzipEncoder};
+///
 /// fn main() {
 ///   let mut server = Server::create();
-///   
-///   server.use_handler(Gzip);
+///
+///   server.use_handler(GzipEncoder);
 /// }
-/// 
+///
 #[derive(Debug)]
-pub struct Gzip;
+pub struct GzipEncoder;
 
-impl Gzip {
+impl GzipEncoder {
     fn encode(body: &Vec<u8>) -> Result<Vec<u8>, String> {
         let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
 
@@ -41,12 +39,12 @@ impl Gzip {
     }
 }
 
-impl Middleware for Gzip {
-    fn middleware(request: &HttpRequest, response: &mut HttpResponse) {
+impl Middleware for GzipEncoder {
+    fn middleware(&self, request: &HttpRequest, response: &mut HttpResponse) -> HandlerResult {
         let body = response.get_body_mut();
 
         if body.len() == 0 {
-            return;
+            return HandlerResult::Next;
         }
 
         match request.get_header("accept-encoding") {
@@ -60,7 +58,7 @@ impl Middleware for Gzip {
                     response.insert_header("Content-Encoding", "gzip");
                     let body = response.get_body_mut();
 
-                    match Gzip::encode(body) {
+                    match Self::encode(body) {
                         Ok(compressed_bytes) => {
                             *body = compressed_bytes;
                         }
@@ -70,9 +68,9 @@ impl Middleware for Gzip {
                     }
                 }
             }
-            None => {
-                return;
-            }
+            None => {}
         }
+
+        return HandlerResult::Next;
     }
 }

@@ -113,7 +113,7 @@ impl Default for HttpRequest {
 }
 
 impl Debug for HttpRequest {
-    fn fmt(&self, f: &mut Formatter) -> fResult {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
         let headers = self.headers
             .iter()
             .fold(String::new(), |acc, (k, v)| format!("{acc}{k}: {v}\r\n"));
@@ -131,7 +131,7 @@ impl Debug for HttpRequest {
 pub struct ParseHttpRequestError;
 
 impl Display for ParseHttpRequestError {
-    fn fmt(&self, f: &mut Formatter) -> fResult {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
         write!(f, "Failed to parse HTTP request")
     }
 }

@@ -197,7 +197,7 @@ impl Display for StatusCode {
     /// assert_eq!(status_code_200.to_string(), "200");
     /// assert_eq!(status_code_418.to_string(), "418");
     /// ```
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", *self as u16)
     }
 }
@@ -206,7 +206,7 @@ impl Display for StatusCode {
 pub struct ParseStatusCodeError;
 
 impl Display for ParseStatusCodeError {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "Invalid status code for HTTP response")
     }
 }

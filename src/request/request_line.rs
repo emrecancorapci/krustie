@@ -2,7 +2,7 @@ use std::fmt::{ Display, Formatter, Result as fResult };
 
 use super::http_method::HttpMethod;
 
-pub struct RequestLine {
+pub(crate) struct RequestLine {
     method: HttpMethod,
     path: String,
     version: String,
@@ -44,7 +44,7 @@ impl RequestLine {
 }
 
 impl Display for RequestLine {
-    fn fmt(&self, f: &mut Formatter) -> fResult {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
         write!(f, "{} {} {}", self.method, self.path, self.version)
     }
 }
@@ -66,10 +66,10 @@ impl TryFrom<&str> for RequestLine {
 }
 
 #[derive(Debug)]
-pub struct ParseRequestLineError;
+pub(crate) struct ParseRequestLineError;
 
 impl Display for ParseRequestLineError {
-    fn fmt(&self, f: &mut Formatter) -> fResult {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
         write!(f, "invalid request line")
     }
 }

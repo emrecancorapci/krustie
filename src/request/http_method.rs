@@ -20,7 +20,7 @@ impl Default for HttpMethod {
 }
 
 impl Display for HttpMethod {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         match self {
             Self::GET => write!(f, "GET"),
             Self::POST => write!(f, "POST"),
@@ -66,7 +66,7 @@ impl TryFrom<&str> for HttpMethod {
 pub struct ParseHttpMethodError;
 
 impl Display for ParseHttpMethodError {
-    fn fmt(&self, f: &mut Formatter) -> fResult {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
         write!(f, "Invalid method for HTTP request")
     }
 }

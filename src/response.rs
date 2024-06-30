@@ -168,7 +168,7 @@ impl Default for HttpResponse {
 }
 
 impl Debug for HttpResponse {
-    fn fmt(&self, f: &mut Formatter) -> Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f,
             "{http_version} {status_code} {status_msg}\r\n{headers}\r\n",
             http_version = self.http_version,

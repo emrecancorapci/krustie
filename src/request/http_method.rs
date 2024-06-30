@@ -38,7 +38,7 @@ impl TryFrom<&str> for HttpMethod {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::request::HttpMethod;
+    /// use krustie::HttpMethod;
     ///
     /// fn main() {
     ///   match HttpMethod::try_from("GET") {

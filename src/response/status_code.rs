@@ -80,7 +80,7 @@ impl TryFrom<&u16> for StatusCode {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::response::StatusCode;
+    /// use krustie::StatusCode;
     ///
     /// match StatusCode::try_from(&200) {
     ///   Ok(status_code) => assert_eq!(status_code, StatusCode::Ok),
@@ -123,7 +123,7 @@ impl TryFrom<&str> for StatusCode {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::response::StatusCode;
+    /// use krustie::StatusCode;
     ///
     /// match StatusCode::try_from("200") {
     ///   Ok(status_code) => assert_eq!(status_code, StatusCode::Ok),
@@ -147,7 +147,7 @@ impl TryFrom<u16> for StatusCode {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::response::StatusCode;
+    /// use krustie::StatusCode;
     ///
     /// match StatusCode::try_from(200) {
     ///   Ok(status_code) => assert_eq!(status_code, StatusCode::Ok),
@@ -170,7 +170,7 @@ impl From<&StatusCode> for u16 {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::response::StatusCode;
+    /// use krustie::StatusCode;
     ///
     /// let status_code_200 = StatusCode::Ok;
     /// let status_code_418 = StatusCode::IAmATeapot;
@@ -189,7 +189,7 @@ impl Display for StatusCode {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::response::StatusCode;
+    /// use krustie::StatusCode;
     ///
     /// let status_code_200 = StatusCode::Ok;
     /// let status_code_418 = StatusCode::IAmATeapot;

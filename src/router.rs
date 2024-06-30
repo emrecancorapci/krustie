@@ -15,7 +15,7 @@ type Controller = fn(&HttpRequest, &mut HttpResponse);
 /// # Example
 ///
 /// ```rust
-/// use krustie::{ router::{ Router, methods::Endpoints }, response::StatusCode };
+/// use krustie::{ Router, StatusCode, router::methods::Endpoints };
 ///
 /// let mut main_router = Router::new();
 /// let mut sub_router = Router::new();
@@ -47,7 +47,7 @@ impl Router {
     /// To create a `GET` method for `/`
     ///
     /// ```rust
-    /// use krustie::{ router::{ Router, methods::Endpoints }, response::StatusCode };
+    /// use krustie::{ Router, StatusCode, router::methods::Endpoints };
     ///
     /// let mut main_router = Router::new();
     ///
@@ -72,7 +72,7 @@ impl Router {
     /// Create a 'POST' method for `/sub/suber`
     ///
     /// ```rust
-    /// use krustie::{ router::{ Router, methods::Endpoints }, response::StatusCode };
+    /// use krustie::{ Router, StatusCode, router::methods::Endpoints };
     ///
     /// let mut main_router = Router::new();
     /// let mut sub_router = Router::new();

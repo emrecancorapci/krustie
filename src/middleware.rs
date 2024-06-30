@@ -2,6 +2,8 @@ use crate::{ request::HttpRequest, response::HttpResponse, server::Handler };
 
 pub mod gzip;
 
+pub use gzip::Gzip;
+
 /// Middleware trait to be implemented for creating middleware
 /// 
 /// # Example

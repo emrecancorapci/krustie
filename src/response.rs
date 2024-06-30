@@ -19,7 +19,7 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
+    /// use krustie::{ HttpResponse, StatusCode, HttpRequest };
     ///
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///    response.status(StatusCode::Ok);
@@ -35,8 +35,8 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
+    /// use krustie::{ HttpResponse, StatusCode, HttpRequest };
     /// use std::collections::HashMap;
-    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
     ///
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///     let mut headers = HashMap::new();
@@ -59,7 +59,7 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
+    /// use krustie::{ HttpResponse, StatusCode, HttpRequest };
     ///
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///    response.insert_header("Server", "Krustie");
@@ -75,7 +75,7 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
+    /// use krustie::{ HttpResponse, StatusCode, HttpRequest };
     ///
     /// fn get(request: &HttpRequest, response: HttpResponse) {
     ///   let headers = response.get_headers();
@@ -103,7 +103,7 @@ impl Into<Vec<u8>> for HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
+    /// use krustie::{ HttpResponse, StatusCode, HttpRequest };
     ///
     /// fn get(request: &HttpRequest, response: HttpResponse) {
     ///   let response_bytes: Vec<u8> = response.into();

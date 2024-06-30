@@ -9,7 +9,7 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
+    /// use krustie::{ HttpResponse, StatusCode, HttpRequest, json::json };
     ///
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///     response.body(b"Hello, World!".to_vec(), "text/plain");
@@ -17,7 +17,7 @@ impl HttpResponse {
     /// ```
     ///
     /// ```rust
-    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
+    /// use krustie::{ HttpResponse, StatusCode, HttpRequest, json::json };
     ///
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///    response.status(StatusCode::Ok).body(b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(), "text/html");
@@ -36,7 +36,7 @@ impl HttpResponse {
     /// # Example
     /// 
     /// ```rust
-    /// use krustie::{ response::{ HttpResponse, StatusCode }, request::HttpRequest, json::json };
+    /// use krustie::{ HttpResponse, StatusCode, HttpRequest, json::json };
     /// 
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///    response.json_body(json!({"message": "Hello, World!"}));
@@ -52,7 +52,7 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
+    /// use krustie::{ HttpResponse, StatusCode, HttpRequest, json::json };
     ///
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///  let body = response.get_body();
@@ -66,7 +66,7 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{response::{HttpResponse, StatusCode}, request::HttpRequest};
+    /// use krustie::{ HttpResponse, StatusCode, HttpRequest, json::json };
     ///
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///  let body = response.get_body();

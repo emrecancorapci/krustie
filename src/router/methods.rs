@@ -6,7 +6,6 @@ pub trait Endpoints<TController> {
     fn put(&mut self, controller: TController) -> &mut Self;
     fn delete(&mut self, controller: TController) -> &mut Self;
     fn patch(&mut self, controller: TController) -> &mut Self;
-
 }
 
 impl Endpoints<Controller> for Router {
@@ -15,7 +14,7 @@ impl Endpoints<Controller> for Router {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{router::{ Router, methods::Endpoints }, response::StatusCode};
+    /// use krustie::{ Router, StatusCode, router::methods::Endpoints };
     ///
     /// let mut router = Router::new();
     ///
@@ -33,7 +32,7 @@ impl Endpoints<Controller> for Router {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{router::{ Router, methods::Endpoints }, response::StatusCode};
+    /// use krustie::{ Router, StatusCode, router::methods::Endpoints };
     ///
     /// let mut router = Router::new();
     ///
@@ -51,7 +50,7 @@ impl Endpoints<Controller> for Router {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{router::{ Router, methods::Endpoints }, response::StatusCode};
+    /// use krustie::{ Router, StatusCode, router::methods::Endpoints };
     ///
     /// let mut router = Router::new();
     ///
@@ -69,7 +68,7 @@ impl Endpoints<Controller> for Router {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{router::{ Router, methods::Endpoints }, response::StatusCode};
+    /// use krustie::{ Router, StatusCode, router::methods::Endpoints };
     ///
     /// let mut router = Router::new();
     ///
@@ -87,7 +86,7 @@ impl Endpoints<Controller> for Router {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{router::{ Router, methods::Endpoints }, response::StatusCode};
+    /// use krustie::{ Router, StatusCode, router::methods::Endpoints };
     ///
     /// let mut router = Router::new();
     ///

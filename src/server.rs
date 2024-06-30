@@ -17,11 +17,9 @@ use crate::{
 ///
 /// ```rust
 /// use krustie::{
-///   server::Server,
-///   router::{ Router, methods::Endpoints },
-///   response::{ HttpResponse, StatusCode },
-///   request::HttpRequest,
-///   middleware::{ MiddlewareHandler, Middleware, gzip::Gzip },
+///   Server, Router, HttpResponse, HttpRequest, StatusCode, Middleware,
+///   router::methods::Endpoints,
+///   middleware::Gzip,
 ///   json::{ json, get_string_from_json },
 /// };
 /// use std::collections::HashMap;
@@ -87,8 +85,7 @@ impl Server {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::server::Server;
-    /// use std::net::Ipv4Addr;
+    /// use krustie::Server;
     ///
     /// let server = Server::create();
     ///
@@ -109,7 +106,7 @@ impl Server {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::server::Server;
+    /// use krustie::Server;
     ///
     /// let mut server = Server::create();
     ///
@@ -125,7 +122,7 @@ impl Server {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::server::Server;
+    /// use krustie::Server;
     ///
     /// let mut server = Server::create();
     ///
@@ -156,7 +153,7 @@ impl Server {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::{ Middleware, gzip::Gzip } };
+    /// use krustie::{ Server, Router, HttpResponse, StatusCode, Middleware, middleware::gzip::Gzip };
     /// use std::collections::HashMap;
     ///
     /// let mut server = Server::create();

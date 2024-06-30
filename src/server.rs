@@ -1,8 +1,14 @@
-use std::{ fs, io::Write, net::{ Ipv4Addr, TcpListener, TcpStream }, path::PathBuf };
+use std::{
+    fmt::{ Debug, Formatter },
+    fs,
+    io::Write,
+    net::{ TcpListener, TcpStream },
+    path::PathBuf,
+};
 
 use crate::{
-    request::{ request_parser::Parse, HttpMethod, HttpRequest },
-    response::{ HttpResponse, StatusCode },
+    request::{ request_parser::Parse, http_method::HttpMethod, HttpRequest },
+    response::{ HttpResponse, status_code::StatusCode },
 };
 
 /// A server for handling requests
@@ -20,9 +26,9 @@ use crate::{
 /// };
 /// use std::collections::HashMap;
 /// use std::net::Ipv4Addr;
-/// 
+///
 /// struct AddKrustieHeader;
-/// 
+///
 /// impl Middleware for AddKrustieHeader {
 ///   fn middleware(req: &HttpRequest, res: &mut HttpResponse) {
 ///     res.insert_header("Server", "Krustie");
@@ -145,9 +151,9 @@ impl Server {
     }
 
     /// Adds a middleware or router to the server
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::{ Middleware, gzip::Gzip } };
     /// use std::collections::HashMap;
@@ -212,6 +218,22 @@ impl Server {
                 return None;
             }
         }
+    }
+}
+
+impl Debug for Server {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(
+            f,
+            "Server {{ Address: {}, \r\nStatic: {}, Static Path: {}}}",
+            self.address,
+            if self.is_serves_static {
+                "Enabled"
+            } else {
+                "Disabled"
+            },
+            self.static_path
+        )
     }
 }
 

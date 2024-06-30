@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 use crate::{
     middleware::MiddlewareHandler,
-    request::{ HttpMethod, HttpRequest },
-    response::{ HttpResponse, StatusCode },
+    request::{ http_method::HttpMethod, HttpRequest },
+    response::{ HttpResponse, status_code::StatusCode },
     server::Handler,
 };
 

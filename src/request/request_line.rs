@@ -1,6 +1,6 @@
 use std::fmt::{ Display, Formatter, Result as fResult };
 
-use super::HttpMethod;
+use super::http_method::HttpMethod;
 
 pub struct RequestLine {
     method: HttpMethod,

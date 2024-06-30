@@ -27,7 +27,7 @@ pub trait Middleware {
     fn middleware(req: &HttpRequest, res: &mut HttpResponse) where Self: Sized;
 }
 
-pub trait MiddlewareHandler: Middleware + Handler {}
+pub(crate) trait MiddlewareHandler: Middleware + Handler {}
 
 // Implement the `Handler` trait for any type that implements the `Middleware` trait
 impl<T> Handler for T

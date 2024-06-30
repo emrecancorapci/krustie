@@ -1,13 +1,15 @@
 [package]
 name = "krustie"
 version = "0.1.5"
-authors = ["Emre Can Corapci"]
-description = "A simple HTTP server"
+description = "Krustie is a backend framework written in Rust. Currently, it is a work in progress and not yet ready for production use. This project is a personal endeavor aimed at enhancing my learning experience. As an aspiring developer, I am constantly learning and welcome any feedback or suggestions."
+categories = ["network-programming", "web-programming::http-server"]
+keywords = ["http", "web", "framework"]
 homepage = "https://github.com/emrecancorapci/krustie"
 repository = "https://github.com/emrecancorapci/krustie"
+authors = ["Emre Can Corapci"]
 license = "MIT"
 edition = "2021"
 
 [dependencies]
 flate2 = "1.0.30"
-serde_json = "=1.0.117"
+serde_json = "=1.0.118"

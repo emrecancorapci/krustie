@@ -1,36 +1,41 @@
 # Krustie - A Basic Backend Framework
 
-Krustie is a backend written in Rust. It is a work in progress and is not yet ready for use.
+[<img alt="github" src="https://img.shields.io/badge/github-krustie-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="20">](https://github.com/emrecancorapci/krustie)
+[<img alt="crates.io" src="https://img.shields.io/crates/v/krustie.svg?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/krustie)
+[<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-krustie-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/krustie)
+[<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/emrecancorapci/krustie/rust.yml?branch=main&style=for-the-badge" height="20">](https://github.com/emrecancorapci/krustie/actions?query=branch%3main)
 
-It is a hobby project and is intended to be a learning experience for me. I am not a professional developer and I am learning as I go. I am open to feedback and suggestions.
+Krustie is a backend framework written in Rust. It is currently a work in progress and not yet ready for production use. This project serves as a personal learning experience, and contributions or feedback are welcome.
 
 ## Features
 
-- [x] Basic request and response handling
-- [x] Stacked Router
-- [x] Server Middleware support
-- [x] Router Middleware support
-- [x] Static file serving
-- [x] Compression (gzip)
-- [x] JSON parsing (Thanks to [serde_json](https://github.com/serde-rs/json))
+- Basic request and response handling
+- Stacked Router
+- Server Middleware support
+- Router Middleware support
+- Static file serving
+- Gzip Compression (Thanks to [flate2](https://crates.io/crates/flate2))
+- JSON parsing (Thanks to [serde_json](https://crates.io/crates/serde_json))
 
 ## Getting Started
 
 ### Prerequisites
 
-- Rust
-- Cargo
+Before you begin, ensure you have the following installed:
+
+- [Rust](https://www.rust-lang.org/)
+- [Cargo](https://doc.rust-lang.org/cargo/)
 
 ### Installation
 
-1. Add Krustie to your `Cargo.toml`:
+To add Krustie to your project, include it in your `Cargo.toml`:
 
 ```toml
 [dependencies]
 krustie = "0.1.5"
 ```
 
-or use `cargo add` in your terminal:
+Alternatively, you can add it using Cargo:
 
 ```bash
 cargo add krustie
@@ -59,7 +64,7 @@ impl Middleware for AddKrustieHeader {
 }
 
 fn main() {
-  let mut server = Server::create(Ipv4Addr::new(127, 0, 0, 1), 8080);
+  let mut server = Server::create();
   let mut router = Router::new();
   let mut sub_router = Router::new();
 
@@ -75,6 +80,8 @@ fn main() {
   server.use_handler(router);
   server.use_handler(AddKrustieHeader);
   server.use_handler(Gzip);
+
+  server.listen((127, 0, 0, 1), 8080);
 }
 
 fn post_req(req: &HttpRequest, res: &mut HttpResponse) {
@@ -103,53 +110,3 @@ cargo run
 
 As an inexperienced developer contributions will be welcomed. Please open an issue or a pull request.
 
-## Planned Features
-
-### Basic Server Features
-
-- [ ] Database support
-- [ ] Authentication
-- [ ] Authorization
-- [ ] Error handling
-- [ ] File uploads
-- [ ] Websockets
-
-### Basic Web Server Features
-
-- [ ] Templating
-- [ ] Session management
-
-### Basic API Server Features
-
-- [ ] XML parsing
-- [ ] Query parameter parsing
-- [ ] Request validation
-- [ ] Response formatting
-
-### Security
-
-- [ ] Rate limiting
-- [ ] CSRF protection
-- [ ] XSS protection
-- [ ] SQL injection protection
-- [ ] Secure headers
-- [ ] Content Security Policy
-
-### Performance
-
-- [ ] Caching
-- [ ] Connection pooling
-- [ ] Load balancing
-- [ ] Clustering
-
-### Monitoring
-
-- [ ] Metrics
-- [ ] Tracing
-- [ ] Logging
-
-### Documentation
-
-- [ ] API documentation
-- [ ] Code documentation
-- [ ] Examples

@@ -36,7 +36,7 @@ use crate::{
 /// }
 ///
 /// fn main() {
-///   let mut server = Server::create(Ipv4Addr::new(127, 0, 0, 1), 8080);
+///   let mut server = Server::create();
 ///   let mut router = Router::new();
 ///   let mut sub_router = Router::new();
 ///
@@ -52,8 +52,11 @@ use crate::{
 ///   server.use_handler(router);
 ///   server.use_handler(AddKrustieHeader);
 ///   server.use_handler(Gzip);
+///
+///   // vvvvvv Uncommment to listen on
+///   // server.listen((127, 0, 0, 1), 8080);
 /// }
-/// 
+///
 /// fn post_req(req: &HttpRequest, res: &mut HttpResponse) {
 ///   match req.get_body_as_json() {
 ///     Ok(body) => {
@@ -71,7 +74,7 @@ use crate::{
 /// ```
 pub struct Server {
     request_handlers: Vec<Box<dyn Handler>>,
-    listener: TcpListener,
+    address: String,
     // listener_ip: Option<IpAddr>,
     // Static file serving
     static_path: String,
@@ -87,29 +90,18 @@ impl Server {
     /// use krustie::server::Server;
     /// use std::net::Ipv4Addr;
     ///
-    /// let server = Server::create(Ipv4Addr::new(127, 0, 0, 1), 8080);
+    /// let server = Server::create();
     ///
-    /// // server.listen();
+    /// // vvvvvv Uncommment to listen on
+    /// // server.listen((127, 0, 0, 1), 8080)
     /// ```
-    pub fn create(ip: Ipv4Addr, port: u16) -> Self {
-        let addr = format!("{ip}:{port}");
-
-        match TcpListener::bind(addr) {
-            Ok(listener) => {
-                Self {
-                    request_handlers: Vec::new(),
-                    listener,
-                    is_serves_static: false,
-                    static_path: String::from("./public"),
-                    // listener_ip: None,
-                }
-            }
-            Err(err) => { panic!("{}", err) }
+    pub fn create() -> Self {
+        Self {
+            address: String::from(""),
+            request_handlers: Vec::new(),
+            is_serves_static: false,
+            static_path: String::from("./public"),
         }
-    }
-
-    pub fn create_local(port: u16) -> Self {
-        Self::create(Ipv4Addr::new(127, 0, 0, 1), port)
     }
 
     /// Serves static files from the specified path
@@ -119,7 +111,7 @@ impl Server {
     /// ```rust
     /// use krustie::server::Server;
     ///
-    /// let mut server = Server::create_local(8080);
+    /// let mut server = Server::create();
     ///
     /// server.serve_static("./public");
     /// ```
@@ -128,25 +120,34 @@ impl Server {
         self.static_path = path.to_string();
     }
 
-    pub fn listen(&mut self) {
-        // match self.listener.accept() {
-        //     Ok((_, addr)) => {
-        //         self.listener_ip = Some(addr.ip());
-        //     }
-        //     Err(e) => {
-        //         println!("error: {}", e);
-        //         return;
-        //     }
-        // }
-        for stream_result in self.listener.incoming() {
-            match stream_result {
-                Ok(mut stream) => {
-                    self.handle_stream(&mut stream);
-                }
-                Err(e) => {
-                    println!("error: {}", e);
+    /// Listens for incoming requests on the specified IP and port
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::server::Server;
+    ///
+    /// let mut server = Server::create();
+    ///
+    /// // vvvvvv Uncommment to listen on
+    /// // server.listen((127, 0, 0, 1), 8080);
+    /// ```
+    pub fn listen(&mut self, ip: (u8, u8, u8, u8), port: u16) {
+        self.address = format!("{}.{}.{}.{}:{}", ip.0, ip.1, ip.2, ip.3, port);
+        match TcpListener::bind(&self.address) {
+            Ok(listener) => {
+                for stream_result in listener.incoming() {
+                    match stream_result {
+                        Ok(mut stream) => {
+                            self.handle_stream(&mut stream);
+                        }
+                        Err(e) => {
+                            println!("error: {}", e);
+                        }
+                    }
                 }
             }
+            Err(err) => { panic!("{}", err) }
         }
     }
 
@@ -158,7 +159,7 @@ impl Server {
     /// use krustie::{ server::Server, router::Router, response::{ HttpResponse, StatusCode }, middleware::{ Middleware, gzip::Gzip } };
     /// use std::collections::HashMap;
     ///
-    /// let mut server = Server::create_local(8080);
+    /// let mut server = Server::create();
     /// let mut router = Router::new();
     ///
     ///

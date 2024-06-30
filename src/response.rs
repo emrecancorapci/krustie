@@ -1,4 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::{Debug, Formatter, Result}};
+
+use self::status_code::StatusCode;
 
 pub mod status_code;
 pub mod body;
@@ -138,7 +140,6 @@ impl Into<Vec<u8>> for HttpResponse {
             response_bytes.extend_from_slice(&self.body);
         }
 
-
         response_bytes
     }
 }
@@ -166,24 +167,14 @@ impl Default for HttpResponse {
     }
 }
 
-#[derive(Eq, Hash, PartialEq, Debug, Clone, Copy)]
-pub enum StatusCode {
-    Ok = 200,
-    Created = 201,
-    Accepted = 202,
-    NoContent = 204,
-    BadRequest = 400,
-    Unauthorized = 401,
-    Forbidden = 403,
-    NotFound = 404,
-    MethodNotAllowed = 405,
-    RequestTimeout = 408,
-    LengthRequired = 411,
-    UnsupportedMediaType = 415,
-    IAmATeapot = 418,
-    InternalServerError = 500,
-    NotImplemented = 501,
-    ServiceUnavailable = 503,
-    GatewayTimeout = 504,
-    HttpVersionNotSupported = 505,
+impl Debug for HttpResponse {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(f,
+            "{http_version} {status_code} {status_msg}\r\n{headers}\r\n",
+            http_version = self.http_version,
+            status_code = self.status_code.to_string(),
+            status_msg = self.status_code.get_message(),
+            headers = self.headers.iter().map(|(key, value)| format!("{key}: {value}\r\n")).collect::<String>()
+        )
+    }
 }

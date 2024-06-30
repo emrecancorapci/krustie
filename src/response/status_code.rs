@@ -1,6 +1,46 @@
 use std::fmt::{self, Display, Formatter};
 
-use super::StatusCode;
+/// Represents the status code of an HTTP response
+#[derive(Eq, Hash, PartialEq, Debug, Clone, Copy)]
+pub enum StatusCode {
+    /// 200 OK
+    Ok = 200,
+    /// 201 Created
+    Created = 201,
+    /// 202 Accepted
+    Accepted = 202,
+    /// 204 No Content
+    NoContent = 204,
+    /// 400 Bad Request
+    BadRequest = 400,
+    /// 401 Unauthorized
+    Unauthorized = 401,
+    /// 403 Forbidden
+    Forbidden = 403,
+    /// 404 Not Found
+    NotFound = 404,
+    /// 405 Method Not Allowed
+    MethodNotAllowed = 405,
+    /// 408 Request Timeout
+    RequestTimeout = 408,
+    /// 411 Length Required
+    LengthRequired = 411,
+    /// 415 Unsupported Media Type
+    UnsupportedMediaType = 415,
+    /// 418 I'm A Teapot
+    IAmATeapot = 418,
+    /// 500 Internal Server Error
+    InternalServerError = 500,
+    /// 501 Not Implemented
+    NotImplemented = 501,
+    /// 503 Service Unavailable
+    ServiceUnavailable = 503,
+    /// 504 Gateway Timeout
+    GatewayTimeout = 504,
+    /// 505 HTTP Version Not Supported
+    HttpVersionNotSupported = 505,
+}
+
 
 impl StatusCode {
     pub(super) fn get_message(&self) -> &str {

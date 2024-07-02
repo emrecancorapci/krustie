@@ -15,57 +15,81 @@ pub mod route_handler;
 ///
 /// ```rust
 /// use krustie::{
-///   Server, Router, HttpResponse, HttpRequest, StatusCode, Middleware,
-///   router::methods::Endpoints,
-///   middleware::Gzip,
-///   json::{ json, get_string_from_json },
+///     Server,
+///     Router,
+///     HttpRequest,
+///     HttpResponse,
+///     Middleware,
+///     StatusCode,
+///     json::{ get_string_from_json, json },
+///     middleware::gzip::GzipEncoder,
+///     server::route_handler::HandlerResult,
 /// };
-/// use std::collections::HashMap;
-/// use std::net::Ipv4Addr;
 ///
-/// struct AddKrustieHeader;
+/// struct AddHeader {
+///     key: String,
+///     value: String,
+/// }
 ///
-/// impl Middleware for AddKrustieHeader {
-///   fn middleware(req: &HttpRequest, res: &mut HttpResponse) {
-///     res.insert_header("Server", "Krustie");
-///   }
+/// impl AddHeader {
+///     fn new(key: &str, value: &str) -> Self {
+///         Self { key: key.to_string(), value: value.to_string() }
+///     }
+/// }
+///
+/// impl Middleware for AddHeader {
+///     fn middleware(&self, _: &HttpRequest, res: &mut HttpResponse) -> HandlerResult {
+///         res.insert_header(&self.key, &self.value);
+///         HandlerResult::Next
+///     }
 /// }
 ///
 /// fn main() {
-///   let mut server = Server::create();
-///   let mut router = Router::new();
-///   let mut sub_router = Router::new();
+///     let mut server = Server::create();
+///     let krustie_middleware = AddHeader::new("Server", "Krustie");
+///     let mut router = Router::new();
 ///
-///   sub_router
-///     .get(|_, res| {
-///       let body = json!({"message": "Hello, World!"});
-///       res.status(StatusCode::Ok).json_body(body);
-///     })
-///     .post(post_req);
+///     router.get(|_, res| {
+///         res.status(StatusCode::Ok).body(
+///             b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(),
+///             "text/html"
+///         );
+///     });
 ///
-///   router.use_router("home", sub_router);
+///     let mut sub_router = Router::new();
+/// 
+///     sub_router
+///         .get(|_, res| {
+///             let body = json!({"message": "Hello, World!"});
+///             res.status(StatusCode::Ok).json_body(body);
+///         })
+///         .post(post_req);
 ///
-///   server.use_handler(router);
-///   server.use_handler(AddKrustieHeader);
-///   server.use_handler(Gzip);
+///     router.use_router("/home", sub_router);
 ///
-///   // vvvvvv Uncommment to listen on
-///   // server.listen((127, 0, 0, 1), 8080);
+///     server.use_handler(router);
+///     server.use_handler(krustie_middleware);
+///     server.use_handler(GzipEncoder);
+///
+///     // server.listen((127, 0, 0, 1), 8080);
 /// }
 ///
 /// fn post_req(req: &HttpRequest, res: &mut HttpResponse) {
-///   match req.get_body_as_json() {
-///     Ok(body) => {
-///       if get_string_from_json(body.get("server")).unwrap() == "Krustie" {
-///         res.status(StatusCode::Ok).json_body(body);
-///       } else {
-///         res.status(StatusCode::try_from(201).unwrap()).json_body(json!({"error": "Invalid server"}));
-///       }
+///     match req.get_body_as_json() {
+///         Ok(body) => {
+///             let server_key_option = body.get("server");
+///             if get_string_from_json(server_key_option).unwrap() == "Krustie" {
+///                 res.status(StatusCode::Ok).json_body(body);
+///             } else {
+///                 res.status(StatusCode::try_from(201).unwrap()).json_body(
+///                     json!({"error": "Invalid server"})
+///                 );
+///             }
+///         }
+///         Err(_) => {
+///             res.status(StatusCode::BadRequest).json_body(json!({"error": "Invalid JSON"}));
+///         }
 ///     }
-///     Err(_) => {
-///       res.status(StatusCode::BadRequest).json_body(json!({"error": "Invalid JSON"}));
-///     }
-///   }
 /// }
 /// ```
 pub struct Server {
@@ -130,7 +154,7 @@ impl Server {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ Server, Router, HttpResponse, StatusCode, Middleware, middleware::gzip::Gzip };
+    /// use krustie::{ Server, Router, HttpResponse, StatusCode, Middleware, middleware::gzip::GzipEncoder };
     /// use std::collections::HashMap;
     ///
     /// let mut server = Server::create();
@@ -138,7 +162,7 @@ impl Server {
     ///
     ///
     /// server.use_handler(router);
-    /// server.use_handler(Gzip);
+    /// server.use_handler(GzipEncoder);
     /// ```
     pub fn use_handler(&mut self, handler: impl RouteHandler + 'static) {
         self.route_handlers.push(Box::new(handler));

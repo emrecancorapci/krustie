@@ -11,6 +11,7 @@ pub struct HttpRequest {
     request: RequestLine,
     headers: HashMap<String, String>,
     body: Option<Vec<u8>>,
+    locals: HashMap<String, String>,
 }
 
 impl HttpRequest {
@@ -39,6 +40,7 @@ impl HttpRequest {
                     request,
                     headers,
                     body,
+                    locals: HashMap::new(),
                 }),
             Err(_) => Err(ParseHttpRequestError),
         }
@@ -72,6 +74,14 @@ impl HttpRequest {
     /// }
     pub fn get_header(&self, key: &str) -> Option<&String> {
         self.headers.get(key)
+    }
+
+    pub fn add_local(&mut self, key: &str, value: &str) {
+        self.locals.insert(key.to_string(), value.to_string());
+    }
+
+    pub fn get_local(&self, key: &str) -> Option<&String> {
+        self.locals.get(key)
     }
 
     /// Returns the method of the HTTP request
@@ -108,6 +118,7 @@ impl Default for HttpRequest {
             ),
             headers: HashMap::new(),
             body: None,
+            locals: HashMap::new(),
         }
     }
 }

@@ -10,12 +10,15 @@ Krustie is a backend framework written in Rust. It is currently a work in progre
 ## Features
 
 - Basic request and response handling
-- Stacked Router
-- Server Middleware support
+- Stackable Router
+- General Middleware support
 - Router Middleware support
+- JSON parsing ([serde_json](https://crates.io/crates/serde_json))
+
+### Builtin Middlewares
+
 - Static file serving
-- Gzip Compression (Thanks to [flate2](https://crates.io/crates/flate2))
-- JSON parsing (Thanks to [serde_json](https://crates.io/crates/serde_json))
+- Gzip encoding ([flate2](https://crates.io/crates/flate2))
 
 ## Getting Started
 
@@ -28,79 +31,42 @@ Before you begin, ensure you have the following installed:
 
 ### Installation
 
-To add Krustie to your project, include it in your `Cargo.toml`:
+#### Add Krustie to your project
+
+Include it in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-krustie = "0.1.5"
+krustie = "0.1.6"
 ```
 
-Alternatively, you can add it using Cargo:
+Run the following Cargo command in your project directory:
 
 ```bash
 cargo add krustie
 ```
 
-2. Start your server:
+#### Start your server
 
 ```rust
-use krustie::{
-  server::Server,
-  router::{ Router, methods::Endpoints },
-  response::{ HttpResponse, StatusCode },
-  request::HttpRequest,
-  middleware::{ MiddlewareHandler, Middleware, gzip::Gzip },
-  json::{ json, get_string_from_json },
-};
-use std::collections::HashMap;
-use std::net::Ipv4Addr;
-
-struct AddKrustieHeader;
-
-impl Middleware for AddKrustieHeader {
-  fn middleware(req: &HttpRequest, res: &mut HttpResponse) {
-    res.insert_header("Server", "Krustie");
-  }
-}
+use krustie::{ Server, Router, StatusCodes };
 
 fn main() {
-  let mut server = Server::create();
-  let mut router = Router::new();
-  let mut sub_router = Router::new();
+    let mut server = Server::create();
+    let mut router = Router::new();
 
-  sub_router
-    .get(|_, res| {
-      let body = json!({"message": "Hello, World!"});
-      res.status(StatusCode::Ok).json_body(body);
-    })
-    .post(post_req);
+    router.get(|_, res| {
+        res.status(StatusCode::Ok)
+            .body(b"Hello World!".to_vec(), "text/plain");
+    });
 
-  router.use_router("home", sub_router);
+    server.use_handler(router);
 
-  server.use_handler(router);
-  server.use_handler(AddKrustieHeader);
-  server.use_handler(Gzip);
-
-  server.listen((127, 0, 0, 1), 8080);
-}
-
-fn post_req(req: &HttpRequest, res: &mut HttpResponse) {
-  match req.get_body_as_json() {
-    Ok(body) => {
-      if get_string_from_json(body.get("server")).unwrap() == "Krustie" {
-        res.status(StatusCode::Ok).json_body(body);
-      } else {
-        res.status(StatusCode::try_from(201).unwrap()).json_body(json!({"error": "Invalid server"}));
-      }
-    }
-    Err(_) => {
-      res.status(StatusCode::BadRequest).json_body(json!({"error": "Invalid JSON"}));
-    }
-  }
+    server.listen((127, 0, 0, 1), 8080);
 }
 ```
 
-3. Run your server:
+#### Run your server
 
 ```bash
 cargo run
@@ -109,4 +75,3 @@ cargo run
 ## Contributing
 
 As an inexperienced developer contributions will be welcomed. Please open an issue or a pull request.
-

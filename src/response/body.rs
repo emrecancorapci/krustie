@@ -74,4 +74,13 @@ impl HttpResponse {
     pub fn get_body_mut(&mut self) -> &mut Vec<u8> {
         &mut self.body
     }
+
+    pub fn update_body(&mut self, body: Vec<u8>) -> Result<(), String> {
+        if self.body.len() == 0 {
+            return Err("Request has no body.".to_string());
+        }
+        self.headers.insert(String::from("Content-Length"), body.len().to_string());
+        self.body = body;
+        return Ok(());
+    }
 }

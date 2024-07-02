@@ -47,28 +47,26 @@ impl Middleware for GzipEncoder {
             return HandlerResult::Next;
         }
 
-        match request.get_header("accept-encoding") {
-            Some(str_encodings) => {
-                let encodings = str_encodings
-                    .split(",")
-                    .map(|item| item.trim())
-                    .collect::<Vec<&str>>();
+        if let Some(str_encodings) = request.get_header("accept-encoding") {
+            let encodings = str_encodings
+                .split(",")
+                .map(|item| item.trim())
+                .collect::<Vec<&str>>();
 
-                if encodings.contains(&"gzip") {
+            if !encodings.contains(&"gzip") {
+                return HandlerResult::Next;
+            }
+
+            match Self::encode(body) {
+                Ok(compressed_bytes) => {
                     response.insert_header("Content-Encoding", "gzip");
-                    let body = response.get_body_mut();
 
-                    match Self::encode(body) {
-                        Ok(compressed_bytes) => {
-                            *body = compressed_bytes;
-                        }
-                        Err(err) => {
-                            eprintln!("Error while compressing: {}", err);
-                        }
-                    }
+                    let _ = response.update_body(compressed_bytes);
+                }
+                Err(err) => {
+                    eprintln!("Error while compressing: {}", err);
                 }
             }
-            None => {}
         }
 
         return HandlerResult::Next;

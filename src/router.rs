@@ -114,7 +114,7 @@ impl Router {
         response: &mut HttpResponse,
         path: &Vec<String>
     ) -> HandlerResult {
-        if path.len() == 1 {
+        if path.len() == 0 {
             match self.endpoints.get(request.get_method()) {
                 Some(endpoint) => {
                     endpoint(request, response);
@@ -125,7 +125,7 @@ impl Router {
                 }
             }
         } else {
-            match self.get_route(&path[1]) {
+            match self.get_route(&path[0]) {
                 Ok(router) => {
                     router.handle(request, response, &path[1..].to_vec());
                 }

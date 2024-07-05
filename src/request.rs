@@ -1,3 +1,11 @@
+//! This module contains the `HttpRequest` struct and its implementation.
+//!
+//! It has public methods to get the headers, add and get local variables
+//!
+//! All request parameters are non-mutable except for the *local* variables. Local variables can be
+//! used to store data that can be defined in a *middleware* and accessed from the other
+//! *middlewares* or *controllers*.
+
 use std::{ collections::HashMap, fmt::{ Debug, Display, Formatter, Result as fResult } };
 use self::{ http_method::HttpMethod, request_line::RequestLine };
 
@@ -7,6 +15,7 @@ pub mod json;
 pub(crate) mod request_parser;
 mod request_line;
 
+/// Represents the HTTP request
 pub struct HttpRequest {
     request: RequestLine,
     headers: HashMap<String, String>,
@@ -76,10 +85,16 @@ impl HttpRequest {
         self.headers.get(key)
     }
 
+    /// Adds a local variable to the http request
+    ///
+    /// `Local` variables can be used to store data that can be defined in a *middleware* and accessed in the *controller*
     pub fn add_local(&mut self, key: &str, value: &str) {
         self.locals.insert(key.to_string(), value.to_string());
     }
 
+    /// Returns the value of the local variable
+    ///
+    /// `Local` variables can be used to store data that can be defined in a *middleware* and accessed in the *controller*
     pub fn get_local(&self, key: &str) -> Option<&String> {
         self.locals.get(key)
     }
@@ -139,6 +154,7 @@ impl Debug for HttpRequest {
 }
 
 #[derive(Debug)]
+/// Represents an error that occurs when parsing an HTTP request
 pub struct ParseHttpRequestError;
 
 impl Display for ParseHttpRequestError {

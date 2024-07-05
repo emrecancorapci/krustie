@@ -1,3 +1,7 @@
+//! A router for handling requests
+//!
+//! It is used to handle requests and route them to the correct endpoint. Routers support sub-routers and middlewares.
+
 use std::{ collections::HashMap, fmt::{ self, Debug, Formatter } };
 use crate::{
     request::{ http_method::HttpMethod, HttpRequest },
@@ -90,10 +94,75 @@ impl Router {
 
         self.subroutes.entry(path.to_string()).or_insert(router);
     }
+
+    /// Adds a middleware to the router that will be executed before the request is handled
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{ Router, StatusCode, Middleware, HttpRequest, HttpResponse, server::route_handler::HandlerResult };
+    ///
+    /// struct AddHeader {
+    ///   key: String,
+    ///   value: String,
+    /// }
+    ///
+    /// impl AddHeader {
+    ///   fn new(key: &str, value: &str) -> Self {
+    ///     Self { key: key.to_string(), value: value.to_string() }
+    ///   }
+    /// }
+    ///
+    /// impl Middleware for AddHeader {
+    ///   fn middleware(&self, _: &HttpRequest, res: &mut HttpResponse) -> HandlerResult {
+    ///     res.insert_header(&self.key, &self.value);
+    ///     HandlerResult::Next
+    ///   }
+    /// }
+    ///
+    /// fn main() {
+    ///   let mut router = Router::new();
+    ///   let krustie_middleware = AddHeader::new("Server", "Krustie");
+    ///
+    ///   router.use_request_middleware(krustie_middleware);
+    /// }
+    /// ```
     pub fn use_request_middleware<T>(&mut self, middleware: T) where T: Middleware + 'static {
         self.request_middlewares.push(Box::new(middleware));
     }
 
+    /// Adds a middleware to the router that will be executed before the request is handled
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{ Router, StatusCode, Middleware, HttpRequest, HttpResponse, server::route_handler::HandlerResult };
+    ///
+    /// struct AddHeader {
+    ///   key: String,
+    ///   value: String,
+    /// }
+    ///
+    /// impl AddHeader {
+    ///   fn new(key: &str, value: &str) -> Self {
+    ///     Self { key: key.to_string(), value: value.to_string() }
+    ///   }
+    /// }
+    ///
+    /// impl Middleware for AddHeader {
+    ///   fn middleware(&self, _: &HttpRequest, res: &mut HttpResponse) -> HandlerResult {
+    ///     res.insert_header(&self.key, &self.value);
+    ///     HandlerResult::Next
+    ///   }
+    /// }
+    ///
+    /// fn main() {
+    ///   let mut router = Router::new();
+    ///   let krustie_middleware = AddHeader::new("Server", "Krustie");
+    ///
+    ///   router.use_response_middleware(krustie_middleware);
+    /// }
+    /// ```
     pub fn use_response_middleware<T>(&mut self, middleware: T) where T: Middleware + 'static {
         self.response_middlewares.push(Box::new(middleware));
     }

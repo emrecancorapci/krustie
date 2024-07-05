@@ -1,4 +1,6 @@
-use std::fmt::{self, Display, Formatter};
+//! Contains the `StatusCode` enum and its implementations.
+
+use std::fmt::{ self, Display, Formatter };
 
 /// Represents the status code of an HTTP response
 #[derive(Eq, Hash, PartialEq, Debug, Clone, Copy)]
@@ -41,7 +43,6 @@ pub enum StatusCode {
     HttpVersionNotSupported = 505,
 }
 
-
 impl StatusCode {
     pub(super) fn get_message(&self) -> &str {
         match self {
@@ -75,7 +76,11 @@ impl Default for StatusCode {
 
 impl TryFrom<&u16> for StatusCode {
     type Error = ParseStatusCodeError;
-    /// Converts a u16 to a StatusCode
+    /// Converts a `u16` to a `StatusCode`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the `status_code` is invalid
     ///
     /// # Example
     ///
@@ -91,8 +96,8 @@ impl TryFrom<&u16> for StatusCode {
     ///   Err(_) => panic!("Invalid status code"),
     /// }
     /// ```
-    fn try_from(code: &u16) -> Result<Self, Self::Error> {
-        match code {
+    fn try_from(status_code: &u16) -> Result<Self, Self::Error> {
+        match status_code {
             200 => Ok(Self::Ok),
             201 => Ok(Self::Created),
             202 => Ok(Self::Accepted),
@@ -118,7 +123,11 @@ impl TryFrom<&u16> for StatusCode {
 
 impl TryFrom<&str> for StatusCode {
     type Error = ParseStatusCodeError;
-    /// Converts a string to a StatusCode
+    /// Converts a `string` to a `StatusCode`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the `status_code` is invalid
     ///
     /// # Example
     ///
@@ -142,7 +151,11 @@ impl TryFrom<&str> for StatusCode {
 
 impl TryFrom<u16> for StatusCode {
     type Error = ParseStatusCodeError;
-    /// Converts a u16 to a StatusCode
+    /// Converts a `u16` to a `StatusCode`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the `status_code` is invalid
     ///
     /// # Example
     ///
@@ -203,6 +216,9 @@ impl Display for StatusCode {
 }
 
 #[derive(Debug)]
+/// Error for parsing status code
+///
+/// This error is returned when the status code is invalid
 pub struct ParseStatusCodeError;
 
 impl Display for ParseStatusCodeError {

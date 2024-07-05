@@ -1,10 +1,38 @@
-use std::{collections::HashMap, fmt::{Debug, Formatter, Result}};
+//! This module contains the `HttpResponse` struct and its implementation.
+//!
+//! Because they are mutable, they don't need to be returned from the controllers.
+//!
+//! Response can be basicaly built by using the `get`, `headers` and `body` functions which can be
+//! chained like this:
+//!
+//! ```rust
+//! use krustie::{ HttpResponse, StatusCode, HttpRequest };
+//! use std::collections::HashMap;
+//!
+//! fn get(request: &HttpRequest, response: &mut HttpResponse) {
+//!   let mut headers = HashMap::new();
+//!
+//!   headers.insert("Server".to_string(), "Krustie".to_string());
+//!
+//!   response
+//!     .status(StatusCode::Ok)
+//!     .headers(headers)
+//!     .body(b"Hello, World!".to_vec(), "text/plain");
+//! }
+//! ```
+//!
+//! But there are other functions such as `insert_header` and `update_body` can be useful especially when creating a middleware.
+//!
+use std::{ collections::HashMap, fmt::{ Debug, Formatter, Result } };
 
 use self::status_code::StatusCode;
 
 pub mod status_code;
 pub mod body;
 
+/// Represents the HTTP response
+///
+///
 pub struct HttpResponse {
     debug_mode: bool,
     http_version: String,
@@ -88,7 +116,9 @@ impl HttpResponse {
         &self.headers
     }
 
-    /// Allows to set the debug mode for the response. If debug mode is set to true, all debug messages will be printed to the console.
+    /// Allows to set the debug mode for the response.
+    ///
+    /// If `debug_mode` is set to `true`, all debug messages will be printed to the console.
     pub(crate) fn debug_msg(&mut self, msg: &str) -> &mut Self {
         if self.debug_mode {
             println!("{}", msg);
@@ -120,11 +150,11 @@ impl Into<Vec<u8>> for HttpResponse {
 
         if self.body.len() > 0 {
             if !headers_string.contains("Content-Length") {
-                println!("Content-Length not found even though body is present");
+                eprintln!("Content-Length not found even though body is present");
                 headers_string.push_str(&format!("Content-Length: {}\r\n", self.body.len()));
             }
             if !headers_string.contains("Content-Type") {
-                println!("Content-Type not found even though body is present");
+                eprintln!("Content-Type not found even though body is present");
                 headers_string.push_str("Content-Type: text/plain\r\n");
             }
         }
@@ -169,12 +199,16 @@ impl Default for HttpResponse {
 
 impl Debug for HttpResponse {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f,
+        write!(
+            f,
             "{http_version} {status_code} {status_msg}\r\n{headers}\r\n",
             http_version = self.http_version,
             status_code = self.status_code.to_string(),
             status_msg = self.status_code.get_message(),
-            headers = self.headers.iter().map(|(key, value)| format!("{key}: {value}\r\n")).collect::<String>()
+            headers = self.headers
+                .iter()
+                .map(|(key, value)| format!("{key}: {value}\r\n"))
+                .collect::<String>()
         )
     }
 }

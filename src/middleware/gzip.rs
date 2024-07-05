@@ -1,3 +1,5 @@
+//! A middleware for compressing response body using gzip
+
 use std::io::Write;
 use flate2::{ write::GzEncoder, Compression };
 

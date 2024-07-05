@@ -1,11 +1,31 @@
+//! HTTP method module
+//!
+//! This module contains the `HttpMethod` enum and `ParseHttpMethodError` error.
+
 use std::fmt::{ Display, Error, Formatter, Result as fResult };
 
 #[derive(Eq, Hash, PartialEq, Clone, Copy, Debug)]
+/// An enum that represents an HTTP method
+///
+/// The HTTP method is used to indicate the desired action to be performed for a given resource.
+///
+/// # Supported methods
+///
+/// - GET
+/// - POST
+/// - PUT
+/// - PATCH
+///
 pub enum HttpMethod {
+    /// GET method is used to request data from a specified resource
     GET,
+    /// POST method is used to submit data to be processed to a specified resource
     POST,
+    /// PUT method is used to update data to a specified resource
     PUT,
+    /// PATCH method is used to apply partial modifications to a resource
     PATCH,
+    /// DELETE method is used to delete a specified resource
     DELETE,
     // CONNTECT,
     // HEAD,
@@ -35,6 +55,10 @@ impl TryFrom<&str> for HttpMethod {
     type Error = ParseHttpMethodError;
     /// Converts a string to an HttpMethod
     ///
+    /// # Errors
+    ///
+    /// Returns an error if the string is not a valid HTTP method
+    ///
     /// # Example
     ///
     /// ```rust
@@ -59,7 +83,6 @@ impl TryFrom<&str> for HttpMethod {
         }
     }
 }
-
 
 /// Error for parsing an HTTP method
 #[derive(Debug)]

@@ -1,3 +1,6 @@
+//! Body module for the HttpResponse struct. Contains functions for setting the body of the
+//! response.
+
 use super::HttpResponse;
 use serde_json::Value as JsonValue;
 
@@ -32,12 +35,12 @@ impl HttpResponse {
     }
 
     /// Sets the body of the response to a JSON value.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{ HttpResponse, StatusCode, HttpRequest, json::json };
-    /// 
+    ///
     /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
     ///    response.json_body(json!({"message": "Hello, World!"}));
     /// }
@@ -75,6 +78,24 @@ impl HttpResponse {
         &mut self.body
     }
 
+    /// Updates the body of the response.
+    ///
+    /// Function sets `Content-Length` automatically but needs `Content-Type` to be set manually.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the request has no body already.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{ HttpResponse, StatusCode, HttpRequest, json::json };
+    ///
+    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    ///   response.body(b"Hello, World!".to_vec(), "text/plain");
+    ///
+    ///   response.update_body(b"Goodbye, Mars!".to_vec());
+    /// }
     pub fn update_body(&mut self, body: Vec<u8>) -> Result<(), String> {
         if self.body.len() == 0 {
             return Err("Request has no body.".to_string());

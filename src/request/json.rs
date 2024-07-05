@@ -1,3 +1,5 @@
+//! JSON utilities for the HttpRequest struct
+
 use std::io::{ Error, ErrorKind };
 use serde_json::{ from_slice, Value };
 

@@ -1,3 +1,8 @@
+//! This module contains the implementation of the HTTP methods for the router.
+//!
+//! Each method is implemented as a function that takes a controller function and adds it to the router.
+//!
+//! A controller should be defined as `fn(&HttpRequest, &mut HttpResponse)`
 use super::{ Controller, HttpMethod, Router };
 
 impl Router {

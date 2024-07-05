@@ -183,7 +183,7 @@ impl Router {
         response: &mut HttpResponse,
         path: &Vec<String>
     ) -> HandlerResult {
-        if path.len() == 0 {
+        if path.len() == 0 || path[0] == "" {
             match self.endpoints.get(request.get_method()) {
                 Some(endpoint) => {
                     endpoint(request, response);

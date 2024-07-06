@@ -7,10 +7,11 @@
 //! *middlewares* or *controllers*.
 
 use std::{ collections::HashMap, fmt::{ Debug, Display, Formatter, Result as fResult } };
+use crate::json::JsonValue;
+
 use self::{ http_method::HttpMethod, request_line::RequestLine };
 
 pub mod http_method;
-pub mod json;
 
 pub(crate) mod request_parser;
 mod request_line;
@@ -19,7 +20,7 @@ mod request_line;
 pub struct HttpRequest {
     request: RequestLine,
     headers: HashMap<String, String>,
-    body: Option<Vec<u8>>,
+    body: BodyType,
     locals: HashMap<String, String>,
 }
 
@@ -132,7 +133,7 @@ impl Default for HttpRequest {
                 "Failed to create default RequestLine"
             ),
             headers: HashMap::new(),
-            body: None,
+            body: BodyType::None,
             locals: HashMap::new(),
         }
     }
@@ -145,8 +146,10 @@ impl Debug for HttpRequest {
             .fold(String::new(), |acc, (k, v)| format!("{acc}{k}: {v}\r\n"));
 
         let body = match &self.body {
-            Some(body) => format!("{:?}", body),
-            None => String::new(),
+            BodyType::Text(body) => format!("{:?}", body),
+            BodyType::Json(json) => format!("{:?}", json),
+            BodyType::Form(form) => format!("{:?}", form),
+            BodyType::None => "None".to_string(),
         };
 
         write!(f, "Request Line: {}\r\n Headers: {}\r\n Body: {}", self.request, headers, body)
@@ -161,4 +164,11 @@ impl Display for ParseHttpRequestError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
         write!(f, "Failed to parse HTTP request")
     }
+}
+
+enum BodyType {
+    Text(Vec<u8>),
+    Json(JsonValue),
+    Form(HashMap<String, String>),
+    None,
 }

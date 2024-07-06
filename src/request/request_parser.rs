@@ -1,6 +1,6 @@
-use std::{ io::{ BufRead, BufReader, Read }, net::TcpStream };
+use std::{ collections::HashMap, io::{ BufRead, BufReader, Read }, net::TcpStream };
 
-use super::HttpRequest;
+use super::{ request_line::RequestLine, BodyType, HttpRequest, ParseHttpRequestError };
 
 pub(crate) trait Parse {
     fn parse(stream: &TcpStream) -> Result<HttpRequest, String>;
@@ -10,7 +10,7 @@ impl Parse for HttpRequest {
     /// Parses a TcpStream into HttpRequest
     fn parse(mut stream: &TcpStream) -> Result<Self, String> {
         let mut buf_reader = BufReader::new(&mut stream);
-        let mut headers = Vec::new();
+        let mut http_request = Vec::new();
 
         // Don't touch this. It's too sensitive :(((.
         for line_result in buf_reader.by_ref().lines() {
@@ -18,35 +18,85 @@ impl Parse for HttpRequest {
             if line.is_empty() {
                 break;
             }
-            headers.push(line);
+            http_request.push(line);
         }
 
-        match parse_length(&headers) {
-            None => { Self::new(&headers, None).map_err(|err| err.to_string()) }
-            Some(0) => { Self::new(&headers, None).map_err(|err| err.to_string()) }
-            Some(content_length) => {
-                let mut body = Vec::with_capacity(content_length);
+        let request_line = RequestLine::try_from(http_request[0].as_str());
 
-                if
-                    buf_reader
-                        .take(content_length as u64)
-                        .read_to_end(&mut body)
-                        .is_err()
-                {
-                    return Err("Error while reading body".to_string());
-                }
+        if request_line.is_err() {
+            return Err("Error while parsing request line".to_string());
+        }
 
-                match String::from_utf8(body) {
-                    Ok(body) => {
-                        HttpRequest::new(&headers, Some(body.as_str())).map_err(|err|
-                            err.to_string()
-                        )
-                    }
-                    Err(_) => { Err("Error while parsing body".to_string()) }
-                }
+        let headers: HashMap<String, String> = http_request
+            .iter()
+            .skip(1)
+            .filter_map(HttpRequest::header_parser())
+            .collect();
+
+        let content_length = parse_length(&http_request);
+
+        if content_length.is_none() || content_length.unwrap() == 0 {
+            return Ok(HttpRequest {
+                request: RequestLine::try_from(http_request[0].as_str()).unwrap(),
+                headers,
+                body: BodyType::None,
+                locals: HashMap::new(),
+            });
+        }
+
+        let content_length = content_length.unwrap();
+
+        let mut body = Vec::with_capacity(content_length);
+
+        if
+            buf_reader
+                .take(content_length as u64)
+                .read_to_end(&mut body)
+                .is_err()
+        {
+            return Err("Error while reading body".to_string());
+        }
+
+        let body = match parse_body(body, &headers) {
+            Ok(value) => value,
+            Err(value) => {
+                return Err(value);
+            }
+        };
+
+        Ok(HttpRequest {
+            request: request_line.unwrap(),
+            headers,
+            body,
+            locals: HashMap::new(),
+        })
+    }
+}
+
+fn parse_body(body: Vec<u8>, headers: &HashMap<String, String>) -> Result<BodyType, String> {
+    if body.len() == 0 {
+        return Err("Error while reading body".to_string());
+    }
+    if !headers.contains_key("content-type") {
+        return Err(ParseHttpRequestError.to_string());
+    }
+    let body = match headers.get("content-type").unwrap().as_str() {
+        "application/json" => {
+            match serde_json::from_slice(&body[..]) {
+                Ok(json) => BodyType::Json(json),
+                Err(_) => BodyType::None,
             }
         }
-    }
+        "plain/text" => { BodyType::Text(body.to_vec()) }
+        _ => {
+            let error = format!(
+                "Error while parsing body. Content-type not supported: {}",
+                headers.get("content-type").unwrap()
+            );
+            return Err(error);
+        }
+    };
+    Ok(body)
 }
 
 /// Gets the content length from the headers

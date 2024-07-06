@@ -25,37 +25,6 @@ pub struct HttpRequest {
 }
 
 impl HttpRequest {
-    /// Creates a new HttpRequest
-    fn new(http_request: &Vec<String>, body: Option<&str>) -> Result<Self, ParseHttpRequestError> {
-        if http_request.is_empty() {
-            return Err(ParseHttpRequestError);
-        }
-
-        let request = RequestLine::try_from(http_request[0].as_str());
-
-        let headers = http_request
-            .iter()
-            .skip(1)
-            .filter_map(HttpRequest::header_parser())
-            .collect();
-
-        let body = match body {
-            Some(body) => Some(body.as_bytes().to_vec()),
-            None => None,
-        };
-
-        match request {
-            Ok(request) =>
-                Ok(HttpRequest {
-                    request,
-                    headers,
-                    body,
-                    locals: HashMap::new(),
-                }),
-            Err(_) => Err(ParseHttpRequestError),
-        }
-    }
-
     /// Returns the reference of the HTTPRequest headers as a HashMap
     ///
     /// # Example

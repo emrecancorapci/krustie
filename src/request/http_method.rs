@@ -33,6 +33,15 @@ pub enum HttpMethod {
     // TRACE,
 }
 
+impl HttpMethod {
+    pub(crate) fn is_valid(method: &str) -> bool {
+        match method {
+            "GET" | "POST" | "PUT" | "PATCH" | "DELETE" => true,
+            _ => false,
+        }
+    }
+}
+
 impl Default for HttpMethod {
     fn default() -> Self {
         Self::GET

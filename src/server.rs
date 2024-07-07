@@ -89,7 +89,7 @@ use std::{ fmt::{ Debug, Formatter }, io::Write, net::{ TcpListener, TcpStream }
 use route_handler::{ HandlerResult, RouteHandler };
 
 use crate::{
-    request::{ request_parser::Parse, HttpRequest },
+    request:: HttpRequest,
     response::{ status_code::StatusCode, HttpResponse },
 };
 

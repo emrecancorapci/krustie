@@ -2,13 +2,9 @@ use std::{ collections::HashMap, io::{ BufRead, BufReader, Read }, net::TcpStrea
 
 use super::{ request_line::RequestLine, BodyType, HttpRequest, ParseHttpRequestError };
 
-pub(crate) trait Parse {
-    fn parse(stream: &TcpStream) -> Result<HttpRequest, String>;
-}
-
-impl Parse for HttpRequest {
+impl HttpRequest {
     /// Parses a TcpStream into HttpRequest
-    fn parse(mut stream: &TcpStream) -> Result<Self, String> {
+    pub(crate) fn parse(mut stream: &TcpStream) -> Result<Self, String> {
         let mut buf_reader = BufReader::new(&mut stream);
         let mut http_request = Vec::new();
 
@@ -77,26 +73,15 @@ fn parse_body(body: Vec<u8>, headers: &HashMap<String, String>) -> Result<BodyTy
     if body.len() == 0 {
         return Err("Error while reading body".to_string());
     }
-    if !headers.contains_key("content-type") {
-        return Err(ParseHttpRequestError.to_string());
+
+    match headers.get("content-type") {
+        Some(content_type) => {
+            return BodyType::parse(body, content_type);
+        }
+        None => {
+            return Err(ParseHttpRequestError.to_string());
+        }
     }
-    let body = match headers.get("content-type").unwrap().as_str() {
-        "application/json" => {
-            match serde_json::from_slice(&body[..]) {
-                Ok(json) => BodyType::Json(json),
-                Err(_) => BodyType::None,
-            }
-        }
-        "plain/text" => { BodyType::Text(body.to_vec()) }
-        _ => {
-            let error = format!(
-                "Error while parsing body. Content-type not supported: {}",
-                headers.get("content-type").unwrap()
-            );
-            return Err(error);
-        }
-    };
-    Ok(body)
 }
 
 /// Gets the content length from the headers

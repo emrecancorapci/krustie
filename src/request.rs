@@ -7,11 +7,13 @@
 //! *middlewares* or *controllers*.
 
 use std::{ collections::HashMap, fmt::{ Debug, Display, Formatter, Result as fResult } };
-use crate::json::JsonValue;
+
+use body_type::BodyType;
 
 use self::{ http_method::HttpMethod, request_line::RequestLine };
 
 pub mod http_method;
+pub mod body_type;
 
 pub(crate) mod request_parser;
 mod request_line;
@@ -133,11 +135,4 @@ impl Display for ParseHttpRequestError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
         write!(f, "Failed to parse HTTP request")
     }
-}
-
-enum BodyType {
-    Text(Vec<u8>),
-    Json(JsonValue),
-    Form(HashMap<String, String>),
-    None,
 }

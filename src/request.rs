@@ -15,7 +15,7 @@ use self::{ http_method::HttpMethod, request_line::RequestLine };
 pub mod http_method;
 pub mod body_type;
 
-pub(crate) mod request_parser;
+pub(crate) mod parser;
 mod request_line;
 
 /// Represents the HTTP request

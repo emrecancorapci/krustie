@@ -11,7 +11,8 @@ use crate::{ HttpRequest, HttpResponse };
 /// Route handler trait
 ///
 /// This trait is used to define the handler for the routes and middlewares.
-pub(crate) trait RouteHandler {
+pub trait RouteHandler {
+    /// Handles the request and returns the result of the handler. It is used to define the handler for the routes and middlewares.
     fn handle(
         &self,
         request: &HttpRequest,

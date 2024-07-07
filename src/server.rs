@@ -13,6 +13,7 @@
 //!     json::{ get_string_from_json, json },
 //!     middleware::{ GzipEncoder, ServeStaticFiles },
 //!     server::route_handler::HandlerResult,
+//!     request::BodyType,
 //! };
 //!
 //! struct AddHeader {
@@ -66,21 +67,20 @@
 //! }
 //!
 //! fn post_req(req: &HttpRequest, res: &mut HttpResponse) {
-//!     match req.get_body_as_json() {
-//!         Ok(body) => {
-//!             let server_key_option = body.get("server");
-//!             if get_string_from_json(server_key_option).unwrap() == "Krustie" {
-//!                 res.status(StatusCode::Ok).json_body(body);
-//!             } else {
-//!                 res.status(StatusCode::try_from(201).unwrap()).json_body(
-//!                     json!({"error": "Invalid server"})
-//!                 );
-//!             }
-//!         }
-//!         Err(_) => {
-//!             res.status(StatusCode::BadRequest).json_body(json!({"error": "Invalid JSON"}));
-//!         }
+//!   match req.get_body() {
+//!     BodyType::Json(json) => {
+//!       let key_result = json.get("server");
+//!       if get_string_from_json(key_result).unwrap() == "Krustie" {
+//!         res.status(StatusCode::Ok).json_body(json!({"message": "Valid server"}));
+//!       } else {
+//!         res.status(StatusCode::try_from(201).unwrap())
+//!           .json_body(json!({"error": "Invalid server"}));
+//!       }
+//!     },
+//!     _ => {
+//!       res.status(StatusCode::BadRequest).json_body(json!({"error": "Invalid JSON"}));
 //!     }
+//!   }
 //! }
 //! ```
 

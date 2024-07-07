@@ -8,7 +8,7 @@
 
 use std::{ collections::HashMap, fmt::{ Debug, Display, Formatter, Result as fResult } };
 
-use body_type::BodyType;
+pub use body_type::BodyType;
 
 use self::{ http_method::HttpMethod, request_line::RequestLine };
 
@@ -55,6 +55,33 @@ impl HttpRequest {
     /// }
     pub fn get_header(&self, key: &str) -> Option<&String> {
         self.headers.get(key)
+    }
+
+    /// Returns the body of the HTTP request
+    /// 
+    /// The body can be of type `Text`, `Json`, `Form` or `None`
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::{ HttpRequest, HttpResponse, request::BodyType };
+    /// 
+    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    ///   match request.get_body() {
+    ///     BodyType::Text(body) => {
+    ///       // Do something with the body
+    ///     },
+    ///     BodyType::Json(json) => {
+    ///      // Do something with the json
+    ///     },
+    ///     _ => {
+    ///      // Do something else
+    ///     }
+    ///   }
+    /// }
+    /// 
+    pub fn get_body(&self) -> &BodyType {
+        &self.body
     }
 
     /// Adds a local variable to the http request

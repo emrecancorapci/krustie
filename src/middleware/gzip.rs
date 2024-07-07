@@ -3,7 +3,7 @@
 use std::io::Write;
 use flate2::{ write::GzEncoder, Compression };
 
-use crate::{ request::HttpRequest, response::HttpResponse, server::route_handler::HandlerResult };
+use crate::{ request::Request, response::Response, server::route_handler::HandlerResult };
 use super::Middleware;
 
 /// A middleware for compressing response body using gzip
@@ -42,7 +42,7 @@ impl GzipEncoder {
 }
 
 impl Middleware for GzipEncoder {
-    fn middleware(&self, request: &HttpRequest, response: &mut HttpResponse) -> HandlerResult {
+    fn middleware(&self, request: &Request, response: &mut Response) -> HandlerResult {
         let body = response.get_body_mut();
 
         if body.len() == 0 {

@@ -4,15 +4,15 @@
 
 use std::{ collections::HashMap, fmt::{ self, Debug, Formatter } };
 use crate::{
-    request::{ http_method::HttpMethod, HttpRequest },
-    response::{ status_code::StatusCode, HttpResponse },
+    request::{ http_method::HttpMethod, Request },
+    response::{ status_code::StatusCode, Response },
     server::route_handler::{ RouteHandler, HandlerResult },
     Middleware,
 };
 
 pub mod methods;
 
-type Controller = fn(&HttpRequest, &mut HttpResponse);
+type Controller = fn(&Request, &mut Response);
 
 /// A router for handling requests
 ///
@@ -100,7 +100,7 @@ impl Router {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ Router, StatusCode, Middleware, HttpRequest, HttpResponse, server::route_handler::HandlerResult };
+    /// use krustie::{ Router, StatusCode, Middleware, Request, Response, server::route_handler::HandlerResult };
     ///
     /// struct AddHeader {
     ///   key: String,
@@ -114,7 +114,7 @@ impl Router {
     /// }
     ///
     /// impl Middleware for AddHeader {
-    ///   fn middleware(&self, _: &HttpRequest, res: &mut HttpResponse) -> HandlerResult {
+    ///   fn middleware(&self, _: &Request, res: &mut Response) -> HandlerResult {
     ///     res.insert_header(&self.key, &self.value);
     ///     HandlerResult::Next
     ///   }
@@ -136,7 +136,7 @@ impl Router {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ Router, StatusCode, Middleware, HttpRequest, HttpResponse, server::route_handler::HandlerResult };
+    /// use krustie::{ Router, StatusCode, Middleware, Request, Response, server::route_handler::HandlerResult };
     ///
     /// struct AddHeader {
     ///   key: String,
@@ -150,7 +150,7 @@ impl Router {
     /// }
     ///
     /// impl Middleware for AddHeader {
-    ///   fn middleware(&self, _: &HttpRequest, res: &mut HttpResponse) -> HandlerResult {
+    ///   fn middleware(&self, _: &Request, res: &mut Response) -> HandlerResult {
     ///     res.insert_header(&self.key, &self.value);
     ///     HandlerResult::Next
     ///   }
@@ -179,8 +179,8 @@ impl Router {
 
     fn handle_router(
         &self,
-        request: &HttpRequest,
-        response: &mut HttpResponse,
+        request: &Request,
+        response: &mut Response,
         path: &Vec<String>
     ) -> HandlerResult {
         if path.len() == 0 || path[0] == "" {
@@ -217,8 +217,8 @@ impl Debug for Router {
 impl RouteHandler for Router {
     fn handle(
         &self,
-        request: &HttpRequest,
-        response: &mut HttpResponse,
+        request: &Request,
+        response: &mut Response,
         path: &Vec<String>
     ) -> HandlerResult {
         for middleware in &self.request_middlewares {

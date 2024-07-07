@@ -4,11 +4,11 @@
 //!
 //! To create a middleware, implement the `Middleware` trait. Which has a single function called `middleware`.
 //!
-//! It takes itself as `&self`, a `HttpRequest` and a `HttpResponse` as arguments and returns a `HandlerResult`.
+//! It takes itself as `&self`, a `Request` and a `Response` as arguments and returns a `HandlerResult`.
 
 use crate::{
-    request::HttpRequest,
-    response::HttpResponse,
+    request::Request,
+    response::Response,
     server::route_handler::{ RouteHandler, HandlerResult },
 };
 
@@ -27,18 +27,18 @@ pub use self::{ gzip::GzipEncoder, statics::ServeStaticFiles };
 /// - In this example `AddKrustieHeader` can be used as `server.add_handler(AddKrustieHeader)`
 ///
 /// ```rust
-/// use krustie::{ HttpRequest, HttpResponse, Middleware, server::route_handler::HandlerResult };
+/// use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult };
 ///
 /// struct AddKrustieHeader;
 ///
 /// impl AddKrustieHeader {
-///   fn add_header(res: &mut HttpResponse) {
+///   fn add_header(res: &mut Response) {
 ///     res.insert_header("Server", "Krustie");
 ///   }
 /// }
 ///
 /// impl Middleware for AddKrustieHeader {
-///   fn middleware(&self, req: &HttpRequest, res: &mut HttpResponse) -> HandlerResult {
+///   fn middleware(&self, req: &Request, res: &mut Response) -> HandlerResult {
 ///     AddKrustieHeader::add_header(res);
 ///     HandlerResult::Next
 ///   }
@@ -48,7 +48,7 @@ pub use self::{ gzip::GzipEncoder, statics::ServeStaticFiles };
 /// - In this example `AddHeader` should be initialized.
 ///
 /// ```rust
-/// use krustie::{ HttpRequest, HttpResponse, Middleware, server::route_handler::HandlerResult };
+/// use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult };
 ///
 /// struct AddHeader {
 ///     server: String,
@@ -62,7 +62,7 @@ pub use self::{ gzip::GzipEncoder, statics::ServeStaticFiles };
 /// }
 ///
 /// impl Middleware for AddHeader {
-///   fn middleware(&self, _: &HttpRequest, res: &mut HttpResponse) -> HandlerResult {
+///   fn middleware(&self, _: &Request, res: &mut Response) -> HandlerResult {
 ///     res.insert_header(&self.server, &self.value);
 ///     HandlerResult::Next
 ///   }
@@ -75,14 +75,14 @@ pub trait Middleware {
     /// For the middleware to be executed and continue the execution, it should return `HandlerResult::Next`.
     ///
     /// If the middleware should stop the execution (e.g. return 404), it should return `HandlerResult::Stop`.
-    fn middleware(&self, req: &HttpRequest, res: &mut HttpResponse) -> HandlerResult;
+    fn middleware(&self, req: &Request, res: &mut Response) -> HandlerResult;
 }
 
 impl<T> RouteHandler for T where T: Middleware {
     fn handle(
         &self,
-        request: &HttpRequest,
-        response: &mut HttpResponse,
+        request: &Request,
+        response: &mut Response,
         _: &Vec<String>
     ) -> HandlerResult {
         T::middleware(&self, request, response)

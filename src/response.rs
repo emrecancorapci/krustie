@@ -1,4 +1,4 @@
-//! This module contains the `HttpResponse` struct and its implementation.
+//! This module contains the `Response` struct and its implementation.
 //!
 //! Because they are mutable, they don't need to be returned from the controllers.
 //!
@@ -6,10 +6,10 @@
 //! chained like this:
 //!
 //! ```rust
-//! use krustie::{ HttpResponse, StatusCode, HttpRequest };
+//! use krustie::{ Response, StatusCode, Request };
 //! use std::collections::HashMap;
 //!
-//! fn get(request: &HttpRequest, response: &mut HttpResponse) {
+//! fn get(request: &Request, response: &mut Response) {
 //!   let mut headers = HashMap::new();
 //!
 //!   headers.insert("Server".to_string(), "Krustie".to_string());
@@ -33,7 +33,7 @@ pub mod body;
 /// Represents the HTTP response
 ///
 ///
-pub struct HttpResponse {
+pub struct Response {
     debug_mode: bool,
     http_version: String,
     status_code: StatusCode,
@@ -41,15 +41,15 @@ pub struct HttpResponse {
     body: Vec<u8>,
 }
 
-impl HttpResponse {
+impl Response {
     /// Sets the status of the response
     ///
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ HttpResponse, StatusCode, HttpRequest };
+    /// use krustie::{ Response, StatusCode, Request };
     ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    /// fn get(request: &Request, response: &mut Response) {
     ///    response.status(StatusCode::Ok);
     /// }
     /// ```
@@ -63,10 +63,10 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ HttpResponse, StatusCode, HttpRequest };
+    /// use krustie::{ Response, StatusCode, Request };
     /// use std::collections::HashMap;
     ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    /// fn get(request: &Request, response: &mut Response) {
     ///     let mut headers = HashMap::new();
     ///
     ///     headers.insert("Server".to_string(), "Krustie".to_string());
@@ -87,9 +87,9 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ HttpResponse, StatusCode, HttpRequest };
+    /// use krustie::{ Response, StatusCode, Request };
     ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    /// fn get(request: &Request, response: &mut Response) {
     ///    response.insert_header("Server", "Krustie");
     /// }
     /// ```
@@ -103,9 +103,9 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ HttpResponse, StatusCode, HttpRequest };
+    /// use krustie::{ Response, StatusCode, Request };
     ///
-    /// fn get(request: &HttpRequest, response: HttpResponse) {
+    /// fn get(request: &Request, response: Response) {
     ///   let headers = response.get_headers();
     ///
     ///   for (key, value) in headers.iter() {
@@ -127,15 +127,15 @@ impl HttpResponse {
     }
 }
 
-impl Into<Vec<u8>> for HttpResponse {
+impl Into<Vec<u8>> for Response {
     /// Returns the response as a byte vector.
     ///
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ HttpResponse, StatusCode, HttpRequest };
+    /// use krustie::{ Response, StatusCode, Request };
     ///
-    /// fn get(request: &HttpRequest, response: HttpResponse) {
+    /// fn get(request: &Request, response: Response) {
     ///   let response_bytes: Vec<u8> = response.into();
     /// }
     /// ```
@@ -174,16 +174,16 @@ impl Into<Vec<u8>> for HttpResponse {
     }
 }
 
-impl Default for HttpResponse {
-    /// Returns a default instance of HttpResponse
+impl Default for Response {
+    /// Returns a default instance of Response
     ///
     /// # Example
     ///
     /// ```rust
-    /// use krustie::response::HttpResponse;
+    /// use krustie::response::Response;
     ///
     /// fn main() {
-    ///     let response = HttpResponse::default();
+    ///     let response = Response::default();
     /// }
     /// ```
     fn default() -> Self {
@@ -197,7 +197,7 @@ impl Default for HttpResponse {
     }
 }
 
-impl Debug for HttpResponse {
+impl Debug for Response {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(
             f,

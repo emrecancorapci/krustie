@@ -2,7 +2,7 @@
 //!
 //! Each method is implemented as a function that takes a controller function and adds it to the router.
 //!
-//! A controller should be defined as `fn(&HttpRequest, &mut HttpResponse)`
+//! A controller should be defined as `fn(&Request, &mut Response)`
 use super::{ Controller, HttpMethod, Router };
 
 impl Router {

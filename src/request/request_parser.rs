@@ -1,9 +1,9 @@
 use std::{ collections::HashMap, io::{ BufRead, BufReader, Read }, net::TcpStream };
 
-use super::{ request_line::RequestLine, BodyType, HttpRequest, ParseHttpRequestError };
+use super::{ request_line::RequestLine, BodyType, Request, ParseHttpRequestError };
 
-impl HttpRequest {
-    /// Parses a TcpStream into HttpRequest
+impl Request {
+    /// Parses a TcpStream into Request
     pub(crate) fn parse(mut stream: &TcpStream) -> Result<Self, String> {
         let mut buf_reader = BufReader::new(&mut stream);
         let mut http_request = Vec::new();
@@ -26,13 +26,13 @@ impl HttpRequest {
         let headers: HashMap<String, String> = http_request
             .iter()
             .skip(1)
-            .filter_map(HttpRequest::header_parser())
+            .filter_map(Request::header_parser())
             .collect();
 
         let content_length = parse_length(&http_request);
 
         if content_length.is_none() || content_length.unwrap() == 0 {
-            return Ok(HttpRequest {
+            return Ok(Request {
                 request: RequestLine::try_from(http_request[0].as_str()).unwrap(),
                 headers,
                 body: BodyType::None,
@@ -60,7 +60,7 @@ impl HttpRequest {
             }
         };
 
-        Ok(HttpRequest {
+        Ok(Request {
             request: request_line.unwrap(),
             headers,
             body,

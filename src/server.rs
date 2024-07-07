@@ -6,8 +6,8 @@
 //! use krustie::{
 //!     Server,
 //!     Router,
-//!     HttpRequest,
-//!     HttpResponse,
+//!     Request,
+//!     Response,
 //!     Middleware,
 //!     StatusCode,
 //!     json::{ get_string_from_json, json },
@@ -28,7 +28,7 @@
 //! }
 //!
 //! impl Middleware for AddHeader {
-//!     fn middleware(&self, _: &HttpRequest, res: &mut HttpResponse) -> HandlerResult {
+//!     fn middleware(&self, _: &Request, res: &mut Response) -> HandlerResult {
 //!         res.insert_header(&self.key, &self.value);
 //!         HandlerResult::Next
 //!     }
@@ -66,7 +66,7 @@
 //!     // server.listen((127, 0, 0, 1), 8080);
 //! }
 //!
-//! fn post_req(req: &HttpRequest, res: &mut HttpResponse) {
+//! fn post_req(req: &Request, res: &mut Response) {
 //!   match req.get_body() {
 //!     BodyType::Json(json) => {
 //!       let key_result = json.get("server");
@@ -89,8 +89,8 @@ use std::{ fmt::{ Debug, Formatter }, io::Write, net::{ TcpListener, TcpStream }
 use route_handler::{ HandlerResult, RouteHandler };
 
 use crate::{
-    request:: HttpRequest,
-    response::{ status_code::StatusCode, HttpResponse },
+    request:: Request,
+    response::{ status_code::StatusCode, Response },
 };
 
 pub mod route_handler;
@@ -183,7 +183,7 @@ impl Server {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ Server, Router, HttpResponse, StatusCode, Middleware, middleware::gzip::GzipEncoder };
+    /// use krustie::{ Server, Router, Response, StatusCode, Middleware, middleware::gzip::GzipEncoder };
     ///
     /// let mut server = Server::create();
     /// let mut router = Router::new();
@@ -197,9 +197,9 @@ impl Server {
     }
 
     fn handle_stream(&self, stream: &mut TcpStream) {
-        let mut response = HttpResponse::default();
+        let mut response = Response::default();
 
-        match HttpRequest::parse(&stream) {
+        match Request::parse(&stream) {
             Ok(request) => {
                 for handler in &self.route_handlers {
                     match handler.handle(&request, &mut response, &request.get_path_array()) {

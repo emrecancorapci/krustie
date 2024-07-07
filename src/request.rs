@@ -1,4 +1,4 @@
-//! This module contains the `HttpRequest` struct and its implementation.
+//! This module contains the `Request` struct and its implementation.
 //!
 //! It has public methods to get the headers, add and get local variables
 //!
@@ -19,22 +19,22 @@ pub(crate) mod request_parser;
 mod request_line;
 
 /// Represents the HTTP request
-pub struct HttpRequest {
+pub struct Request {
     request: RequestLine,
     headers: HashMap<String, String>,
     body: BodyType,
     locals: HashMap<String, String>,
 }
 
-impl HttpRequest {
-    /// Returns the reference of the HTTPRequest headers as a HashMap
+impl Request {
+    /// Returns the reference of the Request headers as a HashMap
     ///
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ request::HttpRequest, response::HttpResponse};
+    /// use krustie::{ request::Request, response::Response};
     ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    /// fn get(request: &Request, response: &mut Response) {
     ///   let headers = request.get_headers();
     ///   let content_type = headers.get("content-type");
     /// }
@@ -48,9 +48,9 @@ impl HttpRequest {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ request::HttpRequest, response::HttpResponse};
+    /// use krustie::{ request::Request, response::Response};
     ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    /// fn get(request: &Request, response: &mut Response) {
     ///   let content_type = request.get_header("content-type");
     /// }
     pub fn get_header(&self, key: &str) -> Option<&String> {
@@ -64,9 +64,9 @@ impl HttpRequest {
     /// # Example
     /// 
     /// ```rust
-    /// use krustie::{ HttpRequest, HttpResponse, request::BodyType };
+    /// use krustie::{ Request, Response, request::BodyType };
     /// 
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    /// fn get(request: &Request, response: &mut Response) {
     ///   match request.get_body() {
     ///     BodyType::Text(body) => {
     ///       // Do something with the body
@@ -124,7 +124,7 @@ impl HttpRequest {
     }
 }
 
-impl Default for HttpRequest {
+impl Default for Request {
     fn default() -> Self {
         Self {
             request: RequestLine::new("GET", "/", "HTTP/1.1").expect(
@@ -137,7 +137,7 @@ impl Default for HttpRequest {
     }
 }
 
-impl Debug for HttpRequest {
+impl Debug for Request {
     fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
         let headers = self.headers
             .iter()

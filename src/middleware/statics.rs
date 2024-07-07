@@ -28,8 +28,8 @@ use std::{ collections::HashMap, fs, path::PathBuf };
 
 use crate::{
     server::route_handler::HandlerResult,
-    HttpRequest,
-    HttpResponse,
+    Request,
+    Response,
     Middleware,
     StatusCode,
 };
@@ -135,7 +135,7 @@ impl ServeStaticFiles {
 }
 
 impl Middleware for ServeStaticFiles {
-    fn middleware(&self, request: &HttpRequest, response: &mut HttpResponse) -> HandlerResult {
+    fn middleware(&self, request: &Request, response: &mut Response) -> HandlerResult {
         let file_name = &request.get_path_array()[0];
 
         let path = PathBuf::from(&self.folder_path).join(file_name);

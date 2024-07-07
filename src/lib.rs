@@ -20,8 +20,8 @@ pub mod json;
 
 pub use server::Server;
 pub use router::Router;
-pub use request::HttpRequest;
-pub use response::HttpResponse;
+pub use request::Request;
+pub use response::Response;
 pub use middleware::Middleware;
 pub use request::http_method::HttpMethod;
 pub use response::status_code::StatusCode;

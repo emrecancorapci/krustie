@@ -1,10 +1,10 @@
-//! Body module for the HttpResponse struct. Contains functions for setting the body of the
+//! Body module for the Response struct. Contains functions for setting the body of the
 //! response.
 
-use super::HttpResponse;
+use super::Response;
 use serde_json::Value as JsonValue;
 
-impl HttpResponse {
+impl Response {
     /// Sets the body of the response. Function sets `Content-Length` automatically but needs `Content-Type` to be set manually.
     ///
     /// If `Content-Type` is not set, it defaults to `text/plain`.
@@ -12,17 +12,17 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ HttpResponse, StatusCode, HttpRequest, json::json };
+    /// use krustie::{ Response, StatusCode, Request, json::json };
     ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    /// fn get(request: &Request, response: &mut Response) {
     ///     response.body(b"Hello, World!".to_vec(), "text/plain");
     /// }
     /// ```
     ///
     /// ```rust
-    /// use krustie::{ HttpResponse, StatusCode, HttpRequest, json::json };
+    /// use krustie::{ Response, StatusCode, Request, json::json };
     ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    /// fn get(request: &Request, response: &mut Response) {
     ///    response.status(StatusCode::Ok).body(b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(), "text/html");
     /// }
     /// ```
@@ -39,9 +39,9 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ HttpResponse, StatusCode, HttpRequest, json::json };
+    /// use krustie::{ Response, StatusCode, Request, json::json };
     ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    /// fn get(request: &Request, response: &mut Response) {
     ///    response.json_body(json!({"message": "Hello, World!"}));
     /// }
     pub fn json_body(&mut self, data: JsonValue) -> &mut Self {
@@ -55,9 +55,9 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ HttpResponse, StatusCode, HttpRequest, json::json };
+    /// use krustie::{ Response, StatusCode, Request, json::json };
     ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    /// fn get(request: &Request, response: &mut Response) {
     ///  let body = response.get_body();
     /// }
     pub fn get_body(&mut self) -> &Vec<u8> {
@@ -69,9 +69,9 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ HttpResponse, StatusCode, HttpRequest, json::json };
+    /// use krustie::{ Response, StatusCode, Request, json::json };
     ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    /// fn get(request: &Request, response: &mut Response) {
     ///  let body = response.get_body();
     /// }
     pub fn get_body_mut(&mut self) -> &mut Vec<u8> {
@@ -89,9 +89,9 @@ impl HttpResponse {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ HttpResponse, StatusCode, HttpRequest, json::json };
+    /// use krustie::{ Response, StatusCode, Request, json::json };
     ///
-    /// fn get(request: &HttpRequest, response: &mut HttpResponse) {
+    /// fn get(request: &Request, response: &mut Response) {
     ///   response.body(b"Hello, World!".to_vec(), "text/plain");
     ///
     ///   response.update_body(b"Goodbye, Mars!".to_vec());

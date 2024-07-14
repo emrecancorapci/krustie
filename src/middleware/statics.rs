@@ -10,9 +10,16 @@
 //! - **Media:** `mp3`, `wav`, `mp4`, `mpeg`, `webm`
 //! - **Font:** `woff`, `woff2`, `ttf`, `otf`, `eot`
 
-use std::{ collections::HashMap, fs, path::PathBuf };
+use std::{ fs, path::PathBuf };
 
-use crate::{ server::route_handler::HandlerResult, Request, Response, Middleware, StatusCode };
+use crate::{
+    response::content_type::ContentType,
+    server::route_handler::HandlerResult,
+    Middleware,
+    Request,
+    Response,
+    StatusCode,
+};
 
 #[derive(Debug)]
 /// Serve static files from a specified folder.
@@ -27,36 +34,35 @@ use crate::{ server::route_handler::HandlerResult, Request, Response, Middleware
 ///
 /// server.use_handler(statics);
 /// ```
-pub struct ServeStaticFiles {
+pub struct ServeStatic {
     folder_path: String,
 }
 
-impl ServeStaticFiles {
-    /// Creates a new instance of ServeStaticFiles
+impl ServeStatic {
+    /// Creates a new instance of ServeStatic
     ///
     /// # Example
     ///
     /// ```rust
-    /// use krustie::middleware::ServeStaticFiles;
+    /// use krustie::middleware::ServeStatic;
     ///
-    /// let statics = ServeStaticFiles::new("public");
+    /// let statics = ServeStatic::new("public");
     /// ```
-    pub fn new(folder_path: &str) -> ServeStaticFiles {
-        ServeStaticFiles {
+    pub fn new(folder_path: &str) -> ServeStatic {
+        ServeStatic {
             folder_path: folder_path.to_string(),
         }
     }
 
     fn get_extension(&self, path: &PathBuf) -> Result<String, String> {
         match path.extension() {
-            Some(ext) => {
+            Some(ext) =>
                 match ext.to_str() {
                     Some(val) => Ok(val.to_string()),
                     None => {
                         return Err(format!("Failed to convert extension to string: {:?}", ext));
                     }
                 }
-            }
             None => {
                 return Err(format!("No extension found for file: {:?}", path));
             }

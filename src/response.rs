@@ -6,7 +6,7 @@
 //! chained like this:
 //!
 //! ```rust
-//! use krustie::{ Response, StatusCode, Request };
+//! use krustie::{ Response, StatusCode, Request, response::ContentType, };
 //! use std::collections::HashMap;
 //!
 //! fn get(request: &Request, response: &mut Response) {
@@ -17,15 +17,16 @@
 //!   response
 //!     .status(StatusCode::Ok)
 //!     .headers(headers)
-//!     .body(b"Hello, World!".to_vec(), "text/plain");
+//!     .body(b"Hello, World!".to_vec(), ContentType::Text);
 //! }
 //! ```
 //!
 //! But there are other functions such as `insert_header` and `update_body` can be useful especially when creating a middleware.
 //!
 use std::{ collections::HashMap, fmt::{ Debug, Formatter, Result } };
-
 use self::status_code::StatusCode;
+
+pub use self::content_type::ContentType;
 
 pub mod status_code;
 pub mod body;

@@ -51,7 +51,7 @@
 //!     sub_router
 //!         .get(|_, res| {
 //!             let body = json!({"message": "Hello, World!"});
-//!             res.status(StatusCode::Ok).json_body(body);
+//!             res.status(StatusCode::Ok).body_json(body);
 //!         })
 //!         .post(post_req);
 //!
@@ -71,14 +71,14 @@
 //!     BodyType::Json(json) => {
 //!       let key_result = json.get("server");
 //!       if get_string_from_json(key_result).unwrap() == "Krustie" {
-//!         res.status(StatusCode::Ok).json_body(json!({"message": "Valid server"}));
+//!         res.status(StatusCode::Ok).body_json(json!({"message": "Valid server"}));
 //!       } else {
 //!         res.status(StatusCode::try_from(201).unwrap())
-//!           .json_body(json!({"error": "Invalid server"}));
+//!           .body_json(json!({"error": "Invalid server"}));
 //!       }
 //!     },
 //!     _ => {
-//!       res.status(StatusCode::BadRequest).json_body(json!({"error": "Invalid JSON"}));
+//!       res.status(StatusCode::BadRequest).body_json(json!({"error": "Invalid JSON"}));
 //!     }
 //!   }
 //! }

@@ -29,6 +29,7 @@ use self::status_code::StatusCode;
 
 pub mod status_code;
 pub mod body;
+pub mod utilities;
 
 /// Represents the HTTP response
 ///
@@ -80,40 +81,6 @@ impl Response {
     pub fn headers(&mut self, headers: HashMap<String, String>) -> &mut Self {
         self.headers.extend(headers);
         self
-    }
-
-    /// Adds a single header to the response
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::{ Response, StatusCode, Request };
-    ///
-    /// fn get(request: &Request, response: &mut Response) {
-    ///    response.insert_header("Server", "Krustie");
-    /// }
-    /// ```
-    pub fn insert_header(&mut self, key: &str, value: &str) -> &mut Self {
-        self.headers.insert(key.to_string(), value.to_string());
-        self
-    }
-
-    /// Gets the headers of the response
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::{ Response, StatusCode, Request };
-    ///
-    /// fn get(request: &Request, response: Response) {
-    ///   let headers = response.get_headers();
-    ///
-    ///   for (key, value) in headers.iter() {
-    ///    println!("{}: {}", key, value);
-    ///   }
-    /// }
-    pub fn get_headers(&self) -> &HashMap<String, String> {
-        &self.headers
     }
 
     /// Allows to set the debug mode for the response.

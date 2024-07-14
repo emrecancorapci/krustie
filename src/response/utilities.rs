@@ -1,56 +1,63 @@
-//! Body module for the Response struct. Contains functions for setting the body of the
-//! response.
+use std::collections::HashMap;
 
-use super::Response;
-use serde_json::Value as JsonValue;
+use crate::Response;
 
 impl Response {
-    /// Sets the body of the response. Function sets `Content-Length` automatically but needs `Content-Type` to be set manually.
-    ///
-    /// If `Content-Type` is not set, it defaults to `text/plain`.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::{ Response, StatusCode, Request, json::json };
-    ///
-    /// fn get(request: &Request, response: &mut Response) {
-    ///     response.body(b"Hello, World!".to_vec(), "text/plain");
-    /// }
-    /// ```
-    ///
-    /// ```rust
-    /// use krustie::{ Response, StatusCode, Request, json::json };
-    ///
-    /// fn get(request: &Request, response: &mut Response) {
-    ///    response.status(StatusCode::Ok).body(b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(), "text/html");
-    /// }
-    /// ```
-    pub fn body(&mut self, body: Vec<u8>, content_type: &str) -> &mut Self {
-        let content_type = if content_type.len() > 0 { content_type } else { "text/plain" };
-        self.headers.insert(String::from("Content-Length"), body.len().to_string());
-        self.headers.insert(String::from("Content-Type"), content_type.to_string());
-        self.body = body;
-        self
-    }
-
-    /// Sets the body of the response to a JSON value.
+    
+    /// Adds a single header to the response
     ///
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ Response, StatusCode, Request, json::json };
+    /// use krustie::{ Response, StatusCode, Request };
     ///
     /// fn get(request: &Request, response: &mut Response) {
-    ///    response.body_json(json!({"message": "Hello, World!"}));
+    ///    response.insert_header("Server", "Krustie");
     /// }
-    pub fn body_json(&mut self, data: JsonValue) -> &mut Self {
-        let json = serde_json::to_string(&data).unwrap();
-        self.body(json.as_bytes().to_vec(), "application/json");
+    /// ```
+    pub fn insert_header(&mut self, key: &str, value: &str) -> &mut Self {
+        self.headers.insert(key.to_string(), value.to_string());
         self
     }
 
-    /// Gets the body of the response as a byte vector reference
+    /// Gets the headers of the response
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{ Response, StatusCode, Request };
+    ///
+    /// fn get(request: &Request, response: Response) {
+    ///   let headers = response.get_headers();
+    ///
+    ///   for (key, value) in headers.iter() {
+    ///    println!("{}: {}", key, value);
+    ///   }
+    /// }
+    pub fn get_headers(&self) -> &HashMap<String, String> {
+        &self.headers
+    }
+
+    /// Gets requested header from the response
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::{ Response, StatusCode, Request };
+    /// 
+    /// fn get(request: &Request, response: Response) {
+    ///   let server_header = response.get_header("Server");
+    /// 
+    ///   match server_header {
+    ///     Some(header) => println!("Server header: {}", header),
+    ///     None => println!("Server header not found")
+    ///   }
+    /// }
+    pub fn get_header(&self, key: &str) -> Option<&String> {
+        self.headers.get(key)
+    }
+
+        /// Gets the body of the response as a byte vector reference
     ///
     /// # Example
     ///

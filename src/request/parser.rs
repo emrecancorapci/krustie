@@ -1,10 +1,16 @@
-use std::{ collections::HashMap, io::{ BufRead, BufReader, Read }, net::TcpStream };
+use std::{
+    collections::HashMap,
+    io::{ BufRead, BufReader, Error, ErrorKind, Read },
+    net::TcpStream,
+};
 
-use super::{ request_line::RequestLine, BodyType, Request, ParseHttpRequestError };
+use super::{ request_line::RequestLine, Request, ParseHttpRequestError, RequestBody };
+
+const MAX_HEADER: usize = 100;
 
 impl Request {
     /// Parses a TcpStream into Request
-    pub(crate) fn parse(mut stream: &TcpStream) -> Result<Self, String> {
+    pub(crate) fn parse(mut stream: &TcpStream) -> Result<Self, Error> {
         let mut buf_reader = BufReader::new(&mut stream);
         let mut http_request = Vec::new();
 
@@ -20,22 +26,25 @@ impl Request {
         let request_line = RequestLine::try_from(http_request[0].as_str());
 
         if request_line.is_err() {
-            return Err("Error while parsing request line".to_string());
+            return Err(
+                Error::new(ErrorKind::InvalidInput, "Error while parsing request line".to_string())
+            );
         }
 
         let headers: HashMap<String, String> = http_request
             .iter()
             .skip(1)
+            .take(MAX_HEADER)
             .filter_map(Request::header_parser())
             .collect();
 
-        let content_length = parse_length(&http_request);
+        let content_length = Self::parse_length(&http_request);
 
         if content_length.is_none() || content_length.unwrap() == 0 {
             return Ok(Request {
                 request: RequestLine::try_from(http_request[0].as_str()).unwrap(),
                 headers,
-                body: BodyType::None,
+                body: RequestBody::None,
                 locals: HashMap::new(),
             });
         }
@@ -44,21 +53,9 @@ impl Request {
 
         let mut body = Vec::with_capacity(content_length);
 
-        if
-            buf_reader
-                .take(content_length as u64)
-                .read_to_end(&mut body)
-                .is_err()
-        {
-            return Err("Error while reading body".to_string());
-        }
+        buf_reader.take(content_length as u64).read_to_end(&mut body)?;
 
-        let body = match parse_body(body, &headers) {
-            Ok(value) => value,
-            Err(value) => {
-                return Err(value);
-            }
-        };
+        let body = Self::parse_body(body, &headers)?;
 
         Ok(Request {
             request: request_line.unwrap(),
@@ -67,36 +64,50 @@ impl Request {
             locals: HashMap::new(),
         })
     }
-}
 
-fn parse_body(body: Vec<u8>, headers: &HashMap<String, String>) -> Result<BodyType, String> {
-    if body.len() == 0 {
-        return Err("Error while reading body".to_string());
-    }
+    fn header_parser() -> impl Fn(&String) -> Option<(String, String)> {
+        |line: &String| {
+            let header_line: Vec<&str> = line.split(':').collect();
 
-    match headers.get("content-type") {
-        Some(content_type) => {
-            return BodyType::parse(body, content_type);
-        }
-        None => {
-            return Err(ParseHttpRequestError.to_string());
-        }
-    }
-}
+            if header_line.len() == 2 {
+                let key = header_line[0].trim().to_lowercase().to_string();
+                let value = header_line[1].trim().to_string();
 
-/// Gets the content length from the headers
-fn parse_length(headers: &Vec<String>) -> Option<usize> {
-    for line in headers.iter() {
-        if line.starts_with("Content-Length") {
-            match line.find(":") {
-                Some(index) => {
-                    return Some(line[index + 1..].trim().parse::<usize>().unwrap_or(0));
-                }
-                None => {
-                    return None;
-                }
+                Some((key, value))
+            } else {
+                None
             }
         }
     }
-    return None;
+
+    fn parse_length(headers: &[String]) -> Option<usize> {
+        for line in headers.iter() {
+            if line.starts_with("Content-Length") {
+                match line.find(':') {
+                    Some(index) => {
+                        return Some(line[index + 1..].trim().parse::<usize>().unwrap_or(0));
+                    }
+                    None => {
+                        return None;
+                    }
+                }
+            }
+        }
+        return None;
+    }
+
+    fn parse_body(body: Vec<u8>, headers: &HashMap<String, String>) -> Result<RequestBody, Error> {
+        if body.is_empty() {
+            return Err(Error::new(std::io::ErrorKind::NotFound, "Body is empty."));
+        }
+
+        match headers.get("content-type") {
+            Some(content_type) => {
+                return RequestBody::parse(body, content_type);
+            }
+            None => {
+                return Err(Error::new(ErrorKind::NotFound, ParseHttpRequestError.to_string()));
+            }
+        }
+    }
 }

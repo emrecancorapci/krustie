@@ -1,7 +1,7 @@
 //! Body module for the Response struct. Contains functions for setting the body of the
 //! response.
 
-use super::Response;
+use super::{ content_type::ContentType, Response };
 use serde_json::Value as JsonValue;
 
 impl Response {
@@ -12,22 +12,21 @@ impl Response {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ Response, StatusCode, Request, json::json };
+    /// use krustie::{ Response, StatusCode, Request, response::ContentType, json::json };
     ///
     /// fn get(request: &Request, response: &mut Response) {
-    ///     response.body(b"Hello, World!".to_vec(), "text/plain");
+    ///     response.body(b"Hello, World!".to_vec(), ContentType::Text);
     /// }
     /// ```
     ///
     /// ```rust
-    /// use krustie::{ Response, StatusCode, Request, json::json };
+    /// use krustie::{ Response, StatusCode, Request, response::ContentType, json::json };
     ///
     /// fn get(request: &Request, response: &mut Response) {
-    ///    response.status(StatusCode::Ok).body(b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(), "text/html");
+    ///    response.status(StatusCode::Ok).body(b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(), ContentType::Html);
     /// }
     /// ```
     pub fn body(&mut self, body: Vec<u8>, content_type: ContentType) -> &mut Self {
-        self.headers.insert(String::from("Content-Length"), body.len().to_string());
         self.headers.insert(String::from("Content-Type"), content_type.to_string());
         self.body = body;
         self

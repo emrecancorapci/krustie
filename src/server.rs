@@ -4,82 +4,82 @@
 //!
 //! ```rust
 //! use krustie::{
-//!     Server,
-//!     Router,
-//!     Request,
-//!     Response,
-//!     Middleware,
-//!     StatusCode,
-//!     json::{ get_string_from_json, json },
-//!     middleware::{ GzipEncoder, ServeStaticFiles },
-//!     server::route_handler::HandlerResult,
-//!     request::BodyType,
+//!   Server,
+//!   Router,
+//!   Request,
+//!   Response,
+//!   Middleware,
+//!   StatusCode,
+//!   json::{ get_string_from_json, json },
+//!   middleware::{ GzipEncoder, ServeStatic },
+//!   server::route_handler::HandlerResult,
+//!   request::RequestBody,
+//!   response::ContentType,
 //! };
 //!
-//! struct AddHeader {
-//!     key: String,
-//!     value: String,
-//! }
+//! let mut server = Server::create();
+//! let krustie_middleware = AddHeader::new("Server", "Krustie");
+//! let mut router = Router::new();
 //!
-//! impl AddHeader {
-//!     fn new(key: &str, value: &str) -> Self {
-//!         Self { key: key.to_string(), value: value.to_string() }
-//!     }
-//! }
+//! router.get(|_, res| {
+//!   res.status(StatusCode::Ok).body(
+//!     b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(),
+//!     ContentType::Html
+//!   );
+//! });
 //!
-//! impl Middleware for AddHeader {
-//!     fn middleware(&self, _: &Request, res: &mut Response) -> HandlerResult {
-//!         res.insert_header(&self.key, &self.value);
-//!         HandlerResult::Next
-//!     }
-//! }
+//! let mut sub_router = Router::new();
 //!
-//! fn main() {
-//!     let mut server = Server::create();
-//!     let krustie_middleware = AddHeader::new("Server", "Krustie");
-//!     let mut router = Router::new();
+//! sub_router
+//!   .get(|_, res| {
+//!     let body = json!({"message": "Hello, World!"});
+//!     res.status(StatusCode::Ok).body_json(body);
+//!   })
+//!   .post(post_req);
 //!
-//!     router.get(|_, res| {
-//!         res.status(StatusCode::Ok).body(
-//!             b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(),
-//!             "text/html"
-//!         );
-//!     });
+//! router.use_router("/home", sub_router);
 //!
-//!     let mut sub_router = Router::new();
+//! server.use_handler(router);
+//! server.use_handler(krustie_middleware);
+//! server.use_handler(GzipEncoder);
+//! server.use_handler(ServeStatic::new("public"));
 //!
-//!     sub_router
-//!         .get(|_, res| {
-//!             let body = json!({"message": "Hello, World!"});
-//!             res.status(StatusCode::Ok).body_json(body);
-//!         })
-//!         .post(post_req);
+//! // vvvvvv Uncommment to listen on
+//! // server.listen((127, 0, 0, 1), 8080);
 //!
-//!     router.use_router("/home", sub_router);
-//!
-//!     server.use_handler(router);
-//!     server.use_handler(krustie_middleware);
-//!     server.use_handler(GzipEncoder);
-//!     server.use_handler(ServeStaticFiles::new("public"));
-//!     
-//!     // vvvvvv Uncommment to listen on
-//!     // server.listen((127, 0, 0, 1), 8080);
-//! }
 //!
 //! fn post_req(req: &Request, res: &mut Response) {
 //!   match req.get_body() {
-//!     BodyType::Json(json) => {
+//!     RequestBody::Json(json) => {
 //!       let key_result = json.get("server");
+//!
 //!       if get_string_from_json(key_result).unwrap() == "Krustie" {
 //!         res.status(StatusCode::Ok).body_json(json!({"message": "Valid server"}));
 //!       } else {
-//!         res.status(StatusCode::try_from(201).unwrap())
-//!           .body_json(json!({"error": "Invalid server"}));
+//!         res.status(StatusCode::try_from(201).unwrap()).body_json(json!({"error": "Invalid server"}));
 //!       }
 //!     },
 //!     _ => {
 //!       res.status(StatusCode::BadRequest).body_json(json!({"error": "Invalid JSON"}));
 //!     }
+//!   }
+//! }
+//!
+//! struct AddHeader {
+//!   key: String,
+//!   value: String,
+//! }
+//!
+//! impl AddHeader {
+//!   fn new(key: &str, value: &str) -> Self {
+//!     Self { key: key.to_string(), value: value.to_string() }
+//!   }
+//! }
+//!
+//! impl Middleware for AddHeader {
+//!   fn middleware(&self, _: &Request, res: &mut Response) -> HandlerResult {
+//!     res.insert_header(&self.key, &self.value);
+//!     HandlerResult::Next
 //!   }
 //! }
 //! ```
@@ -101,14 +101,14 @@ pub mod route_handler;
 /// # Example
 ///
 /// ```rust
-/// use krustie::{ Server, Router, StatusCode };
+/// use krustie::{ Server, Router, StatusCode, response::ContentType, };
 ///
 /// let mut server = Server::create();
 /// let mut router = Router::new();
 ///
 /// router.get(|_, res| {
 ///     res.status(StatusCode::Ok)
-///         .body(b"Hello World!".to_vec(), "text/plain");
+///         .body(b"Hello World!".to_vec(), ContentType::Text);
 /// });
 ///
 /// server.use_handler(router);
@@ -118,7 +118,7 @@ pub mod route_handler;
 pub struct Server {
     route_handlers: Vec<Box<dyn RouteHandler>>,
     address: String,
-    // listener_ip: Option<IpAddr>,
+    peer_address: SocketAddr,
 }
 
 impl Server {
@@ -138,6 +138,7 @@ impl Server {
         Self {
             route_handlers: Vec::new(),
             address: String::from(""),
+            peer_address: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080),
         }
     }
 
@@ -155,20 +156,23 @@ impl Server {
     /// ```
     pub fn listen(&mut self, ip: (u8, u8, u8, u8), port: u16) {
         self.address = format!("{}.{}.{}.{}:{}", ip.0, ip.1, ip.2, ip.3, port);
-        match TcpListener::bind(&self.address) {
-            Ok(listener) => {
-                for stream_result in listener.incoming() {
-                    match stream_result {
-                        Ok(mut stream) => {
-                            self.handle_stream(&mut stream);
-                        }
-                        Err(e) => {
-                            eprintln!("Error while listening: {}", e);
-                        }
-                    }
+        let listener = TcpListener::bind(&self.address).unwrap_or_else(|err| panic!("{}", err));
+
+        for stream_result in listener.incoming() {
+            let mut stream = stream_result.unwrap_or_else(|err| {
+                panic!("Error while listening: {}", err);
+            });
+
+            match stream.peer_addr() {
+                Ok(addr) => {
+                    self.peer_address = addr;
+                }
+                Err(_) => {
+                    unimplemented!();
                 }
             }
-            Err(err) => { panic!("{}", err) }
+
+            self.handle_stream(&mut stream);
         }
     }
 
@@ -203,7 +207,7 @@ impl Server {
                 for handler in &self.route_handlers {
                     let result = handler.handle(&request, &mut response, request.get_path_array());
                     if result == HandlerResult::End {
-                            break;
+                        break;
                     }
                 }
             }

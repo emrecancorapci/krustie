@@ -7,14 +7,12 @@
 //! *middlewares* or *controllers*.
 
 use std::{ collections::HashMap, fmt::{ Debug, Display, Formatter, Result as fResult } };
-
-pub use body_type::BodyType;
-
 use self::{ http_method::HttpMethod, request_line::RequestLine };
 
-pub mod http_method;
-pub mod body_type;
+pub use body::RequestBody;
 
+pub mod body;
+pub mod http_method;
 pub(crate) mod parser;
 mod request_line;
 
@@ -22,7 +20,7 @@ mod request_line;
 pub struct Request {
     request: RequestLine,
     headers: HashMap<String, String>,
-    body: BodyType,
+    body: RequestBody,
     locals: HashMap<String, String>,
 }
 
@@ -58,20 +56,20 @@ impl Request {
     }
 
     /// Returns the body of the HTTP request
-    /// 
+    ///
     /// The body can be of type `Text`, `Json`, `Form` or `None`
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
-    /// use krustie::{ Request, Response, request::BodyType };
-    /// 
+    /// use krustie::{ Request, Response, request::RequestBody };
+    ///
     /// fn get(request: &Request, response: &mut Response) {
     ///   match request.get_body() {
-    ///     BodyType::Text(body) => {
+    ///     RequestBody::Text(body) => {
     ///       // Do something with the body
     ///     },
-    ///     BodyType::Json(json) => {
+    ///     RequestBody::Json(json) => {
     ///      // Do something with the json
     ///     },
     ///     _ => {
@@ -79,8 +77,8 @@ impl Request {
     ///     }
     ///   }
     /// }
-    /// 
-    pub fn get_body(&self) -> &BodyType {
+    ///
+    pub fn get_body(&self) -> &RequestBody {
         &self.body
     }
 
@@ -105,22 +103,7 @@ impl Request {
 
     /// Returns the path of the HTTP request
     pub(crate) fn get_path_array(&self) -> &Vec<String> {
-        &self.request.get_path_array()
-    }
-
-    fn header_parser() -> impl Fn(&String) -> Option<(String, String)> {
-        |line: &String| {
-            let header_line: Vec<&str> = line.split(':').collect();
-
-            if header_line.len() == 2 {
-                let key = header_line[0].trim().to_lowercase().to_string();
-                let value = header_line[1].trim().to_string();
-
-                Some((key, value))
-            } else {
-                None
-            }
-        }
+        self.request.get_path_array()
     }
 }
 
@@ -131,7 +114,7 @@ impl Default for Request {
                 "Failed to create default RequestLine"
             ),
             headers: HashMap::new(),
-            body: BodyType::None,
+            body: RequestBody::None,
             locals: HashMap::new(),
         }
     }
@@ -144,10 +127,9 @@ impl Debug for Request {
             .fold(String::new(), |acc, (k, v)| format!("{acc}{k}: {v}\r\n"));
 
         let body = match &self.body {
-            BodyType::Text(body) => format!("{:?}", body),
-            BodyType::Json(json) => format!("{:?}", json),
-            BodyType::Form(form) => format!("{:?}", form),
-            BodyType::None => "None".to_string(),
+            RequestBody::Text(body) => format!("{:?}", body),
+            RequestBody::Json(json) => format!("{:?}", json),
+            RequestBody::None => "None".to_string(),
         };
 
         write!(f, "Request Line: {}\r\n Headers: {}\r\n Body: {}", self.request, headers, body)

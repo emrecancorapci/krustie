@@ -11,7 +11,7 @@ impl Response {
     /// use krustie::{ Response, StatusCode, Request };
     ///
     /// fn get(request: &Request, response: &mut Response) {
-    ///    response.insert_header("Server", "Krustie");
+    ///   response.insert_header("Server", "Krustie");
     /// }
     /// ```
     pub fn insert_header(&mut self, key: &str, value: &str) -> &mut Self {
@@ -30,7 +30,7 @@ impl Response {
     ///   let headers = response.get_headers();
     ///
     ///   for (key, value) in headers.iter() {
-    ///    println!("{}: {}", key, value);
+    ///     println!("{}: {}", key, value);
     ///   }
     /// }
     pub fn get_headers(&self) -> &HashMap<String, String> {
@@ -64,7 +64,7 @@ impl Response {
     /// use krustie::{ Response, StatusCode, Request, json::json };
     ///
     /// fn get(request: &Request, response: &mut Response) {
-    ///  let body = response.get_body();
+    ///   let body = response.get_body();
     /// }
     pub fn get_body(&mut self) -> &Vec<u8> {
         &mut self.body
@@ -78,7 +78,7 @@ impl Response {
     /// use krustie::{ Response, StatusCode, Request, json::json };
     ///
     /// fn get(request: &Request, response: &mut Response) {
-    ///  let body = response.get_body();
+    ///   let body = response.get_body();
     /// }
     pub fn get_body_mut(&mut self) -> &mut Vec<u8> {
         &mut self.body
@@ -95,10 +95,10 @@ impl Response {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{ Response, StatusCode, Request, json::json };
+    /// use krustie::{ Response, StatusCode, Request, response::ContentType, json::json };
     ///
     /// fn get(request: &Request, response: &mut Response) {
-    ///   response.body(b"Hello, World!".to_vec(), "text/plain");
+    ///   response.body(b"Hello, World!".to_vec(), ContentType::Text);
     ///
     ///   response.update_body(b"Goodbye, Mars!".to_vec());
     /// }

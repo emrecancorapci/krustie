@@ -1,5 +1,13 @@
-#![warn(missing_debug_implementations, missing_docs, rust_2018_idioms, unreachable_pub)]
+#![warn(
+    missing_debug_implementations,
+    missing_docs,
+    rust_2018_idioms,
+    unreachable_pub,
+    clippy::all
+)]
+#![allow(clippy::needless_return)]
 #![forbid(unsafe_code)]
+
 //! # Krustie
 //!
 //! Krustie is a *simple* backend framework that inspired by *Express.js* and is designed to be a

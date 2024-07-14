@@ -3,21 +3,19 @@
 use std::io::Write;
 use flate2::{ write::GzEncoder, Compression };
 
-use crate::{ request::Request, response::Response, server::route_handler::HandlerResult };
 use super::Middleware;
+use crate::{ request::Request, response::Response, server::route_handler::HandlerResult };
 
-/// A middleware for compressing response body using gzip
+/// A middleware for compressing response body using gzip.
 ///
-/// # Example
+/// # ExampleF
 ///
 /// ```rust
 /// use krustie::{server::Server, middleware::gzip::GzipEncoder};
 ///
-/// fn main() {
-///   let mut server = Server::create();
+/// let mut server = Server::create();
 ///
-///   server.use_handler(GzipEncoder);
-/// }
+/// server.use_handler(GzipEncoder);
 ///
 #[derive(Debug)]
 pub struct GzipEncoder;
@@ -45,13 +43,13 @@ impl Middleware for GzipEncoder {
     fn middleware(&self, request: &Request, response: &mut Response) -> HandlerResult {
         let body = response.get_body_mut();
 
-        if body.len() == 0 {
+        if body.is_empty() {
             return HandlerResult::Next;
         }
 
         if let Some(str_encodings) = request.get_header("accept-encoding") {
             let encodings = str_encodings
-                .split(",")
+                .split(',')
                 .map(|item| item.trim())
                 .collect::<Vec<&str>>();
 

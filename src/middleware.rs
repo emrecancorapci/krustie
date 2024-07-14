@@ -6,16 +6,12 @@
 //!
 //! It takes itself as `&self`, a `Request` and a `Response` as arguments and returns a `HandlerResult`.
 
-use crate::{
-    request::Request,
-    response::Response,
-    server::route_handler::{ RouteHandler, HandlerResult },
-};
+use crate::{ server::route_handler::{ HandlerResult, RouteHandler }, Request, Response };
 
 pub mod gzip;
 pub mod statics;
 
-pub use self::{ gzip::GzipEncoder, statics::ServeStaticFiles };
+pub use self::{ gzip::GzipEncoder, statics::ServeStatic };
 
 /// Middleware trait to be implemented for creating middleware.
 ///
@@ -75,16 +71,11 @@ pub trait Middleware {
     /// For the middleware to be executed and continue the execution, it should return `HandlerResult::Next`.
     ///
     /// If the middleware should stop the execution (e.g. return 404), it should return `HandlerResult::Stop`.
-    fn middleware(&self, req: &Request, res: &mut Response) -> HandlerResult;
+    fn middleware(&self, request: &Request, response: &mut Response) -> HandlerResult;
 }
 
 impl<T> RouteHandler for T where T: Middleware {
-    fn handle(
-        &self,
-        request: &Request,
-        response: &mut Response,
-        _: &Vec<String>
-    ) -> HandlerResult {
-        T::middleware(&self, request, response)
+    fn handle(&self, request: &Request, response: &mut Response, _: &[String]) -> HandlerResult {
+        T::middleware(self, request, response)
     }
 }

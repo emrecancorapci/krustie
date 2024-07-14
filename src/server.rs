@@ -84,14 +84,15 @@
 //! }
 //! ```
 
-use std::{ fmt::{ Debug, Formatter }, io::Write, net::{ TcpListener, TcpStream } };
+use std::{
+    fmt::{ Debug, Formatter },
+    io::Write,
+    net::{ IpAddr, Ipv4Addr, SocketAddr, TcpListener, TcpStream },
+};
+
+use crate::{ Request, Response, StatusCode };
 
 use route_handler::{ HandlerResult, RouteHandler };
-
-use crate::{
-    request:: Request,
-    response::{ status_code::StatusCode, Response },
-};
 
 pub mod route_handler;
 
@@ -102,19 +103,17 @@ pub mod route_handler;
 /// ```rust
 /// use krustie::{ Server, Router, StatusCode };
 ///
-/// fn main() {
-///     let mut server = Server::create();
-///     let mut router = Router::new();
+/// let mut server = Server::create();
+/// let mut router = Router::new();
 ///
-///     router.get(|_, res| {
-///         res.status(StatusCode::Ok)
-///             .body(b"Hello World!".to_vec(), "text/plain");
-///     });
+/// router.get(|_, res| {
+///     res.status(StatusCode::Ok)
+///         .body(b"Hello World!".to_vec(), "text/plain");
+/// });
 ///
-///     server.use_handler(router);
+/// server.use_handler(router);
 ///
-///     // server.listen((127, 0, 0, 1), 8080);
-/// }
+/// // server.listen((127, 0, 0, 1), 8080);
 /// ```
 pub struct Server {
     route_handlers: Vec<Box<dyn RouteHandler>>,
@@ -199,24 +198,19 @@ impl Server {
     fn handle_stream(&self, stream: &mut TcpStream) {
         let mut response = Response::default();
 
-        match Request::parse(&stream) {
+        match Request::parse(stream) {
             Ok(request) => {
                 for handler in &self.route_handlers {
-                    match handler.handle(&request, &mut response, &request.get_path_array()) {
-                        HandlerResult::End => {
+                    let result = handler.handle(&request, &mut response, request.get_path_array());
+                    if result == HandlerResult::End {
                             break;
-                        }
-                        HandlerResult::Next => {
-                            continue;
-                        }
                     }
                 }
             }
-            Err(error) => {
-                response.status(StatusCode::BadRequest).debug_msg(&error);
+            Err(err) => {
+                response.status(StatusCode::BadRequest).debug_msg(&err.to_string());
             }
         }
-
         let response_stream: Vec<u8> = response.into();
 
         match stream.write_all(&response_stream) {

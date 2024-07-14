@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use crate::Response;
 
 impl Response {
-    
     /// Adds a single header to the response
     ///
     /// # Example
@@ -39,15 +38,15 @@ impl Response {
     }
 
     /// Gets requested header from the response
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{ Response, StatusCode, Request };
-    /// 
+    ///
     /// fn get(request: &Request, response: Response) {
     ///   let server_header = response.get_header("Server");
-    /// 
+    ///
     ///   match server_header {
     ///     Some(header) => println!("Server header: {}", header),
     ///     None => println!("Server header not found")
@@ -57,7 +56,7 @@ impl Response {
         self.headers.get(key)
     }
 
-        /// Gets the body of the response as a byte vector reference
+    /// Gets the body of the response as a byte vector reference
     ///
     /// # Example
     ///

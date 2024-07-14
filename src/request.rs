@@ -100,7 +100,7 @@ impl Request {
 
     /// Returns the method of the HTTP request
     pub(crate) fn get_method(&self) -> &HttpMethod {
-        &self.request.get_method()
+        self.request.get_method()
     }
 
     /// Returns the path of the HTTP request

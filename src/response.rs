@@ -34,6 +34,15 @@ pub mod content_type;
 
 /// Represents the HTTP response
 ///
+/// In Krustie, reponse objects doesn't need to be returned and created by developer.
+/// Instead they need to be modified using functions.
+///
+/// The basic functions to create a response are: `status`, `headers`, `body` and `body_json`.
+///
+/// - `status` *sets* the status code of the response. It takes [StatusCode] as an argument.
+/// - `headers` *extends* the current headers of the response. It takes a `HashMap<string, string>` as an argument.
+///   - If you want to add just *a single header* there is the `insert_header` function which takes two strings, a key and a value, as an argument.
+/// - `body`
 ///
 pub struct Response {
     debug_mode: bool,
@@ -64,6 +73,8 @@ impl Response {
     ///
     /// # Example
     ///
+    /// Add `Server: Rust` and `Connection: close` headers to the response.
+    ///
     /// ```rust
     /// use krustie::{ Response, StatusCode, Request };
     /// use std::collections::HashMap;
@@ -77,8 +88,6 @@ impl Response {
     ///     response.status(StatusCode::Ok).headers(headers);
     /// }
     /// ```
-    ///
-    /// Code above will add `Server: Rust` and `Connection: close` headers to the response.
     pub fn headers(&mut self, headers: HashMap<String, String>) -> &mut Self {
         self.headers.extend(headers);
         self
@@ -95,7 +104,7 @@ impl Response {
     }
 }
 
-impl Into<Vec<u8>> for Response {
+impl From<Response> for Vec<u8> {
     /// Returns the response as a byte vector.
     ///
     /// # Example
@@ -107,20 +116,18 @@ impl Into<Vec<u8>> for Response {
     ///   let response_bytes: Vec<u8> = response.into();
     /// }
     /// ```
-    fn into(self) -> Vec<u8> {
+    fn from(response: Response) -> Vec<u8> {
         let mut headers_string = String::new();
 
-        if self.headers.len() > 0 {
-            self.headers.iter().for_each(|(key, value)| {
+        if !response.headers.is_empty() {
+            response.headers.iter().for_each(|(key, value)| {
                 headers_string.push_str(&format!("{key}: {value}\r\n"));
             });
         }
 
-        if self.body.len() > 0 {
-            if !headers_string.contains("Content-Length") {
-                eprintln!("Content-Length not found even though body is present");
-                headers_string.push_str(&format!("Content-Length: {}\r\n", self.body.len()));
-            }
+        if !response.body.is_empty() {
+            headers_string.push_str(&format!("Content-Length: {}\r\n", response.body.len()));
+
             if !headers_string.contains("Content-Type") {
                 eprintln!("Content-Type not found even though body is present");
                 headers_string.push_str("Content-Type: text/plain\r\n");
@@ -129,13 +136,13 @@ impl Into<Vec<u8>> for Response {
 
         let mut response_bytes: Vec<u8> = format!(
             "{http_version} {status_code} {status_msg}\r\n{headers_string}\r\n",
-            http_version = self.http_version,
-            status_code = self.status_code.to_string(),
-            status_msg = self.status_code.get_message()
+            http_version = response.http_version,
+            status_code = response.status_code,
+            status_msg = response.status_code.get_message()
         ).into_bytes();
 
-        if self.body.len() > 0 {
-            response_bytes.extend_from_slice(&self.body);
+        if !response.body.is_empty() {
+            response_bytes.extend_from_slice(&response.body);
         }
 
         response_bytes
@@ -150,9 +157,7 @@ impl Default for Response {
     /// ```rust
     /// use krustie::response::Response;
     ///
-    /// fn main() {
-    ///     let response = Response::default();
-    /// }
+    /// let response = Response::default();
     /// ```
     fn default() -> Self {
         Self {
@@ -171,12 +176,11 @@ impl Debug for Response {
             f,
             "{http_version} {status_code} {status_msg}\r\n{headers}\r\n",
             http_version = self.http_version,
-            status_code = self.status_code.to_string(),
+            status_code = self.status_code,
             status_msg = self.status_code.get_message(),
             headers = self.headers
                 .iter()
-                .map(|(key, value)| format!("{key}: {value}\r\n"))
-                .collect::<String>()
+                .fold(String::new(), |acc, (key, value)| format!("{acc}{key}: {value}\r\n"))
         )
     }
 }

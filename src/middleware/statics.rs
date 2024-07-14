@@ -4,36 +4,15 @@
 //!
 //! ## Supported Content Types
 //!
-//! ### Documents
-//!
-//! html, css, js, json, xml
-//!
-//! ### Images
-//!
-//! png, jpg, jpeg, gif, svg, ico
-//!
-//! ### Files
-//!
-//! pdf, zip, gzip
-//!
-//! ### Media
-//!
-//! mp3, wav, mp4, mpeg, webm
-//!
-//! ### Fonts
-//!
-//! woff, woff2, ttf, otf, eot
+//! - **Document:** `html`, `css`, `js`, `json`, `xml`
+//! - **Image:** `png`, `jpg`, `jpeg`, `gif`, `svg`, `ico`
+//! - **File:** `pdf`, `zip`, `gzip`
+//! - **Media:** `mp3`, `wav`, `mp4`, `mpeg`, `webm`
+//! - **Font:** `woff`, `woff2`, `ttf`, `otf`, `eot`
 
-use std::{ fs, path::PathBuf };
+use std::{ collections::HashMap, fs, path::PathBuf };
 
-use crate::{
-    response::content_type::ContentType,
-    server::route_handler::HandlerResult,
-    Middleware,
-    Request,
-    Response,
-    StatusCode,
-};
+use crate::{ server::route_handler::HandlerResult, Request, Response, Middleware, StatusCode };
 
 #[derive(Debug)]
 /// Serve static files from a specified folder.
@@ -41,14 +20,13 @@ use crate::{
 /// # Example
 ///
 /// ```rust
-/// use krustie::{ Server, middleware::ServeStaticFiles };
+/// use krustie::{ Server, middleware::ServeStatic };
 ///
-/// fn main() {
-///   let mut server = Server::create();
-///   let statics = ServeStaticFiles::new("public");
+/// let mut server = Server::create();
+/// let statics = ServeStatic::new("public");
 ///
-///   server.use_handler(statics);
-/// }
+/// server.use_handler(statics);
+/// ```
 pub struct ServeStaticFiles {
     folder_path: String,
 }
@@ -86,7 +64,7 @@ impl ServeStaticFiles {
     }
 }
 
-impl Middleware for ServeStaticFiles {
+impl Middleware for ServeStatic {
     fn middleware(&self, request: &Request, response: &mut Response) -> HandlerResult {
         let file_name = &request.get_path_array()[0];
 
@@ -111,5 +89,11 @@ impl Middleware for ServeStaticFiles {
                 return HandlerResult::Next;
             }
         }
+    }
+}
+
+impl Default for ServeStatic {
+    fn default() -> Self {
+        Self::new("public")
     }
 }

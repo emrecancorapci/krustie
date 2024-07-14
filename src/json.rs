@@ -11,5 +11,5 @@ pub fn get_string_from_json(json_key: Option<&JsonValue>) -> Option<String> {
 }
 
 fn trim_json_string(string: String) -> String {
-    string.replace("\"", "")
+    string.replace('"', "")
 }

@@ -20,14 +20,13 @@ impl RequestLine {
             .map(|str| str.to_string())
             .collect();
         match HttpMethod::try_from(method) {
-            Ok(method) => {
+            Ok(method) =>
                 Ok(Self {
                     method,
                     path: path.to_string(),
                     version: version.to_string(),
                     path_array,
-                })
-            }
+                }),
             Err(_) => {
                 return Err(ParseRequestLineError);
             }
@@ -58,7 +57,11 @@ impl TryFrom<&str> for RequestLine {
             return Err(ParseRequestLineError);
         }
 
-        if !HttpMethod::is_valid(request_line[0]) || !request_line[1].starts_with('/') || !request_line[2].starts_with("HTTP/") {
+        if
+            !HttpMethod::is_valid(request_line[0]) ||
+            !request_line[1].starts_with('/') ||
+            !request_line[2].starts_with("HTTP/")
+        {
             return Err(ParseRequestLineError);
         }
 
@@ -69,7 +72,7 @@ impl TryFrom<&str> for RequestLine {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct ParseRequestLineError;
 
 impl Display for ParseRequestLineError {

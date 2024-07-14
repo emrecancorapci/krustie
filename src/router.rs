@@ -1,14 +1,37 @@
 //! A router for handling requests
 //!
 //! It is used to handle requests and route them to the correct endpoint. Routers support sub-routers and middlewares.
+//!
+//! # Example
+//!
+//! ```rust
+//! use krustie::{ Router, StatusCode };
+//!
+//! let mut main_router = Router::new();
+//! let mut sub_router = Router::new();
+//! let mut sub_sub_router = Router::new();
+//!
+//! sub_sub_router
+//!   .get(|req, res| {
+//!     res.status(StatusCode::Ok);
+//!   })
+//!   .post(|req, res| {
+//!     res.status(StatusCode::Ok);
+//!   });
+//!
+//! sub_router.use_router("suber", sub_sub_router);
+//! main_router.use_router("sub", sub_router);
+//! ```
 
-use std::{ collections::HashMap, fmt::{ self, Debug, Formatter } };
 use crate::{
-    request::{ http_method::HttpMethod, Request },
-    response::{ status_code::StatusCode, Response },
-    server::route_handler::{ RouteHandler, HandlerResult },
+    server::route_handler::{ HandlerResult, RouteHandler },
+    HttpMethod,
+    Request,
+    Response,
     Middleware,
+    StatusCode,
 };
+use std::{ collections::HashMap, fmt::{ Debug, Formatter, Result as fmtResult } };
 
 pub mod methods;
 
@@ -90,9 +113,9 @@ impl Router {
     /// main_router.use_router("sub", sub_router);
     /// ```
     pub fn use_router(&mut self, path: &str, router: Router) {
-        let path = if path.starts_with("/") { &path[1..] } else { path };
+        let sub_path = if let Some(path) = path.strip_prefix('/') { &path[1..] } else { path };
 
-        self.subroutes.entry(path.to_string()).or_insert(router);
+        self.subroutes.entry(sub_path.to_string()).or_insert(router);
     }
 
     /// Adds a middleware to the router that will be executed before the request is handled
@@ -120,12 +143,10 @@ impl Router {
     ///   }
     /// }
     ///
-    /// fn main() {
-    ///   let mut router = Router::new();
-    ///   let krustie_middleware = AddHeader::new("Server", "Krustie");
+    /// let mut router = Router::new();
+    /// let krustie_middleware = AddHeader::new("Server", "Krustie");
     ///
-    ///   router.use_request_middleware(krustie_middleware);
-    /// }
+    /// router.use_request_middleware(krustie_middleware);
     /// ```
     pub fn use_request_middleware<T>(&mut self, middleware: T) where T: Middleware + 'static {
         self.request_middlewares.push(Box::new(middleware));
@@ -156,12 +177,10 @@ impl Router {
     ///   }
     /// }
     ///
-    /// fn main() {
-    ///   let mut router = Router::new();
-    ///   let krustie_middleware = AddHeader::new("Server", "Krustie");
+    /// let mut router = Router::new();
+    /// let krustie_middleware = AddHeader::new("Server", "Krustie");
     ///
-    ///   router.use_response_middleware(krustie_middleware);
-    /// }
+    /// router.use_response_middleware(krustie_middleware);
     /// ```
     pub fn use_response_middleware<T>(&mut self, middleware: T) where T: Middleware + 'static {
         self.response_middlewares.push(Box::new(middleware));
@@ -173,7 +192,6 @@ impl Router {
                 return Ok(router);
             }
         }
-
         return Err("Route not found");
     }
 
@@ -181,9 +199,9 @@ impl Router {
         &self,
         request: &Request,
         response: &mut Response,
-        path: &Vec<String>
+        path: &[String]
     ) -> HandlerResult {
-        if path.len() == 0 || path[0] == "" {
+        if path.is_empty() || path[0].is_empty() {
             match self.endpoints.get(request.get_method()) {
                 Some(endpoint) => {
                     endpoint(request, response);
@@ -196,7 +214,7 @@ impl Router {
         } else {
             match self.get_route(&path[0]) {
                 Ok(router) => {
-                    router.handle(request, response, &path[1..].to_vec());
+                    router.handle(request, response, &path[1..]);
                 }
                 Err(_) => {
                     response.status(StatusCode::NotFound);
@@ -209,18 +227,13 @@ impl Router {
 }
 
 impl Debug for Router {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmtResult {
         write!(f, "Router {{ endpoints: {:?}, subroutes: {:?} }}", self.endpoints, self.subroutes)
     }
 }
 
 impl RouteHandler for Router {
-    fn handle(
-        &self,
-        request: &Request,
-        response: &mut Response,
-        path: &Vec<String>
-    ) -> HandlerResult {
+    fn handle(&self, request: &Request, response: &mut Response, path: &[String]) -> HandlerResult {
         for middleware in &self.request_middlewares {
             match middleware.middleware(request, response) {
                 HandlerResult::End => {
@@ -247,5 +260,27 @@ impl RouteHandler for Router {
         }
 
         return HandlerResult::Next;
+    }
+}
+
+impl Default for Router {
+    /// Creates a new router
+    ///
+    /// # Example
+    ///
+    /// To create a `GET` method for `/`
+    ///
+    /// ```rust
+    /// use krustie::{ Router, StatusCode };
+    ///
+    /// let mut main_router = Router::default();
+    ///
+    /// main_router.get(|req, res| {
+    ///   res.status(StatusCode::Ok);
+    /// });
+    ///
+    /// ```
+    fn default() -> Self {
+        return Self::new();
     }
 }

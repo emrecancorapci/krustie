@@ -4,7 +4,7 @@
 
 use std::fmt::{ Display, Error, Formatter, Result as fResult };
 
-#[derive(Eq, Hash, PartialEq, Clone, Copy, Debug)]
+#[derive(Eq, Hash, PartialEq, Debug)]
 /// An enum that represents an HTTP method
 ///
 /// The HTTP method is used to indicate the desired action to be performed for a given resource.
@@ -15,6 +15,7 @@ use std::fmt::{ Display, Error, Formatter, Result as fResult };
 /// - POST
 /// - PUT
 /// - PATCH
+/// - DELETE
 ///
 pub enum HttpMethod {
     /// GET method is used to request data from a specified resource
@@ -35,10 +36,7 @@ pub enum HttpMethod {
 
 impl HttpMethod {
     pub(crate) fn is_valid(method: &str) -> bool {
-        match method {
-            "GET" | "POST" | "PUT" | "PATCH" | "DELETE" => true,
-            _ => false,
-        }
+        matches!(method, "GET" | "POST" | "PUT" | "PATCH" | "DELETE")
     }
 }
 
@@ -73,11 +71,9 @@ impl TryFrom<&str> for HttpMethod {
     /// ```rust
     /// use krustie::HttpMethod;
     ///
-    /// fn main() {
-    ///   match HttpMethod::try_from("GET") {
-    ///     Ok(method) => assert_eq!(method, HttpMethod::GET),
-    ///     Err(_) => panic!("Failed to parse HTTP method"),
-    ///   }
+    /// match HttpMethod::try_from("GET") {
+    ///   Ok(method) => assert_eq!(method, HttpMethod::GET),
+    ///   Err(_) => panic!("Failed to parse HTTP method"),
     /// }
     /// ```
     fn try_from(method: &str) -> Result<Self, Self::Error> {
@@ -94,6 +90,15 @@ impl TryFrom<&str> for HttpMethod {
 }
 
 /// Error for parsing an HTTP method
+///
+/// ```rust
+/// use krustie::HttpMethod;
+///
+/// match HttpMethod::try_from("SET") {
+///   Ok(_) => panic!("SET method should fail."),
+///   Err(err) => assert_eq!(err.to_string(), "Invalid method for HTTP request"),
+/// }
+/// ```
 #[derive(Debug)]
 pub struct ParseHttpMethodError;
 

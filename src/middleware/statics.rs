@@ -24,13 +24,14 @@
 //!
 //! woff, woff2, ttf, otf, eot
 
-use std::{ collections::HashMap, fs, path::PathBuf };
+use std::{ fs, path::PathBuf };
 
 use crate::{
+    response::content_type::ContentType,
     server::route_handler::HandlerResult,
+    Middleware,
     Request,
     Response,
-    Middleware,
     StatusCode,
 };
 
@@ -50,7 +51,6 @@ use crate::{
 /// }
 pub struct ServeStaticFiles {
     folder_path: String,
-    content_types: HashMap<String, String>,
 }
 
 impl ServeStaticFiles {
@@ -64,57 +64,9 @@ impl ServeStaticFiles {
     /// let statics = ServeStaticFiles::new("public");
     /// ```
     pub fn new(folder_path: &str) -> ServeStaticFiles {
-        let mut content_types = HashMap::new();
-        let extensions = vec![
-            ("html", "text/html"),
-            ("css", "text/css"),
-            ("js", "text/javascript"),
-            ("png", "image/png"),
-            ("jpg", "image/jpg"),
-            ("jpeg", "image/jpeg"),
-            ("gif", "image/gif"),
-            ("svg", "image/svg+xml"),
-            ("ico", "image/x-icon"),
-            ("json", "application/json"),
-            ("pdf", "application/pdf"),
-            ("xml", "application/xml"),
-            ("zip", "application/zip"),
-            ("gzip", "application/gzip"),
-            ("mp3", "audio/mpeg"),
-            ("wav", "audio/wav"),
-            ("mp4", "video/mp4"),
-            ("mpeg", "video/mpeg"),
-            ("webm", "video/webm"),
-            ("woff", "font/woff"),
-            ("woff2", "font/woff2"),
-            ("ttf", "font/ttf"),
-            ("otf", "font/otf"),
-            ("eot", "font/eot")
-        ];
-
-        for (ext, content_type) in extensions {
-            content_types.insert(ext.to_string(), content_type.to_string());
-        }
-
         ServeStaticFiles {
             folder_path: folder_path.to_string(),
-            content_types,
         }
-    }
-
-    /// Adds a new content type to the list of supported content types.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::middleware::ServeStaticFiles;
-    ///
-    /// let mut statics = ServeStaticFiles::new("public");
-    ///
-    /// statics.add_content_type("doc", "application/msword");
-    /// ```
-    pub fn add_content_type(&mut self, extension: &str, content_type: &str) {
-        self.content_types.insert(extension.to_string(), content_type.to_string());
     }
 
     fn get_extension(&self, path: &PathBuf) -> Result<String, String> {
@@ -147,13 +99,7 @@ impl Middleware for ServeStaticFiles {
             }
         };
 
-        let content_type = match self.content_types.get(extension.as_str()) {
-            Some(content_type) => content_type,
-            None => {
-                eprintln!("Content type not found for extension: {}", extension);
-                return HandlerResult::Next;
-            }
-        };
+        let content_type = ContentType::from(extension.as_str());
 
         match fs::read(&path) {
             Ok(content) => {

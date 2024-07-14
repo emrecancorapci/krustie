@@ -30,6 +30,7 @@ use self::status_code::StatusCode;
 pub mod status_code;
 pub mod body;
 pub mod utilities;
+pub mod content_type;
 
 /// Represents the HTTP response
 ///

@@ -56,6 +56,7 @@ impl Request {
     /// fn get(request: &Request, response: &mut Response) {
     ///   let content_type = request.get_header("content-type");
     /// }
+    /// ```
     pub fn get_header(&self, key: &str) -> Option<&String> {
         self.headers.get(key)
     }
@@ -82,7 +83,7 @@ impl Request {
     ///     }
     ///   }
     /// }
-    ///
+    /// ```
     pub fn get_body(&self) -> &RequestBody {
         &self.body
     }
@@ -90,6 +91,16 @@ impl Request {
     /// Adds a local variable to the http request
     ///
     /// `Local` variables can be used to store data that can be defined in a *middleware* and accessed in the *controller*
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{ Request, Response };
+    ///
+    /// fn get(request: &Request, response: &mut Response) {
+    ///   request.add_local("user_id", "123");
+    /// }
+    /// ```
     pub fn add_local(&mut self, key: &str, value: &str) {
         self.locals.insert(key.to_string(), value.to_string());
     }
@@ -97,10 +108,33 @@ impl Request {
     /// Returns the value of the local variable
     ///
     /// `Local` variables can be used to store data that can be defined in a *middleware* and accessed in the *controller*
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{ Request, Response };
+    ///
+    /// fn get(request: &Request, response: &mut Response) {
+    ///    let user_id = request.get_local("user_id");
+    /// }
+    /// ```
     pub fn get_local(&self, key: &str) -> Option<&String> {
         self.locals.get(key)
     }
 
+    /// Returns the peer address of the HTTP request
+    ///
+    /// The peer address is the address of the client that made the request
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{ Request, Response };
+    ///
+    /// fn get(request: &Request, response: &mut Response) {
+    ///   let peer_addr: &SocketAddr = request.get_peer_addr();
+    /// }
+    /// ```
     pub fn get_peer_addr(&self) -> &SocketAddr {
         &self.peer_addr
     }

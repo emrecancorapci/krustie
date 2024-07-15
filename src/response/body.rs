@@ -42,6 +42,7 @@ impl Response {
     /// fn get(request: &Request, response: &mut Response) {
     ///    response.body_json(json!({"message": "Hello, World!"}));
     /// }
+    /// ```
     pub fn body_json(&mut self, data: JsonValue) -> &mut Self {
         let json = serde_json::to_string(&data).unwrap();
         self.body(json.as_bytes().to_vec(), ContentType::Json);

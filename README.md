@@ -9,10 +9,8 @@ Krustie is a backend framework written in Rust. It is currently a work in progre
 
 ## Features
 
-- Basic request and response handling
 - Stackable Router
-- General Middleware support
-- Router Middleware support
+- Middleware support
 - JSON parsing ([serde_json](https://crates.io/crates/serde_json))
 
 ### Builtin Middlewares
@@ -20,56 +18,23 @@ Krustie is a backend framework written in Rust. It is currently a work in progre
 - Static file serving
 - Gzip encoding ([flate2](https://crates.io/crates/flate2))
 
-## Getting Started
-
-### Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- [Rust](https://www.rust-lang.org/)
-- [Cargo](https://doc.rust-lang.org/cargo/)
-
-### Installation
-
-#### Add Krustie to your project
-
-Include it in your `Cargo.toml`:
-
-```toml
-[dependencies]
-krustie = "0.1.6"
-```
-
-Run the following Cargo command in your project directory:
-
-```bash
-cargo add krustie
-```
-
-#### Start your server
+## Start your server
 
 ```rust
-use krustie::{ Server, Router, StatusCodes };
+use krustie::{ response::ContentType, Router, Server, StatusCode };
 
 fn main() {
     let mut server = Server::create();
     let mut router = Router::new();
 
     router.get(|_, res| {
-        res.status(StatusCode::Ok)
-            .body(b"Hello World!".to_vec(), "text/plain");
+        res.status(StatusCode::Ok).body(b"Hello World!".to_vec(), ContentType::Text);
     });
 
     server.use_handler(router);
 
     server.listen((127, 0, 0, 1), 8080);
 }
-```
-
-#### Run your server
-
-```bash
-cargo run
 ```
 
 ## Contributing

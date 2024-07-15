@@ -1,5 +1,5 @@
 //! Response utilities
-//! 
+//!
 //! This module contains utility functions for the response object.
 
 use std::collections::HashMap;
@@ -37,6 +37,7 @@ impl Response {
     ///     println!("{}: {}", key, value);
     ///   }
     /// }
+    /// ```
     pub fn get_headers(&self) -> &HashMap<String, String> {
         &self.headers
     }
@@ -56,6 +57,7 @@ impl Response {
     ///     None => println!("Server header not found")
     ///   }
     /// }
+    /// ```
     pub fn get_header(&self, key: &str) -> Option<&String> {
         self.headers.get(key)
     }
@@ -70,6 +72,7 @@ impl Response {
     /// fn get(request: &Request, response: &mut Response) {
     ///   let body = response.get_body();
     /// }
+    /// ```
     pub fn get_body(&mut self) -> &Vec<u8> {
         &mut self.body
     }
@@ -84,6 +87,7 @@ impl Response {
     /// fn get(request: &Request, response: &mut Response) {
     ///   let body = response.get_body();
     /// }
+    /// ```
     pub fn get_body_mut(&mut self) -> &mut Vec<u8> {
         &mut self.body
     }
@@ -106,6 +110,7 @@ impl Response {
     ///
     ///   response.update_body(b"Goodbye, Mars!".to_vec());
     /// }
+    /// ```
     pub fn update_body(&mut self, body: Vec<u8>) -> Result<(), String> {
         if self.body.len() == 0 {
             return Err("Request has no body.".to_string());

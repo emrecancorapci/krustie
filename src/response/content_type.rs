@@ -26,7 +26,7 @@ pub enum ContentType {
     /// Represents the `application/zip` content type
     Zip,
     // Image
-    /// Represents the `image/png` content type 
+    /// Represents the `image/png` content type
     Png,
     /// Represents the `image/jpeg` content type
     Jpeg,

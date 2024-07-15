@@ -6,7 +6,11 @@
 //! used to store data that can be defined in a *middleware* and accessed from the other
 //! *middlewares* or *controllers*.
 
-use std::{ collections::HashMap, fmt::{ Debug, Display, Formatter, Result as fResult } };
+use std::{
+    collections::HashMap,
+    fmt::{ Debug, Display, Formatter, Result as fResult },
+    net::{ IpAddr, Ipv4Addr, SocketAddr },
+};
 use self::{ http_method::HttpMethod, request_line::RequestLine };
 
 pub use body::RequestBody;
@@ -22,6 +26,7 @@ pub struct Request {
     headers: HashMap<String, String>,
     body: RequestBody,
     locals: HashMap<String, String>,
+    peer_addr: SocketAddr,
 }
 
 impl Request {
@@ -96,6 +101,10 @@ impl Request {
         self.locals.get(key)
     }
 
+    pub fn get_peer_addr(&self) -> &SocketAddr {
+        &self.peer_addr
+    }
+
     /// Returns the method of the HTTP request
     pub(crate) fn get_method(&self) -> &HttpMethod {
         self.request.get_method()
@@ -116,6 +125,7 @@ impl Default for Request {
             headers: HashMap::new(),
             body: RequestBody::None,
             locals: HashMap::new(),
+            peer_addr: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0),
         }
     }
 }
@@ -132,7 +142,14 @@ impl Debug for Request {
             RequestBody::None => "None".to_string(),
         };
 
-        write!(f, "Request Line: {}\r\n Headers: {}\r\n Body: {}", self.request, headers, body)
+        write!(
+            f,
+            "From: {}\r\n Request Line: {}\r\n Headers: {}\r\n Body: {}",
+            self.peer_addr,
+            self.request,
+            headers,
+            body
+        )
     }
 }
 

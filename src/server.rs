@@ -84,11 +84,7 @@
 //! }
 //! ```
 
-use std::{
-    fmt::{ Debug, Formatter },
-    io::Write,
-    net::{ IpAddr, Ipv4Addr, SocketAddr, TcpListener, TcpStream },
-};
+use std::{ fmt::{ Debug, Formatter }, io::Write, net::{ TcpListener, TcpStream } };
 
 use crate::{ Request, Response, StatusCode };
 
@@ -118,7 +114,6 @@ pub mod route_handler;
 pub struct Server {
     route_handlers: Vec<Box<dyn RouteHandler>>,
     address: String,
-    peer_address: SocketAddr,
 }
 
 impl Server {
@@ -138,7 +133,6 @@ impl Server {
         Self {
             route_handlers: Vec::new(),
             address: String::from(""),
-            peer_address: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080),
         }
     }
 
@@ -162,15 +156,6 @@ impl Server {
             let mut stream = stream_result.unwrap_or_else(|err| {
                 panic!("Error while listening: {}", err);
             });
-
-            match stream.peer_addr() {
-                Ok(addr) => {
-                    self.peer_address = addr;
-                }
-                Err(_) => {
-                    unimplemented!();
-                }
-            }
 
             self.handle_stream(&mut stream);
         }

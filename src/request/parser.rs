@@ -11,6 +11,8 @@ const MAX_HEADER: usize = 100;
 impl Request {
     /// Parses a TcpStream into Request
     pub(crate) fn parse(mut stream: &TcpStream) -> Result<Self, Error> {
+        let peer_addr = stream.peer_addr()?;
+
         let mut buf_reader = BufReader::new(&mut stream);
         let mut http_request = Vec::new();
 
@@ -38,28 +40,28 @@ impl Request {
             .filter_map(Request::header_parser())
             .collect();
 
-        let content_length = Self::parse_length(&http_request);
+        let content_length = Self::parse_length(&http_request).unwrap_or(0);
 
-        if content_length.is_none() || content_length.unwrap() == 0 {
+        if content_length == 0 {
             return Ok(Request {
                 request: RequestLine::try_from(http_request[0].as_str()).unwrap(),
                 headers,
+                peer_addr,
                 body: RequestBody::None,
                 locals: HashMap::new(),
             });
         }
 
-        let content_length = content_length.unwrap();
-
         let mut body = Vec::with_capacity(content_length);
 
         buf_reader.take(content_length as u64).read_to_end(&mut body)?;
 
-        let body = Self::parse_body(body, &headers)?;
+        let body: RequestBody = Self::parse_body(body, &headers)?;
 
         Ok(Request {
             request: request_line.unwrap(),
             headers,
+            peer_addr,
             body,
             locals: HashMap::new(),
         })

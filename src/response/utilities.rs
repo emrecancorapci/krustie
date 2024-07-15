@@ -1,3 +1,7 @@
+//! Response utilities
+//! 
+//! This module contains utility functions for the response object.
+
 use std::collections::HashMap;
 
 use crate::Response;

@@ -83,11 +83,16 @@ impl Middleware for ServeStatic {
             }
         };
 
-        let content_type = ContentType::from(extension.as_str());
+        let content_type = ContentType::try_from(extension.as_str());
+
+        if content_type.is_err() {
+            response.status(StatusCode::UnsupportedMediaType);
+            return HandlerResult::End;
+        }
 
         match fs::read(&path) {
             Ok(content) => {
-                response.status(StatusCode::Ok).body(content, content_type);
+                response.status(StatusCode::Ok).body(content, content_type.unwrap());
                 return HandlerResult::End;
             }
             Err(_) => {

@@ -25,7 +25,6 @@ pub struct Request {
     request: RequestLine,
     headers: HashMap<String, String>,
     body: RequestBody,
-    locals: HashMap<String, String>,
     peer_addr: SocketAddr,
 }
 
@@ -88,40 +87,6 @@ impl Request {
         &self.body
     }
 
-    /// Adds a local variable to the http request
-    ///
-    /// `Local` variables can be used to store data that can be defined in a *middleware* and accessed in the *controller*
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::{ Request, Response };
-    ///
-    /// fn get(request: &Request, response: &mut Response) {
-    ///   request.add_local("user_id", "123");
-    /// }
-    /// ```
-    pub fn add_local(&mut self, key: &str, value: &str) {
-        self.locals.insert(key.to_string(), value.to_string());
-    }
-
-    /// Returns the value of the local variable
-    ///
-    /// `Local` variables can be used to store data that can be defined in a *middleware* and accessed in the *controller*
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::{ Request, Response };
-    ///
-    /// fn get(request: &Request, response: &mut Response) {
-    ///    let user_id = request.get_local("user_id");
-    /// }
-    /// ```
-    pub fn get_local(&self, key: &str) -> Option<&String> {
-        self.locals.get(key)
-    }
-
     /// Returns the peer address of the HTTP request
     ///
     /// The peer address is the address of the client that made the request
@@ -130,6 +95,7 @@ impl Request {
     ///
     /// ```rust
     /// use krustie::{ Request, Response };
+    /// use std::net::SocketAddr;
     ///
     /// fn get(request: &Request, response: &mut Response) {
     ///   let peer_addr: &SocketAddr = request.get_peer_addr();
@@ -158,7 +124,6 @@ impl Default for Request {
             ),
             headers: HashMap::new(),
             body: RequestBody::None,
-            locals: HashMap::new(),
             peer_addr: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0),
         }
     }

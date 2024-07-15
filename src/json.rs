@@ -10,12 +10,14 @@ pub use serde_json::to_string as struct_to_string;
 /// # Example
 ///
 /// ```rust
+/// use krustie::{ Request, Response, StatusCode, request::RequestBody, json::{ get_string_from_json, json } };
+///
 /// fn post_req(req: &Request, res: &mut Response) {
 ///   match req.get_body() {
 ///     RequestBody::Json(body) => {
 ///       let server_key_option = body.get("server");
 ///
-///       match get_string_from_json(server_key_option).unwrap() {
+///       match get_string_from_json(server_key_option).unwrap().as_str() {
 ///         "Krustie" => {
 ///           res.status(StatusCode::Ok).body_json(body.clone());
 ///         },

@@ -50,6 +50,7 @@ pub struct Response {
     http_version: String,
     status_code: StatusCode,
     headers: HashMap<String, String>,
+    locals: HashMap<String, String>,
     body: Vec<u8>,
 }
 
@@ -167,6 +168,7 @@ impl Default for Response {
             status_code: StatusCode::NotFound,
             headers: HashMap::new(),
             body: Vec::new(),
+            locals: HashMap::new(),
         }
     }
 }

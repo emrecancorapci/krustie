@@ -48,7 +48,6 @@ impl Request {
                 headers,
                 peer_addr,
                 body: RequestBody::None,
-                locals: HashMap::new(),
             });
         }
 
@@ -63,7 +62,6 @@ impl Request {
             headers,
             peer_addr,
             body,
-            locals: HashMap::new(),
         })
     }
 

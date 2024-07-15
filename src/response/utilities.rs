@@ -110,7 +110,6 @@ impl Response {
         if self.body.len() == 0 {
             return Err("Request has no body.".to_string());
         }
-        self.headers.insert(String::from("Content-Length"), body.len().to_string());
         self.body = body;
         return Ok(());
     }

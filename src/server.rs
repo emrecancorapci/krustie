@@ -77,7 +77,7 @@
 //! }
 //!
 //! impl Middleware for AddHeader {
-//!   fn middleware(&self, _: &Request, res: &mut Response) -> HandlerResult {
+//!   fn middleware(&mut self, _: &Request, res: &mut Response) -> HandlerResult {
 //!     res.insert_header(&self.key, &self.value);
 //!     HandlerResult::Next
 //!   }
@@ -85,12 +85,10 @@
 //! ```
 
 use std::{ fmt::{ Debug, Formatter }, io::Write, net::{ TcpListener, TcpStream } };
-
 use crate::{ Request, Response, StatusCode };
 
-use route_handler::{ HandlerResult, RouteHandler };
-
 pub mod route_handler;
+use route_handler::{ HandlerResult, RouteHandler };
 
 /// A server for handling requests
 ///
@@ -184,12 +182,12 @@ impl Server {
         self.route_handlers.push(Box::new(handler));
     }
 
-    fn handle_stream(&self, stream: &mut TcpStream) {
+    fn handle_stream(&mut self, stream: &mut TcpStream) {
         let mut response = Response::default();
 
         match Request::parse(stream) {
             Ok(request) => {
-                for handler in &self.route_handlers {
+                for handler in &mut self.route_handlers {
                     let result = handler.handle(&request, &mut response, request.get_path_array());
                     if result == HandlerResult::End {
                         break;

@@ -34,7 +34,7 @@ pub use self::{ gzip::GzipEncoder, statics::ServeStatic };
 /// }
 ///
 /// impl Middleware for AddKrustieHeader {
-///   fn middleware(&self, req: &Request, res: &mut Response) -> HandlerResult {
+///   fn middleware(&mut self, req: &Request, res: &mut Response) -> HandlerResult {
 ///     AddKrustieHeader::add_header(res);
 ///     HandlerResult::Next
 ///   }
@@ -58,7 +58,7 @@ pub use self::{ gzip::GzipEncoder, statics::ServeStatic };
 /// }
 ///
 /// impl Middleware for AddHeader {
-///   fn middleware(&self, _: &Request, res: &mut Response) -> HandlerResult {
+///   fn middleware(&mut self, _: &Request, res: &mut Response) -> HandlerResult {
 ///     res.insert_header(&self.server, &self.value);
 ///     HandlerResult::Next
 ///   }
@@ -71,11 +71,11 @@ pub trait Middleware {
     /// For the middleware to be executed and continue the execution, it should return `HandlerResult::Next`.
     ///
     /// If the middleware should stop the execution (e.g. return 404), it should return `HandlerResult::Stop`.
-    fn middleware(&self, request: &Request, response: &mut Response) -> HandlerResult;
+    fn middleware(&mut self, request: &Request, response: &mut Response) -> HandlerResult;
 }
 
 impl<T> RouteHandler for T where T: Middleware {
-    fn handle(&self, request: &Request, response: &mut Response, _: &[String]) -> HandlerResult {
+    fn handle(&mut self, request: &Request, response: &mut Response, _: &[String]) -> HandlerResult {
         T::middleware(self, request, response)
     }
 }

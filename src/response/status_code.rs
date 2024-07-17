@@ -31,6 +31,8 @@ pub enum StatusCode {
     UnsupportedMediaType = 415,
     /// 418 I'm A Teapot
     IAmATeapot = 418,
+    /// 249 Too Many Requests
+    TooManyRequests = 429,
     /// 500 Internal Server Error
     InternalServerError = 500,
     /// 501 Not Implemented
@@ -59,6 +61,7 @@ impl StatusCode {
             Self::LengthRequired => "Length Required",
             Self::UnsupportedMediaType => "Unsupported Media Type",
             Self::IAmATeapot => "I'm A Teapot",
+            Self::TooManyRequests => "Too Many Requests",
             Self::InternalServerError => "Internal Server Error",
             Self::NotImplemented => "Not Implemented",
             Self::ServiceUnavailable => "Service Unavailable",
@@ -111,6 +114,7 @@ impl TryFrom<&u16> for StatusCode {
             411 => Ok(Self::LengthRequired),
             415 => Ok(Self::UnsupportedMediaType),
             418 => Ok(Self::IAmATeapot),
+            429 => Ok(Self::TooManyRequests),
             500 => Ok(Self::InternalServerError),
             501 => Ok(Self::NotImplemented),
             503 => Ok(Self::ServiceUnavailable),

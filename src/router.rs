@@ -137,7 +137,7 @@ impl Router {
     /// }
     ///
     /// impl Middleware for AddHeader {
-    ///   fn middleware(&self, _: &Request, res: &mut Response) -> HandlerResult {
+    ///   fn middleware(&mut self, _: &Request, res: &mut Response) -> HandlerResult {
     ///     res.insert_header(&self.key, &self.value);
     ///     HandlerResult::Next
     ///   }
@@ -171,7 +171,7 @@ impl Router {
     /// }
     ///
     /// impl Middleware for AddHeader {
-    ///   fn middleware(&self, _: &Request, res: &mut Response) -> HandlerResult {
+    ///   fn middleware(&mut self, _: &Request, res: &mut Response) -> HandlerResult {
     ///     res.insert_header(&self.key, &self.value);
     ///     HandlerResult::Next
     ///   }
@@ -186,17 +186,8 @@ impl Router {
         self.response_middlewares.push(Box::new(middleware));
     }
 
-    fn get_route(&self, path: &str) -> Result<&Router, &str> {
-        for (key, router) in &self.subroutes {
-            if key == path {
-                return Ok(router);
-            }
-        }
-        return Err("Route not found");
-    }
-
     fn handle_router(
-        &self,
+        &mut self,
         request: &Request,
         response: &mut Response,
         path: &[String]
@@ -212,11 +203,11 @@ impl Router {
                 }
             }
         } else {
-            match self.get_route(&path[0]) {
-                Ok(router) => {
+            match self.subroutes.get_mut(&path[0]) {
+                Some(router) => {
                     router.handle(request, response, &path[1..]);
                 }
-                Err(_) => {
+                None => {
                     response.status(StatusCode::NotFound);
                     return HandlerResult::End;
                 }
@@ -233,8 +224,13 @@ impl Debug for Router {
 }
 
 impl RouteHandler for Router {
-    fn handle(&self, request: &Request, response: &mut Response, path: &[String]) -> HandlerResult {
-        for middleware in &self.request_middlewares {
+    fn handle(
+        &mut self,
+        request: &Request,
+        response: &mut Response,
+        path: &[String]
+    ) -> HandlerResult {
+        for middleware in &mut self.request_middlewares {
             match middleware.middleware(request, response) {
                 HandlerResult::End => {
                     return HandlerResult::End;
@@ -250,7 +246,7 @@ impl RouteHandler for Router {
             HandlerResult::Next => (),
         }
 
-        for middleware in &self.response_middlewares {
+        for middleware in &mut self.response_middlewares {
             match middleware.middleware(request, response) {
                 HandlerResult::End => {
                     return HandlerResult::End;

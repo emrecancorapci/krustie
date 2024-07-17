@@ -10,8 +10,9 @@ use crate::{ server::route_handler::{ HandlerResult, RouteHandler }, Request, Re
 
 pub mod gzip;
 pub mod statics;
+pub mod rate_limiter;
 
-pub use self::{ gzip::GzipEncoder, statics::ServeStatic };
+pub use self::{ gzip::GzipEncoder, statics::ServeStatic, rate_limiter::RateLimiter };
 
 /// Middleware trait to be implemented for creating middleware.
 ///

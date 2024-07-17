@@ -40,7 +40,7 @@ impl GzipEncoder {
 }
 
 impl Middleware for GzipEncoder {
-    fn middleware(&self, request: &Request, response: &mut Response) -> HandlerResult {
+    fn middleware(&mut self, request: &Request, response: &mut Response) -> HandlerResult {
         let body = response.get_body_mut();
 
         if body.is_empty() {

@@ -71,7 +71,7 @@ impl ServeStatic {
 }
 
 impl Middleware for ServeStatic {
-    fn middleware(&self, request: &Request, response: &mut Response) -> HandlerResult {
+    fn middleware(&mut self, request: &Request, response: &mut Response) -> HandlerResult {
         let file_name = &request.get_path_array()[0];
 
         let path = PathBuf::from(&self.folder_path).join(file_name);

@@ -105,14 +105,20 @@ impl Request {
         &self.peer_addr
     }
 
+    // TODO: Add doctest
+    /// Returns the path of the HTTP request as a Vector
+    pub fn get_path_array(&self) -> &Vec<String> {
+        self.request.get_path_array()
+    }
+
+    /// Returns the path of the HTTP request as a String
+    pub fn get_path(&self) -> &String {
+        self.request.get_path()
+    }
+
     /// Returns the method of the HTTP request
     pub(crate) fn get_method(&self) -> &HttpMethod {
         self.request.get_method()
-    }
-
-    /// Returns the path of the HTTP request
-    pub(crate) fn get_path_array(&self) -> &Vec<String> {
-        self.request.get_path_array()
     }
 }
 

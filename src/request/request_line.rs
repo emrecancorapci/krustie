@@ -40,6 +40,14 @@ impl RequestLine {
     pub(super) fn get_path_array(&self) -> &Vec<String> {
         &self.path_array
     }
+
+    pub(super) fn get_version(&self) -> &String {
+        &self.version
+    }
+
+    pub(super) fn get_path(&self) -> &String {
+        &self.path
+    }
 }
 
 impl Display for RequestLine {

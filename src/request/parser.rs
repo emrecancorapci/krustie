@@ -33,6 +33,12 @@ impl Request {
             );
         }
 
+        let request_line = request_line.unwrap();
+
+        if request_line.get_version() != "HTTP/1.1" {
+            return Err(Error::new(ErrorKind::InvalidInput, "Invalid HTTP version".to_string()));
+        }
+
         let headers: HashMap<String, String> = http_request
             .iter()
             .skip(1)
@@ -58,7 +64,7 @@ impl Request {
         let body: RequestBody = Self::parse_body(body, &headers)?;
 
         Ok(Request {
-            request: request_line.unwrap(),
+            request: request_line,
             headers,
             peer_addr,
             body,

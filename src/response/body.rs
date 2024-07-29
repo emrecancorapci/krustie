@@ -32,6 +32,21 @@ impl Response {
         self
     }
 
+    /// Sets the body of the response to a Text value.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use krustie::{ Response, StatusCode, Request };
+    ///
+    /// fn get(request: &Request, response: &mut Response) {
+    ///    response.body_text("Hello, World!");
+    /// }
+    /// ```
+    pub fn body_text(&mut self, text: &str) -> &mut Self {
+        self.body(text.as_bytes().to_vec(), ContentType::Text);
+        self
+    }
+
     /// Sets the body of the response to a JSON value.
     ///
     /// # Example

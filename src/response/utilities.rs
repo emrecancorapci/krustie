@@ -1,28 +1,12 @@
-//! Response utilities
+//! # Response utilities
 //!
 //! This module contains utility functions for the response object.
 
 use std::collections::HashMap;
 
-use crate::Response;
+use crate::{Response, StatusCode};
 
 impl Response {
-    /// Adds a single header to the response
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::{ Response, StatusCode, Request };
-    ///
-    /// fn get(request: &Request, response: &mut Response) {
-    ///   response.insert_header("Server", "Krustie");
-    /// }
-    /// ```
-    pub fn insert_header(&mut self, key: &str, value: &str) -> &mut Self {
-        self.headers.insert(key.to_string(), value.to_string());
-        self
-    }
-
     /// Gets the headers of the response
     ///
     /// # Example
@@ -60,6 +44,22 @@ impl Response {
     /// ```
     pub fn get_header(&self, key: &str) -> Option<&String> {
         self.headers.get(key)
+    }
+
+    /// Adds a single header to the response
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{ Response, StatusCode, Request };
+    ///
+    /// fn get(request: &Request, response: &mut Response) {
+    ///   response.insert_header("Server", "Krustie");
+    /// }
+    /// ```
+    pub fn insert_header(&mut self, key: &str, value: &str) -> &mut Self {
+        self.headers.insert(key.to_string(), value.to_string());
+        self
     }
 
     /// Gets the body of the response as a byte vector reference
@@ -112,11 +112,28 @@ impl Response {
     /// }
     /// ```
     pub fn update_body(&mut self, body: Vec<u8>) -> Result<(), String> {
-        if self.body.len() == 0 {
+        if self.body.is_empty() {
             return Err("Request has no body.".to_string());
         }
         self.body = body;
         return Ok(());
+    }
+
+    /// Returns the value of the local variable
+    ///
+    /// `Local` variables can be used to store data that can be defined in a *middleware* and accessed in the *controller*
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{ Request, Response };
+    ///
+    /// fn get(request: &Request, response: &mut Response) {
+    ///    let user_id = response.get_local("user_id");
+    /// }
+    /// ```
+    pub fn get_local(&self, key: &str) -> Option<&String> {
+        self.locals.get(key)
     }
 
     /// Adds a local variable to the http request
@@ -136,20 +153,25 @@ impl Response {
         self.locals.insert(key.to_string(), value.to_string());
     }
 
-    /// Returns the value of the local variable
-    ///
-    /// `Local` variables can be used to store data that can be defined in a *middleware* and accessed in the *controller*
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::{ Request, Response };
-    ///
-    /// fn get(request: &Request, response: &mut Response) {
-    ///    let user_id = response.get_local("user_id");
-    /// }
-    /// ```
-    pub fn get_local(&self, key: &str) -> Option<&String> {
-        self.locals.get(key)
+    /// Returns true if status code is 4xx or 5xx.
+    pub fn is_err(&self) -> bool {
+        match self.status_code {
+            StatusCode::BadRequest => true,
+            StatusCode::Unauthorized => true,
+            StatusCode::Forbidden => true,
+            StatusCode::NotFound => true,
+            StatusCode::MethodNotAllowed => true,
+            StatusCode::RequestTimeout => true,
+            StatusCode::LengthRequired => true,
+            StatusCode::UnsupportedMediaType => true,
+            StatusCode::IAmATeapot => true,
+            StatusCode::TooManyRequests => true,
+            StatusCode::InternalServerError => true,
+            StatusCode::NotImplemented => true,
+            StatusCode::ServiceUnavailable => true,
+            StatusCode::GatewayTimeout => true,
+            StatusCode::HttpVersionNotSupported => true,
+            _ => false
+        }
     }
 }

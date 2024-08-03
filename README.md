@@ -16,6 +16,7 @@ Krustie is a backend framework written in Rust. It is currently a work in progre
 ### Builtin Middlewares
 
 - Static file serving
+- Rate limiter
 - Gzip encoding ([flate2](https://crates.io/crates/flate2))
 
 ## Start your server
@@ -28,7 +29,7 @@ fn main() {
     let mut router = Router::new();
 
     router.get(|_, res| {
-        res.status(StatusCode::Ok).body(b"Hello World!".to_vec(), ContentType::Text);
+        res.status(StatusCode::Ok).body_text("Hello World!");
     });
 
     server.use_handler(router);

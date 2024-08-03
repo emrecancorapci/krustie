@@ -1,12 +1,11 @@
 //! A middleware for rate limiting requests based on IP address
 
-
-use std::{ collections::HashMap, net::IpAddr, time::{Duration, Instant} };
+use std::{ collections::HashMap, net::IpAddr, time::{ Duration, Instant } };
 
 use crate::{ server::route_handler::HandlerResult, Middleware, StatusCode };
 
 /// A rate limiter middleware
-/// 
+///
 /// Limits the number of requests from an IP address based on the token number and token refill time.
 #[derive(Debug)]
 pub struct RateLimiter {
@@ -17,16 +16,16 @@ pub struct RateLimiter {
 
 impl RateLimiter {
     /// Creates a new instance of RateLimiter
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{ Server, middleware::RateLimiter };
-    /// 
+    ///
     /// let mut server = Server::create();
-    /// 
+    ///
     /// let rate_limiter = RateLimiter::new(10, 1000);
-    /// 
+    ///
     /// server.use_handler(rate_limiter);
     /// ```
     pub fn new(token_number: u16, token_refill_ms: u64) -> Self {

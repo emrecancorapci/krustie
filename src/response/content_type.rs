@@ -1,5 +1,7 @@
 //! This module contains the content type enum for response content type
 
+use std::fmt::{ Debug, Display };
+
 /// Content type enum for response content type
 #[derive(Debug)]
 pub enum ContentType {
@@ -73,40 +75,40 @@ pub enum ContentType {
     Other(String),
 }
 
-impl ToString for ContentType {
-    fn to_string(&self) -> String {
+impl Display for ContentType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ContentType::Text => String::from("text/plain"),
-            ContentType::Html => String::from("text/html"),
-            ContentType::Css => String::from("text/css"),
-            ContentType::Csv => String::from("text/csv"),
-            ContentType::Javascript => String::from("text/javascript"),
-            ContentType::Json => String::from("application/json"),
-            ContentType::Xml => String::from("application/xml"),
-            ContentType::Pdf => String::from("application/pdf"),
-            ContentType::Gzip => String::from("application/gzip"),
-            ContentType::Zip => String::from("application/zip"),
-            ContentType::Png => String::from("image/png"),
-            ContentType::Jpeg => String::from("image/jpeg"),
-            ContentType::Icon => String::from("image/x-icon"),
-            ContentType::Gif => String::from("image/gif"),
-            ContentType::Bmp => String::from("image/bmp"),
-            ContentType::Webp => String::from("image/webp"),
-            ContentType::Tiff => String::from("image/tiff"),
-            ContentType::Mp3 => String::from("audio/mp3"),
-            ContentType::Wav => String::from("audio/wav"),
-            ContentType::Ogg => String::from("audio/ogg"),
-            ContentType::Midi => String::from("audio/midi"),
-            ContentType::AudioWebm => String::from("audio/webm"),
-            ContentType::Mp4 => String::from("video/mp4"),
-            ContentType::Mpeg => String::from("video/mpeg"),
-            ContentType::Webm => String::from("video/webm"),
-            ContentType::OggVideo => String::from("video/ogg"),
-            ContentType::Woff => String::from("font/woff"),
-            ContentType::Woff2 => String::from("font/woff2"),
-            ContentType::Ttf => String::from("font/ttf"),
-            ContentType::Otf => String::from("font/otf"),
-            ContentType::Other(content_type) => content_type.clone(),
+            ContentType::Text => write!(f, "text/plain"),
+            ContentType::Html => write!(f, "text/html"),
+            ContentType::Css => write!(f, "text/css"),
+            ContentType::Csv => write!(f, "text/csv"),
+            ContentType::Javascript => write!(f, "text/javascript"),
+            ContentType::Json => write!(f, "application/json"),
+            ContentType::Xml => write!(f, "application/xml"),
+            ContentType::Pdf => write!(f, "application/pdf"),
+            ContentType::Gzip => write!(f, "application/gzip"),
+            ContentType::Zip => write!(f, "application/zip"),
+            ContentType::Png => write!(f, "image/png"),
+            ContentType::Jpeg => write!(f, "image/jpeg"),
+            ContentType::Icon => write!(f, "image/x-icon"),
+            ContentType::Gif => write!(f, "image/gif"),
+            ContentType::Bmp => write!(f, "image/bmp"),
+            ContentType::Webp => write!(f, "image/webp"),
+            ContentType::Tiff => write!(f, "image/tiff"),
+            ContentType::Mp3 => write!(f, "audio/mp3"),
+            ContentType::Wav => write!(f, "audio/wav"),
+            ContentType::Ogg => write!(f, "audio/ogg"),
+            ContentType::Midi => write!(f, "audio/midi"),
+            ContentType::AudioWebm => write!(f, "audio/webm"),
+            ContentType::Mp4 => write!(f, "video/mp4"),
+            ContentType::Mpeg => write!(f, "video/mpeg"),
+            ContentType::Webm => write!(f, "video/webm"),
+            ContentType::OggVideo => write!(f, "video/ogg"),
+            ContentType::Woff => write!(f, "font/woff"),
+            ContentType::Woff2 => write!(f, "font/woff2"),
+            ContentType::Ttf => write!(f, "font/ttf"),
+            ContentType::Otf => write!(f, "font/otf"),
+            ContentType::Other(content_type) => write!(f, "{}", content_type),
         }
     }
 }

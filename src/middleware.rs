@@ -76,7 +76,12 @@ pub trait Middleware {
 }
 
 impl<T> RouteHandler for T where T: Middleware {
-    fn handle(&mut self, request: &Request, response: &mut Response, _: &[String]) -> HandlerResult {
+    fn handle(
+        &mut self,
+        request: &Request,
+        response: &mut Response,
+        _: &[String]
+    ) -> HandlerResult {
         T::middleware(self, request, response)
     }
 }

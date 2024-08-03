@@ -33,7 +33,7 @@ impl Response {
     }
 
     /// Sets the body of the response to a Text value.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use krustie::{ Response, StatusCode, Request };

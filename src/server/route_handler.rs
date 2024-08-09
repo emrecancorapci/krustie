@@ -6,7 +6,7 @@
 //!
 //! The `HandlerResult` enum is used to define the result of the handler.
 
-use crate::{ Request, Response };
+use crate::{Request, Response};
 
 /// Route handler trait
 ///
@@ -17,7 +17,7 @@ pub trait RouteHandler {
         &mut self,
         request: &Request,
         response: &mut Response,
-        path: &[String]
+        path: &[String],
     ) -> HandlerResult;
 }
 

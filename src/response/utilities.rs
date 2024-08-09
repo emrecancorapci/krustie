@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use crate::{ Response, StatusCode };
+use crate::{Response, StatusCode};
 
 impl Response {
     /// Gets the headers of the response

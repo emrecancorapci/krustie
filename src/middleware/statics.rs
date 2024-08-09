@@ -10,15 +10,11 @@
 //! - **Media:** `mp3`, `wav`, `mp4`, `mpeg`, `webm`
 //! - **Font:** `woff`, `woff2`, `ttf`, `otf`, `eot`
 
-use std::{ fs, path::PathBuf };
+use std::{fs, path::PathBuf};
 
 use crate::{
-    response::content_type::ContentType,
-    server::route_handler::HandlerResult,
-    Middleware,
-    Request,
-    Response,
-    StatusCode,
+    response::content_type::ContentType, server::route_handler::HandlerResult, Middleware, Request,
+    Response, StatusCode,
 };
 
 #[derive(Debug)]
@@ -56,13 +52,12 @@ impl ServeStatic {
 
     fn get_extension(&self, path: &PathBuf) -> Result<String, String> {
         match path.extension() {
-            Some(ext) =>
-                match ext.to_str() {
-                    Some(val) => Ok(val.to_string()),
-                    None => {
-                        return Err(format!("Failed to convert extension to string: {:?}", ext));
-                    }
+            Some(ext) => match ext.to_str() {
+                Some(val) => Ok(val.to_string()),
+                None => {
+                    return Err(format!("Failed to convert extension to string: {:?}", ext));
                 }
+            },
             None => {
                 return Err(format!("No extension found for file: {:?}", path));
             }
@@ -92,7 +87,9 @@ impl Middleware for ServeStatic {
 
         match fs::read(&path) {
             Ok(content) => {
-                response.status(StatusCode::Ok).body(content, content_type.unwrap());
+                response
+                    .status(StatusCode::Ok)
+                    .body(content, content_type.unwrap());
                 return HandlerResult::End;
             }
             Err(_) => {

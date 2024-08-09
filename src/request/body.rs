@@ -6,7 +6,7 @@
 //!
 //! - Json returns a `JsonValue` (it's json_verde::Value)
 
-use std::io::{ Error, ErrorKind };
+use std::io::{Error, ErrorKind};
 
 use crate::json::JsonValue;
 
@@ -26,16 +26,16 @@ pub enum RequestBody {
 impl RequestBody {
     pub(crate) fn parse(body: Vec<u8>, content_type: &str) -> Result<RequestBody, Error> {
         let body = match content_type {
-            "application/json" => {
-                match serde_json::from_slice(&body[..]) {
-                    Ok(json) => RequestBody::Json(json),
-                    Err(_) => RequestBody::None,
-                }
-            }
-            "plain/text" => { RequestBody::Text(body.to_vec()) }
+            "application/json" => match serde_json::from_slice(&body[..]) {
+                Ok(json) => RequestBody::Json(json),
+                Err(_) => RequestBody::None,
+            },
+            "plain/text" => RequestBody::Text(body.to_vec()),
             _ => {
-                let error =
-                    format!("Error while parsing body. Content-type not supported: {}", content_type);
+                let error = format!(
+                    "Error while parsing body. Content-type not supported: {}",
+                    content_type
+                );
                 return Err(Error::new(ErrorKind::InvalidInput, error));
             }
         };

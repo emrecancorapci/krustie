@@ -2,7 +2,7 @@
 //!
 //! This module contains the `HttpMethod` enum and `ParseHttpMethodError` error.
 
-use std::fmt::{ Display, Error, Formatter, Result as fResult };
+use std::fmt::{Display, Error, Formatter, Result as fResult};
 
 #[derive(Eq, Hash, PartialEq, Debug)]
 /// An enum that represents an HTTP method

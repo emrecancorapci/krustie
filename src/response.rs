@@ -23,15 +23,18 @@
 //!
 //! But there are other functions such as `insert_header` and `update_body` can be useful especially when creating a middleware.
 //!
-use std::{ collections::HashMap, fmt::{ Debug, Formatter, Result } };
 use self::status_code::StatusCode;
+use std::{
+    collections::HashMap,
+    fmt::{Debug, Formatter, Result},
+};
 
 pub use self::content_type::ContentType;
 
-pub mod status_code;
 pub mod body;
-pub mod utilities;
 pub mod content_type;
+pub mod status_code;
+pub mod utilities;
 
 /// Represents the HTTP response
 ///
@@ -141,7 +144,8 @@ impl From<Response> for Vec<u8> {
             http_version = response.http_version,
             status_code = response.status_code,
             status_msg = response.status_code.get_message()
-        ).into_bytes();
+        )
+        .into_bytes();
 
         if !response.body.is_empty() {
             response_bytes.extend_from_slice(&response.body);
@@ -181,9 +185,12 @@ impl Debug for Response {
             http_version = self.http_version,
             status_code = self.status_code,
             status_msg = self.status_code.get_message(),
-            headers = self.headers
+            headers = self
+                .headers
                 .iter()
-                .fold(String::new(), |acc, (key, value)| format!("{acc}{key}: {value}\r\n"))
+                .fold(String::new(), |acc, (key, value)| format!(
+                    "{acc}{key}: {value}\r\n"
+                ))
         )
     }
 }

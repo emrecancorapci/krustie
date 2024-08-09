@@ -1,9 +1,9 @@
 //! This module provides utilities for working with JSON data.
 
 pub use serde_json::json;
-pub use serde_json::Value as JsonValue;
-pub use serde_json::Result as JsonResult;
 pub use serde_json::to_string as struct_to_string;
+pub use serde_json::Result as JsonResult;
+pub use serde_json::Value as JsonValue;
 
 /// Converts a `JsonValue` (`serde_json::Value`) to a string
 ///

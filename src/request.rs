@@ -24,6 +24,7 @@ mod request_line;
 pub struct Request {
     request: RequestLine,
     headers: HashMap<String, String>,
+    queries: HashMap<String, String>,
     body: RequestBody,
     peer_addr: SocketAddr,
 }
@@ -128,6 +129,7 @@ impl Default for Request {
             request: RequestLine::new("GET", "/", "HTTP/1.1").expect(
                 "Failed to create default RequestLine"
             ),
+            queries: HashMap::new(),
             headers: HashMap::new(),
             body: RequestBody::None,
             peer_addr: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0),

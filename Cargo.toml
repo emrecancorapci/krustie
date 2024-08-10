@@ -13,3 +13,20 @@ edition = "2021"
 [dependencies]
 flate2 = "1.0.30"
 serde_json = "1.0.120"
+
+[profile.dev]
+opt-level = 0
+debug = true
+panic = "abort"
+
+[profile.test]
+opt-level = 0
+debug = true
+
+[profile.release]
+opt-level = 3
+debug = false
+panic = "unwind"
+lto = true
+codegen-units = 1
+strip = true

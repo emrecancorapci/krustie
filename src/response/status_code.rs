@@ -1,6 +1,6 @@
 //! Contains the `StatusCode` enum and its implementations.
 
-use std::fmt::{ self, Display, Formatter };
+use std::fmt::{self, Display, Formatter};
 
 /// Represents the status code of an HTTP response
 #[derive(Eq, Hash, PartialEq, Debug, Clone, Copy)]

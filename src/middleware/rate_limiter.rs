@@ -1,8 +1,12 @@
 //! A middleware for rate limiting requests based on IP address
 
-use std::{ collections::HashMap, net::IpAddr, time::{ Duration, Instant } };
+use std::{
+    collections::HashMap,
+    net::IpAddr,
+    time::{Duration, Instant},
+};
 
-use crate::{ server::route_handler::HandlerResult, Middleware, StatusCode };
+use crate::{server::route_handler::HandlerResult, Middleware, StatusCode};
 
 /// A rate limiter middleware
 ///
@@ -39,7 +43,10 @@ impl RateLimiter {
     fn check(&mut self, ip: IpAddr) -> bool {
         let now: Instant = Instant::now();
 
-        let entry = self.requests.entry(ip).or_insert_with(|| (now, self.token_number));
+        let entry = self
+            .requests
+            .entry(ip)
+            .or_insert_with(|| (now, self.token_number));
 
         if now.duration_since(entry.0) >= self.token_refill_duration {
             // Duration passed, token refreshed
@@ -61,7 +68,7 @@ impl Middleware for RateLimiter {
     fn middleware(
         &mut self,
         request: &crate::Request,
-        response: &mut crate::Response
+        response: &mut crate::Response,
     ) -> HandlerResult {
         match Self::check(self, request.get_peer_addr().ip()) {
             true => HandlerResult::Next,

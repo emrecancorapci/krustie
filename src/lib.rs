@@ -19,17 +19,17 @@
 //! Biggest flaws it has right now is that it is *not async* and it is *not optimized* for
 //! performance. So it is **not recommended** to use it in production.
 
-pub mod server;
-pub mod router;
+pub mod json;
+pub mod middleware;
 pub mod request;
 pub mod response;
-pub mod middleware;
-pub mod json;
+pub mod router;
+pub mod server;
 
-pub use server::Server;
-pub use router::Router;
-pub use request::Request;
-pub use response::Response;
 pub use middleware::Middleware;
 pub use request::http_method::HttpMethod;
+pub use request::Request;
 pub use response::status_code::StatusCode;
+pub use response::Response;
+pub use router::Router;
+pub use server::Server;

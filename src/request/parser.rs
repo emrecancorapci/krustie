@@ -1,10 +1,10 @@
 use std::{
     collections::HashMap,
-    io::{ BufRead, BufReader, Error, ErrorKind, Read },
+    io::{BufRead, BufReader, Error, ErrorKind, Read},
     net::TcpStream,
 };
 
-use super::{ request_line::RequestLine, Request, ParseHttpRequestError, RequestBody };
+use super::{request_line::RequestLine, ParseHttpRequestError, Request, RequestBody};
 
 const MAX_HEADER: usize = 100;
 
@@ -28,15 +28,19 @@ impl Request {
         let request_line = RequestLine::try_from(http_request[0].as_str());
 
         if request_line.is_err() {
-            return Err(
-                Error::new(ErrorKind::InvalidInput, "Error while parsing request line".to_string())
-            );
+            return Err(Error::new(
+                ErrorKind::InvalidInput,
+                "Error while parsing request line".to_string(),
+            ));
         }
 
         let request_line = request_line.unwrap();
 
         if request_line.get_version() != "HTTP/1.1" {
-            return Err(Error::new(ErrorKind::InvalidInput, "Invalid HTTP version".to_string()));
+            return Err(Error::new(
+                ErrorKind::InvalidInput,
+                "Invalid HTTP version".to_string(),
+            ));
         }
 
         let headers: HashMap<String, String> = http_request
@@ -59,7 +63,9 @@ impl Request {
 
         let mut body = Vec::with_capacity(content_length);
 
-        buf_reader.take(content_length as u64).read_to_end(&mut body)?;
+        buf_reader
+            .take(content_length as u64)
+            .read_to_end(&mut body)?;
 
         let body: RequestBody = Self::parse_body(body, &headers)?;
 
@@ -112,7 +118,10 @@ impl Request {
                 return RequestBody::parse(body, content_type);
             }
             None => {
-                return Err(Error::new(ErrorKind::NotFound, ParseHttpRequestError.to_string()));
+                return Err(Error::new(
+                    ErrorKind::NotFound,
+                    ParseHttpRequestError.to_string(),
+                ));
             }
         }
     }

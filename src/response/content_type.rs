@@ -1,6 +1,6 @@
 //! This module contains the content type enum for response content type
 
-use std::fmt::{ Debug, Display };
+use std::fmt::{Debug, Display};
 
 /// Content type enum for response content type
 #[derive(Debug)]

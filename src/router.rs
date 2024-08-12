@@ -24,14 +24,13 @@
 //! ```
 
 use crate::{
-    server::route_handler::{ HandlerResult, RouteHandler },
-    HttpMethod,
-    Request,
-    Response,
-    Middleware,
-    StatusCode,
+    server::route_handler::{HandlerResult, RouteHandler},
+    HttpMethod, Middleware, Request, Response, StatusCode,
 };
-use std::{ collections::HashMap, fmt::{ Debug, Formatter, Result as fmtResult } };
+use std::{
+    collections::HashMap,
+    fmt::{Debug, Formatter, Result as fmtResult},
+};
 
 pub mod methods;
 
@@ -113,7 +112,11 @@ impl Router {
     /// main_router.use_router("sub", sub_router);
     /// ```
     pub fn use_router(&mut self, path: &str, router: Router) {
-        let sub_path = if let Some(path) = path.strip_prefix('/') { &path[1..] } else { path };
+        let sub_path = if let Some(path) = path.strip_prefix('/') {
+            &path[1..]
+        } else {
+            path
+        };
 
         self.subroutes.entry(sub_path.to_string()).or_insert(router);
     }
@@ -148,7 +151,10 @@ impl Router {
     ///
     /// router.use_request_middleware(krustie_middleware);
     /// ```
-    pub fn use_request_middleware<T>(&mut self, middleware: T) where T: Middleware + 'static {
+    pub fn use_request_middleware<T>(&mut self, middleware: T)
+    where
+        T: Middleware + 'static,
+    {
         self.request_middlewares.push(Box::new(middleware));
     }
 
@@ -182,7 +188,10 @@ impl Router {
     ///
     /// router.use_response_middleware(krustie_middleware);
     /// ```
-    pub fn use_response_middleware<T>(&mut self, middleware: T) where T: Middleware + 'static {
+    pub fn use_response_middleware<T>(&mut self, middleware: T)
+    where
+        T: Middleware + 'static,
+    {
         self.response_middlewares.push(Box::new(middleware));
     }
 
@@ -190,7 +199,7 @@ impl Router {
         &mut self,
         request: &Request,
         response: &mut Response,
-        path: &[String]
+        path: &[String],
     ) -> HandlerResult {
         if path.is_empty() || path[0].is_empty() {
             match self.endpoints.get(request.get_method()) {
@@ -219,7 +228,11 @@ impl Router {
 
 impl Debug for Router {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmtResult {
-        write!(f, "Router {{ endpoints: {:?}, subroutes: {:?} }}", self.endpoints, self.subroutes)
+        write!(
+            f,
+            "Router {{ endpoints: {:?}, subroutes: {:?} }}",
+            self.endpoints, self.subroutes
+        )
     }
 }
 
@@ -228,7 +241,7 @@ impl RouteHandler for Router {
         &mut self,
         request: &Request,
         response: &mut Response,
-        path: &[String]
+        path: &[String],
     ) -> HandlerResult {
         for middleware in &mut self.request_middlewares {
             match middleware.middleware(request, response) {

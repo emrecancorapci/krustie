@@ -6,13 +6,16 @@
 //!
 //! It takes itself as `&self`, a `Request` and a `Response` as arguments and returns a `HandlerResult`.
 
-use crate::{ server::route_handler::{ HandlerResult, RouteHandler }, Request, Response };
+use crate::{
+    server::route_handler::{HandlerResult, RouteHandler},
+    Request, Response,
+};
 
 pub mod gzip;
-pub mod statics;
 pub mod rate_limiter;
+pub mod statics;
 
-pub use self::{ gzip::GzipEncoder, statics::ServeStatic, rate_limiter::RateLimiter };
+pub use self::{gzip::GzipEncoder, rate_limiter::RateLimiter, statics::ServeStatic};
 
 /// Middleware trait to be implemented for creating middleware.
 ///
@@ -75,12 +78,15 @@ pub trait Middleware {
     fn middleware(&mut self, request: &Request, response: &mut Response) -> HandlerResult;
 }
 
-impl<T> RouteHandler for T where T: Middleware {
+impl<T> RouteHandler for T
+where
+    T: Middleware,
+{
     fn handle(
         &mut self,
         request: &Request,
         response: &mut Response,
-        _: &[String]
+        _: &[String],
     ) -> HandlerResult {
         T::middleware(self, request, response)
     }

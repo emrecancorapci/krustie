@@ -84,11 +84,15 @@
 //! }
 //! ```
 
-use std::{ fmt::{ Debug, Formatter }, io::Write, net::{ TcpListener, TcpStream } };
-use crate::{ Request, Response, StatusCode };
+use crate::{Request, Response, StatusCode};
+use std::{
+    fmt::{Debug, Formatter},
+    io::Write,
+    net::{TcpListener, TcpStream},
+};
 
 pub mod route_handler;
-use route_handler::{ HandlerResult, RouteHandler };
+use route_handler::{HandlerResult, RouteHandler};
 
 /// A server for handling requests
 ///
@@ -195,7 +199,9 @@ impl Server {
                 }
             }
             Err(err) => {
-                response.status(StatusCode::BadRequest).debug_msg(&err.to_string());
+                response
+                    .status(StatusCode::BadRequest)
+                    .debug_msg(&err.to_string());
             }
         }
         let response_stream: Vec<u8> = response.into();

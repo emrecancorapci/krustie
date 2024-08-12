@@ -6,12 +6,12 @@
 //! used to store data that can be defined in a *middleware* and accessed from the other
 //! *middlewares* or *controllers*.
 
+use self::{http_method::HttpMethod, request_line::RequestLine};
 use std::{
     collections::HashMap,
-    fmt::{ Debug, Display, Formatter, Result as fResult },
-    net::{ IpAddr, Ipv4Addr, SocketAddr },
+    fmt::{Debug, Display, Formatter, Result as fResult},
+    net::{IpAddr, Ipv4Addr, SocketAddr},
 };
-use self::{ http_method::HttpMethod, request_line::RequestLine };
 
 pub use body::RequestBody;
 
@@ -125,9 +125,8 @@ impl Request {
 impl Default for Request {
     fn default() -> Self {
         Self {
-            request: RequestLine::new("GET", "/", "HTTP/1.1").expect(
-                "Failed to create default RequestLine"
-            ),
+            request: RequestLine::new("GET", "/", "HTTP/1.1")
+                .expect("Failed to create default RequestLine"),
             headers: HashMap::new(),
             body: RequestBody::None,
             peer_addr: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0),
@@ -137,7 +136,8 @@ impl Default for Request {
 
 impl Debug for Request {
     fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
-        let headers = self.headers
+        let headers = self
+            .headers
             .iter()
             .fold(String::new(), |acc, (k, v)| format!("{acc}{k}: {v}\r\n"));
 
@@ -150,10 +150,7 @@ impl Debug for Request {
         write!(
             f,
             "From: {}\r\n Request Line: {}\r\n Headers: {}\r\n Body: {}",
-            self.peer_addr,
-            self.request,
-            headers,
-            body
+            self.peer_addr, self.request, headers, body
         )
     }
 }

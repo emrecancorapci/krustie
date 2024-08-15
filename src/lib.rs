@@ -25,6 +25,7 @@ pub mod request;
 pub mod response;
 pub mod middleware;
 pub mod json;
+pub mod new_router;
 
 pub use server::Server;
 pub use router::Router;

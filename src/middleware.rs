@@ -6,6 +6,8 @@
 //!
 //! It takes itself as `&self`, a `Request` and a `Response` as arguments and returns a `HandlerResult`.
 
+use std::fmt::Debug;
+
 use crate::{ server::route_handler::{ HandlerResult, RouteHandler }, Request, Response };
 
 pub mod gzip;
@@ -66,7 +68,7 @@ pub use self::{ gzip::GzipEncoder, statics::ServeStatic, rate_limiter::RateLimit
 /// }
 /// ```
 ///
-pub trait Middleware {
+pub trait Middleware: Debug {
     /// Middleware function to be implemented for the middleware.
     ///
     /// For the middleware to be executed and continue the execution, it should return `HandlerResult::Next`.

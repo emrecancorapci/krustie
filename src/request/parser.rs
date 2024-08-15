@@ -54,7 +54,7 @@ impl Request {
                 return Err(Error::new(ErrorKind::InvalidInput, "Invalid query usage".to_string()));
             }
 
-            maybe_queries[0].split('&').map(|kvp| {
+            maybe_queries[0].split('&').for_each(|kvp| {
                 if let Some((k, v)) = kvp.split_once('=') {
                     queries.insert(k.to_string(), v.to_string());
                 }

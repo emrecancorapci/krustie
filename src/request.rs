@@ -107,6 +107,12 @@ impl Request {
     }
 
     // TODO: Add doctest
+    /// Returns the queries
+    pub fn get_queries(&self) -> &HashMap<String, String> {
+        &self.queries
+    }
+
+    // TODO: Add doctest
     /// Returns the path of the HTTP request as a Vector
     pub fn get_path_array(&self) -> &Vec<String> {
         self.request.get_path_array()

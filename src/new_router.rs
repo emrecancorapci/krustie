@@ -50,6 +50,17 @@ impl Router {
         }
     }
 
+    pub(crate) fn route_handler<'a>(
+        &'a self,
+        path_array: Vec<String>,
+        method: HttpMethod
+    ) -> (&'a Endpoint, HashMap<String, String>) {
+        let params: HashMap<String, String> = HashMap::new();
+        let iter: std::slice::Iter<'_, String> = path_array.iter();
+
+        return Self::handle_routes(self, method, params, iter);
+    }
+
     fn add_router<'a>(
         router: &'a mut Router,
         new_router: Router,
@@ -133,6 +144,38 @@ impl Router {
                 }
             }
             None => { panic!("Error: Route already exist.") }
+        }
+    }
+
+    fn handle_routes<'a, 'b>(
+        router: &'a Router,
+        method: HttpMethod,
+        mut params: HashMap<String, String>,
+        mut iter: std::slice::Iter<'_, String>
+    ) -> (&'a Endpoint, HashMap<String, String>) {
+        if iter.next().is_none() {
+            for endpoint in &router.endpoints {
+                if endpoint.method == method {
+                    return (endpoint, params.clone());
+                }
+            }
+        }
+
+        let route = iter.next().unwrap();
+
+        match router.subdirs.get(route) {
+            Some(founded_router) => {
+                Self::handle_routes(founded_router.as_ref(), method, params, iter)
+            }
+            None => {
+                match router.param_dir.as_ref() {
+                    Some((param_name, founded_router)) => {
+                        params.insert(param_name.clone(), route.clone());
+                        Self::handle_routes(founded_router, method, params, iter)
+                    }
+                    None => { panic!("Route not found.") }
+                }
+            }
         }
     }
 

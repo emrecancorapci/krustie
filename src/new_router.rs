@@ -25,6 +25,8 @@ impl Router {
     }
 
     pub fn use_router(&mut self, path: &str, router: Router) {
+        let path = path.trim();
+
         if path == "/" || path.is_empty() {
             panic!("Route already exist.");
         }
@@ -36,10 +38,16 @@ impl Router {
     }
 
     pub fn use_endpoint(&mut self, path: &str, endpoint: Endpoint) {
-        let path_types = Self::get_path_types(path);
-        let mut types_iter = path_types.into_iter().peekable();
+        let path = path.trim();
 
-        Self::add_endpoint(self, endpoint, &mut types_iter)
+        if path == "/" || path.is_empty() {
+            self.endpoints.push(endpoint);
+        } else {
+            let path_types = Self::get_path_types(path);
+            let mut types_iter = path_types.into_iter().peekable();
+
+            Self::add_endpoint(self, endpoint, &mut types_iter)
+        }
     }
 
     fn add_router<'a>(

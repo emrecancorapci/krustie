@@ -8,7 +8,7 @@ type Controller = fn(&Request, &mut Response);
 
 #[derive(Debug)]
 pub struct Router {
-    endpoints: HashMap<PathType, Endpoint>,
+    endpoints: Vec<Endpoint>,
     middlewares: Vec<Box<dyn Middleware>>,
     subdirs: HashMap<String, Box<Router>>,
     param_dir: Option<(String, Box<Router>)>,
@@ -17,20 +17,119 @@ pub struct Router {
 impl Router {
     pub fn new() -> Self {
         Self {
-            endpoints: HashMap::new(),
+            endpoints: Vec::new(),
             middlewares: Vec::new(),
             subdirs: HashMap::new(),
             param_dir: None,
         }
     }
 
-    pub fn add_router(&mut self, path: &str, router: Router) {
+    pub fn use_router(&mut self, path: &str, router: Router) {
         if path == "/" || path.is_empty() {
-            panic!("Can't add router to empty path.");
+            panic!("Route already exist.");
         }
 
-        let path_types = path
-            .split('/')
+        let path_types = Self::get_path_types(path);
+        let mut types_iter = path_types.into_iter().peekable();
+
+        Self::add_router(self, router, &mut types_iter);
+    }
+
+    pub fn use_endpoint(&mut self, path: &str, endpoint: Endpoint) {
+        let path_types = Self::get_path_types(path);
+        let mut types_iter = path_types.into_iter().peekable();
+
+        Self::add_endpoint(self, endpoint, &mut types_iter)
+    }
+
+    fn add_router<'a>(
+        router: &'a mut Router,
+        new_router: Router,
+        iter: &mut std::iter::Peekable<std::vec::IntoIter<PathType>>
+    ) {
+        if iter.next().is_none() {
+            panic!("Route already exist.");
+        }
+
+        match iter.next().unwrap() {
+            PathType::Subdirectory(path) => {
+                if let Some(found_router) = router.subdirs.get_mut(&path) {
+                    // Router Found
+                    Self::add_router(found_router, new_router, iter);
+                } else if iter.peek().is_some() {
+                    // No Router & Iteration Continues
+                    let mut inserted_router = Box::new(Router::new());
+                    Self::add_router(inserted_router.as_mut(), new_router, iter);
+                    router.subdirs.insert(path, inserted_router);
+                } else {
+                    // No Router & Iteration Ends
+                    router.subdirs.insert(path, Box::new(new_router));
+                }
+            }
+            PathType::Parameter(param) => {
+                if let Some(found_router) = &mut router.param_dir {
+                    // Router Found
+                    Self::add_router(found_router.1.as_mut(), new_router, iter);
+                } else if iter.peek().is_some() {
+                    // No Router & Iteration Continues
+                    let mut inserted_router = Box::new(Router::new());
+                    Self::add_router(inserted_router.as_mut(), new_router, iter);
+                    router.param_dir = Some((param, Box::new(Router::new())));
+                } else {
+                    // No Router & Iteration Ends
+                    router.param_dir = Some((param, Box::new(new_router)));
+                }
+            }
+        }
+    }
+
+    fn add_endpoint<'a>(
+        router: &'a mut Router,
+        endpoint: Endpoint,
+        iter: &mut std::iter::Peekable<std::vec::IntoIter<PathType>>
+    ) {
+        match iter.next() {
+            Some(PathType::Subdirectory(path)) => {
+                if let Some(found_router) = router.subdirs.get_mut(&path) {
+                    // Router Found
+                    if iter.peek().is_some() {
+                        Self::add_endpoint(found_router, endpoint, iter);
+                    } else {
+                        router.endpoints.push(endpoint);
+                    }
+                } else if iter.peek().is_some() {
+                    // No Router & Iteration Continues
+                    router.subdirs.insert(path, Box::new(Router::new()));
+                    Self::add_endpoint(router, endpoint, iter);
+                } else {
+                    // No Router & Iteration Ends
+                    router.endpoints.push(endpoint);
+                }
+            }
+            Some(PathType::Parameter(param)) => {
+                if let Some(found_router) = &mut router.param_dir {
+                    // Router Found
+                    if iter.peek().is_some() {
+                        Self::add_endpoint(found_router.1.as_mut(), endpoint, iter);
+                    } else {
+                        router.endpoints.push(endpoint);
+                    }
+                } else if iter.peek().is_some() {
+                    // No Router & Iteration Continues
+                    let mut inserted_router = Box::new(Router::new());
+                    Self::add_endpoint(inserted_router.as_mut(), endpoint, iter);
+                    router.param_dir = Some((param, inserted_router));
+                } else {
+                    // No Router & Iteration Ends
+                    router.endpoints.push(endpoint);
+                }
+            }
+            None => { panic!("Error: Route already exist.") }
+        }
+    }
+
+    fn get_path_types(path: &str) -> Vec<PathType> {
+        path.split('/')
             .into_iter()
             .map(|path| {
                 match PathType::try_from(path) {
@@ -38,72 +137,8 @@ impl Router {
                     Err(err) => panic!("Error while adding router: {}", err),
                 }
             })
-            .collect::<Vec<PathType>>();
-
-        let mut types_iter = path_types.into_iter().peekable();
-
-        create_router(self, router, &mut types_iter);
+            .collect::<Vec<PathType>>()
     }
-
-    pub fn add_endpoint(&mut self, path: &str, method: HttpMethod, controller: Controller) {
-        let path_type = PathType::try_from(path).unwrap_or_else(|err| panic!("{}", err));
-        self.endpoints.insert(path_type, Endpoint::new(method, controller, Vec::new()));
-    }
-
-    pub fn add_endpoint_with_middleware(
-        &mut self,
-        path: &str,
-        method: HttpMethod,
-        controller: Controller,
-        middlewares: Vec<Box<dyn Middleware>>
-    ) {
-        let path_type = PathType::try_from(path).unwrap_or_else(|err| panic!("{}", err));
-        self.endpoints.insert(path_type, Endpoint::new(method, controller, middlewares));
-    }
-
-    fn built_route(&self, path: &str) {
-        let mut current_router = self;
-        let parameters: HashMap<String, String> = HashMap::new();
-
-        let split_path = path.split('/');
-        let mut peekable = split_path.peekable();
-
-        while let Some(current) = peekable.next() {
-            // api - users - 23?take=username
-            // There is next one -> Look subdirectories
-            // Find api subdirectory add middlewares
-            // There is next one -> Look subdirectories
-            // Find users subdirectory add middlewares
-            // There is next one -> Look subdirectories -> NOT FOUND
-            // Is there parameter endpoint - YES
-            // Take controller
-            // Is there '?' in last path -> YES
-            // Take queries and send
-
-            if peekable.peek() != None {
-                let subdir = current_router.subdirs.get(current);
-
-                if subdir.is_some() {
-                    current_router = subdir.unwrap();
-                    continue;
-                }
-
-                if current_router.param_dir.is_some() {
-                    current_router = current_router.param_dir.as_ref().unwrap().1.as_ref();
-                } else {
-                    todo!();
-                }
-            } else {
-                let endpoints_iter = self.endpoints.values().enumerate().into_iter();
-            }
-        }
-    }
-}
-
-struct BuiltRoute {
-    controller: Controller,
-    parameters: HashMap<String, String>,
-    queries: HashMap<String, String>,
 }
 
 #[derive(Debug)]

@@ -107,14 +107,22 @@ struct BuiltRoute {
 }
 
 #[derive(Debug)]
-struct Endpoint {
+pub struct Endpoint {
     method: HttpMethod,
     controller: Controller,
     middlewares: Vec<Box<dyn Middleware>>,
 }
 
 impl Endpoint {
-    fn new(
+    pub fn new(method: HttpMethod, controller: Controller) -> Self {
+        Self {
+            method,
+            controller,
+            middlewares: Vec::new(),
+        }
+    }
+
+    pub fn new_with_middleware(
         method: HttpMethod,
         controller: Controller,
         middlewares: Vec<Box<dyn Middleware>>
@@ -156,46 +164,5 @@ pub struct ParsePathTypeError(String);
 impl Display for ParsePathTypeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Invalid path value for router: {}", self.0)
-    }
-}
-
-fn create_router<'a>(
-    router: &'a mut Router,
-    new_router: Router,
-    iter: &mut std::iter::Peekable<std::vec::IntoIter<PathType>>
-) {
-    match iter.next() {
-        Some(PathType::Subdirectory(path)) => {
-            match router.subdirs.get_mut(&path) {
-                Some(found_router) => {
-                    create_router(found_router, new_router, iter);
-                }
-                None => {
-                    if iter.peek().is_none() {
-                        router.subdirs.insert(path, Box::new(new_router));
-                    } else {
-                        router.subdirs.insert(path, Box::new(Router::new()));
-                        create_router(router, new_router, iter);
-                    }
-                }
-            }
-        }
-        Some(PathType::Parameter(param)) => {
-            match &mut router.param_dir {
-                Some(found_router) => {
-                    create_router(found_router.1.as_mut(), new_router, iter);
-                }
-                None => {
-                    if iter.peek().is_none() {
-                        router.param_dir = Some((param, Box::new(new_router)));
-                    } else {
-                        router.param_dir = Some((param, Box::new(Router::new())));
-
-                        create_router(router, new_router, iter);
-                    }
-                }
-            }
-        }
-        None => { panic!("Error: Route already exist.") }
     }
 }

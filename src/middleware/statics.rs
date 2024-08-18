@@ -21,7 +21,6 @@ use crate::{
     StatusCode,
 };
 
-#[derive(Debug)]
 /// Serve static files from a specified folder.
 ///
 /// # Example
@@ -34,6 +33,7 @@ use crate::{
 ///
 /// server.use_handler(statics);
 /// ```
+#[derive(Debug)]
 pub struct ServeStatic {
     folder_path: String,
 }

@@ -28,6 +28,7 @@ pub use self::{ gzip::GzipEncoder, statics::ServeStatic, rate_limiter::RateLimit
 /// ```rust
 /// use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult };
 ///
+/// #[derive(Debug)]
 /// struct AddKrustieHeader;
 ///
 /// impl AddKrustieHeader {
@@ -49,6 +50,7 @@ pub use self::{ gzip::GzipEncoder, statics::ServeStatic, rate_limiter::RateLimit
 /// ```rust
 /// use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult };
 ///
+/// #[derive(Debug)]
 /// struct AddHeader {
 ///     server: String,
 ///     value: String,

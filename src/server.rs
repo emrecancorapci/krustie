@@ -65,6 +65,7 @@
 //!   }
 //! }
 //!
+//! #[derive(Debug)]
 //! struct AddHeader {
 //!   key: String,
 //!   value: String,

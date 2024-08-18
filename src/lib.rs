@@ -20,12 +20,12 @@
 //! performance. So it is **not recommended** to use it in production.
 
 pub mod server;
-pub mod router;
+// pub mod old_router;
 pub mod request;
 pub mod response;
 pub mod middleware;
 pub mod json;
-pub mod new_router;
+pub mod router;
 
 pub use server::Server;
 pub use router::Router;

@@ -206,6 +206,44 @@ impl Router {
     }
 }
 
+impl RouteHandler for Router {
+    fn handle(
+        &mut self,
+        request: &Request,
+        response: &mut Response,
+        path: &[String]
+    ) -> HandlerResult {
+        while let Some(middleware) = self.middlewares.iter_mut().next() {
+            match middleware.middleware(request, response) {
+                HandlerResult::End => {
+                    return HandlerResult::End;
+                }
+                HandlerResult::Next => (),
+            }
+        }
+
+        match self.route_handler(request.get_path_array(), request.get_method()) {
+            Some((endpoint, params)) => {
+                // while let Some(middleware) = endpoint.middlewares.iter_mut().next() {
+                //     match middleware.middleware(request, response) {
+                //         HandlerResult::End => {
+                //             return HandlerResult::End;
+                //         }
+                //         HandlerResult::Next => (),
+                //     }
+                // }
+
+                (endpoint.controller)(request, response);
+                return HandlerResult::Next;
+            }
+            None => {
+                response.status(StatusCode::NotFound);
+                return HandlerResult::Next;
+            }
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct Endpoint {
     method: HttpMethod,

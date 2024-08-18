@@ -2,9 +2,19 @@ use std::{ collections::HashMap, fmt::Display };
 
 use regex::Regex;
 
-use crate::{ HttpMethod, Middleware, Request, Response };
+use crate::{
+    server::route_handler::{ HandlerResult, RouteHandler },
+    HttpMethod,
+    Middleware,
+    Request,
+    Response,
+    StatusCode,
+};
 
 type Controller = fn(&Request, &mut Response);
+type RouterResult<'a> = Option<(&'a Endpoint, HashMap<String, String>)>;
+
+// TODO: Look at Radix Tree
 
 #[derive(Debug)]
 pub struct Router {
@@ -52,9 +62,9 @@ impl Router {
 
     pub(crate) fn route_handler<'a>(
         &'a self,
-        path_array: Vec<String>,
-        method: HttpMethod
-    ) -> (&'a Endpoint, HashMap<String, String>) {
+        path_array: &Vec<String>,
+        method: &HttpMethod
+    ) -> RouterResult<'a> {
         let params: HashMap<String, String> = HashMap::new();
         let iter: std::slice::Iter<'_, String> = path_array.iter();
 
@@ -149,16 +159,18 @@ impl Router {
 
     fn handle_routes<'a, 'b>(
         router: &'a Router,
-        method: HttpMethod,
+        method: &HttpMethod,
         mut params: HashMap<String, String>,
         mut iter: std::slice::Iter<'_, String>
-    ) -> (&'a Endpoint, HashMap<String, String>) {
+    ) -> RouterResult<'a> {
         if iter.next().is_none() {
             for endpoint in &router.endpoints {
-                if endpoint.method == method {
-                    return (endpoint, params.clone());
+                if &endpoint.method == method {
+                    return Some((endpoint, params.clone()));
                 }
             }
+
+            return None;
         }
 
         let route = iter.next().unwrap();
@@ -173,7 +185,9 @@ impl Router {
                         params.insert(param_name.clone(), route.clone());
                         Self::handle_routes(founded_router, method, params, iter)
                     }
-                    None => { panic!("Route not found.") }
+                    None => {
+                        return None;
+                    }
                 }
             }
         }

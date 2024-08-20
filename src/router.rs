@@ -350,7 +350,7 @@ impl RouteHandler for Router {
                 //     }
                 // }
 
-                (endpoint.controller)(request, response);
+                (endpoint.get_controller())(request, response);
                 return HandlerResult::Next;
             }
             None => {

@@ -189,7 +189,7 @@ impl Server {
         match Request::parse(stream) {
             Ok(request) => {
                 for handler in &mut self.route_handlers {
-                    let result = handler.handle(&request, &mut response, request.get_path_array());
+                    let result = handler.handle(&request, &mut response);
                     if result == HandlerResult::End {
                         break;
                     }

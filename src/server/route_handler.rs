@@ -17,7 +17,6 @@ pub trait RouteHandler {
         &mut self,
         request: &Request,
         response: &mut Response,
-        path: &[String]
     ) -> HandlerResult;
 }
 

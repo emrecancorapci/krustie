@@ -195,12 +195,7 @@ impl Router {
 }
 
 impl RouteHandler for Router {
-    fn handle(
-        &mut self,
-        request: &Request,
-        response: &mut Response,
-        path: &[String]
-    ) -> HandlerResult {
+    fn handle(&mut self, request: &Request, response: &mut Response) -> HandlerResult {
         while let Some(middleware) = self.middlewares.iter_mut().next() {
             match middleware.middleware(request, response) {
                 HandlerResult::End => {

@@ -60,7 +60,7 @@ impl Router {
         }
     }
 
-    pub(crate) fn route_handler<'a>(
+    fn route_handler<'a>(
         &'a self,
         path_array: &Vec<String>,
         method: &HttpMethod
@@ -76,12 +76,8 @@ impl Router {
         new_router: Router,
         iter: &mut std::iter::Peekable<std::vec::IntoIter<PathType>>
     ) {
-        if iter.next().is_none() {
-            panic!("Route already exist.");
-        }
-
-        match iter.next().unwrap() {
-            PathType::Subdirectory(path) => {
+        match iter.next() {
+            Some(PathType::Subdirectory(path)) => {
                 if let Some(found_router) = router.subdirs.get_mut(&path) {
                     // Router Found
                     Self::add_router(found_router, new_router, iter);
@@ -95,7 +91,7 @@ impl Router {
                     router.subdirs.insert(path, Box::new(new_router));
                 }
             }
-            PathType::Parameter(param) => {
+            Some(PathType::Parameter(param)) => {
                 if let Some(found_router) = &mut router.param_dir {
                     // Router Found
                     Self::add_router(found_router.1.as_mut(), new_router, iter);
@@ -108,6 +104,9 @@ impl Router {
                     // No Router & Iteration Ends
                     router.param_dir = Some((param, Box::new(new_router)));
                 }
+            }
+            None => {
+                panic!("Route already exist. (Merging routers is not allowed for now.)");
             }
         }
     }
@@ -165,20 +164,27 @@ impl Router {
     ) -> RouterResult<'a> {
         if let Some(route) = iter.next() {
             if let Some(founded_router) = router.subdirs.get(route) {
-                return Self::handle_routes(founded_router.as_ref(), method, params, iter);
+                Self::handle_routes(founded_router.as_ref(), method, params, iter)
             } else if let Some((param_name, founded_router)) = router.param_dir.as_ref() {
                 params.insert(param_name.clone(), route.clone());
-                return Self::handle_routes(founded_router, method, params, iter);
+                Self::handle_routes(founded_router, method, params, iter)
             } else {
                 for endpoint in &router.endpoints {
                     if &endpoint.method == method {
                         return Some((endpoint, params.clone()));
                     }
                 }
-            }
-        }
 
-        return None;
+                None
+            }
+        } else {
+            for endpoint in &router.endpoints {
+                if &endpoint.method == method {
+                    return Some((endpoint, params.clone()));
+                }
+            }
+            None
+        }
     }
 
     fn get_path_types(path: &str) -> Vec<PathType> {

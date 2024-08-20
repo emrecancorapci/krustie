@@ -120,7 +120,7 @@ impl Router {
     /// Create a 'POST' method for `/user/comments`
     ///
     /// ```rust
-    /// use krustie::{ Router, StatusCode };
+    /// use krustie::{ Server, Router, StatusCode };
     ///
     /// let mut server = Server::create();
     ///
@@ -157,12 +157,12 @@ impl Router {
     /// Create a 'GET' method for `/user`
     ///
     /// ```rust
-    /// use krustie::{ Router, StatusCode };
+    /// use krustie::{ Server, Router, StatusCode, Request, Response, HttpMethod, Endpoint };
     ///
     /// let mut server = Server::create();
     /// let mut main_router = Router::new();
     ///
-    /// let endpoint = Endpoint::new(HttpMethod::Get, get);
+    /// let endpoint = Endpoint::new(HttpMethod::GET, get);
     ///
     /// main_router.use_endpoint("/user", endpoint);
     ///
@@ -316,6 +316,7 @@ impl Router {
     fn get_path_types(path: &str) -> Vec<PathType> {
         path.split('/')
             .into_iter()
+            .filter(|path| !path.is_empty())
             .map(|path| {
                 match PathType::try_from(path) {
                     Ok(path_type) => path_type,

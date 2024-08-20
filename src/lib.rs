@@ -34,3 +34,4 @@ pub use response::Response;
 pub use middleware::Middleware;
 pub use request::http_method::HttpMethod;
 pub use response::status_code::StatusCode;
+pub use router::endpoint::Endpoint;

@@ -2,6 +2,7 @@ use std::fmt::{ Display, Formatter, Result as fResult };
 
 use super::http_method::HttpMethod;
 
+#[derive(Clone)]
 pub(crate) struct RequestLine {
     method: HttpMethod,
     path: String,

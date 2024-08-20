@@ -21,10 +21,12 @@ pub(crate) mod parser;
 mod request_line;
 
 /// Represents the HTTP request
+#[derive(Clone)]
 pub struct Request {
     request: RequestLine,
     headers: HashMap<String, String>,
     queries: HashMap<String, String>,
+    params: HashMap<String, String>,
     body: RequestBody,
     peer_addr: SocketAddr,
 }
@@ -118,14 +120,24 @@ impl Request {
         self.request.get_path_array()
     }
 
+    // TODO: Add doctest
     /// Returns the path of the HTTP request as a String
     pub fn get_path(&self) -> &String {
         self.request.get_path()
     }
 
+    /// Returns the version of the HTTP request
+    pub fn get_param(&self, key: &str) -> Option<&String> {
+        self.params.get(key)
+    }
+
     /// Returns the method of the HTTP request
     pub(crate) fn get_method(&self) -> &HttpMethod {
         self.request.get_method()
+    }
+
+    pub(crate) fn add_param(&mut self, params: HashMap<String, String>) {
+        self.params = params;
     }
 }
 
@@ -137,6 +149,7 @@ impl Default for Request {
             ),
             queries: HashMap::new(),
             headers: HashMap::new(),
+            params: HashMap::new(),
             body: RequestBody::None,
             peer_addr: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0),
         }
@@ -147,8 +160,14 @@ impl Debug for Request {
     fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
         let headers = self.headers
             .iter()
-            .fold(String::new(), |acc, (k, v)| format!("{acc}{k}: {v}\r\n"));
-
+            .map(|(k, v)| format!("  {k}: {v}"))
+            .collect::<Vec<String>>()
+            .join("\r\n");
+        let params = self.params
+            .iter()
+            .map(|(k, v)| format!("  {k}: {v}"))
+            .collect::<Vec<String>>()
+            .join("\r\n");
         let body = match &self.body {
             RequestBody::Text(body) => format!("{:?}", body),
             RequestBody::Json(json) => format!("{:?}", json),
@@ -157,10 +176,11 @@ impl Debug for Request {
 
         write!(
             f,
-            "From: {}\r\n Request Line: {}\r\n Headers: {}\r\n Body: {}",
+            "From:\r\n  {}\r\nRequest Line:\r\n  {}\r\nHeaders:\r\n{}\r\nParams:\r\n{}\r\nBody:\r\n{}",
             self.peer_addr,
             self.request,
             headers,
+            params,
             body
         )
     }

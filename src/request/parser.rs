@@ -76,6 +76,7 @@ impl Request {
                 headers,
                 queries,
                 peer_addr,
+                params: HashMap::new(),
                 body: RequestBody::None,
             });
         }
@@ -90,6 +91,7 @@ impl Request {
             request: request_line,
             headers,
             queries,
+            params: HashMap::new(),
             peer_addr,
             body,
         })

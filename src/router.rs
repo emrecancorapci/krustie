@@ -1,3 +1,35 @@
+//! # Router
+//!
+//! A router for handling requests
+//!
+//! It is used to handle requests and route them to the correct endpoint. Routers support sub-routers and middlewares.
+//!
+//! # Example
+//!
+//! ```rust
+//! use krustie::{ Router, StatusCode };
+//!
+//! let mut main_router = Router::new();
+//! let mut user_router = Router::new();
+//! let mut user_id_router = Router::new();
+//!
+//! user_id_router
+//!   .get(|req, res| {
+//!     res.status(StatusCode::Ok);
+//!   })
+//!   .post(|req, res| {
+//!     res.status(StatusCode::Ok);
+//!   });
+//!
+//! user_router.use_router("/:id", user_id_router);
+//!
+//! let mut deeper_router = Router::new();
+//!
+//! main_router.use_router("/admin/user", deeper_router);
+//!
+//! main_router.use_router("/user", user_router);
+//! ```
+
 use std::{ collections::HashMap, fmt::Display };
 use crate::{
     server::route_handler::{ HandlerResult, RouteHandler },
@@ -18,6 +50,33 @@ type RouterResult<'a> = Option<(&'a Endpoint, HashMap<String, String>)>;
 
 // TODO: Look at Radix Tree
 
+/// A router for handling requests
+///
+/// # Example
+///
+/// ```rust
+/// use krustie::{ Router, StatusCode };
+///
+/// let mut main_router = Router::new();
+/// let mut user_router = Router::new();
+/// let mut user_id_router = Router::new();
+///
+/// user_id_router
+///   .get(|req, res| {
+///     res.status(StatusCode::Ok);
+///   })
+///   .post(|req, res| {
+///     res.status(StatusCode::Ok);
+///   });
+///
+/// user_router.use_router("/:id", user_id_router);
+///
+/// let mut deeper_router = Router::new();
+///
+/// main_router.use_router("/admin/user", deeper_router);
+///
+/// main_router.use_router("/user", user_router);
+/// ```
 #[derive(Debug)]
 pub struct Router {
     endpoints: Vec<Endpoint>,
@@ -27,6 +86,24 @@ pub struct Router {
 }
 
 impl Router {
+    /// Creates a new router
+    ///
+    /// # Example
+    ///
+    /// To create a `GET` method for `/`
+    ///
+    /// ```rust
+    /// use krustie::{ Router, StatusCode, Server };
+    ///
+    /// let mut server = Server::create();
+    /// let mut main_router = Router::new();
+    ///
+    /// main_router.get(|req, res| {
+    ///   res.status(StatusCode::Ok);
+    /// });
+    ///
+    /// server.use_handler(main_router);
+    /// ```
     pub fn new() -> Self {
         Self {
             endpoints: Vec::new(),
@@ -36,6 +113,30 @@ impl Router {
         }
     }
 
+    /// Adds a subrouter to a router. It is useful for creating subdirectories.
+    ///
+    /// # Example
+    ///
+    /// Create a 'POST' method for `/user/comments`
+    ///
+    /// ```rust
+    /// use krustie::{ Router, StatusCode };
+    ///
+    /// let mut server = Server::create();
+    ///
+    /// let mut main_router = Router::new();
+    /// let mut user_router = Router::new();
+    /// let mut comments_router = Router::new();
+    ///
+    /// comments_router.post(|req, res| {
+    ///   res.status(StatusCode::Ok);
+    /// });
+    ///
+    /// user_router.use_router("/comments", comments_router);
+    /// main_router.use_router("/user", user_router);
+    ///
+    /// server.use_handler(main_router);
+    /// ```
     pub fn use_router(&mut self, path: &str, router: Router) {
         let path = path.trim();
 
@@ -49,6 +150,29 @@ impl Router {
         Self::add_router(self, router, &mut types_iter);
     }
 
+    /// Adds an endpoint to a router.
+    ///
+    /// # Example
+    ///
+    /// Create a 'GET' method for `/user`
+    ///
+    /// ```rust
+    /// use krustie::{ Router, StatusCode };
+    ///
+    /// let mut server = Server::create();
+    /// let mut main_router = Router::new();
+    ///
+    /// let endpoint = Endpoint::new(HttpMethod::Get, get);
+    ///
+    /// main_router.use_endpoint("/user", endpoint);
+    ///
+    /// server.use_handler(main_router);
+    ///
+    /// fn get(req: &Request, res: &mut Response) {
+    ///   res.status(StatusCode::Ok);
+    /// }
+    ///
+    /// ```
     pub fn use_endpoint(&mut self, path: &str, endpoint: Endpoint) {
         let path = path.trim();
 
@@ -214,7 +338,8 @@ impl RouteHandler for Router {
         }
 
         match self.route_handler(request.get_path_array(), request.get_method()) {
-            Some((endpoint, params)) => {
+            Some((endpoint, _)) => {
+                // TODO: Implement endpoint middleware
                 // while let Some(middleware) = endpoint.middlewares.iter_mut().next() {
                 //     match middleware.middleware(request, response) {
                 //         HandlerResult::End => {
@@ -258,6 +383,7 @@ impl TryFrom<&str> for PathType {
     }
 }
 
+/// Error for parsing path types while adding a router.
 #[derive(Debug, Clone)]
 pub struct ParsePathTypeError(String);
 

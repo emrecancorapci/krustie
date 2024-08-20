@@ -46,7 +46,7 @@ pub mod methods;
 pub mod endpoint;
 
 pub(crate) type Controller = fn(&Request, &mut Response);
-type RouterResult<'a> = Option<(&'a Endpoint, HashMap<String, String>)>;
+type RouterResult<'a> = Option<(&'a mut Endpoint, HashMap<String, String>)>;
 
 // TODO: Look at Radix Tree
 
@@ -187,7 +187,7 @@ impl Router {
     }
 
     fn route_handler<'a>(
-        &'a self,
+        &'a mut self,
         path_array: &Vec<String>,
         method: &HttpMethod
     ) -> RouterResult<'a> {
@@ -253,8 +253,9 @@ impl Router {
                     }
                 } else if iter.peek().is_some() {
                     // No Router & Iteration Continues
-                    router.subdirs.insert(path, Box::new(Router::new()));
-                    Self::add_endpoint(router, endpoint, iter);
+                    let mut inserted_router = Box::new(Router::new());
+                    Self::add_endpoint(inserted_router.as_mut(), endpoint, iter);
+                    router.subdirs.insert(path, inserted_router);
                 } else {
                     // No Router & Iteration Ends
                     router.endpoints.push(endpoint);
@@ -283,20 +284,25 @@ impl Router {
     }
 
     fn handle_routes<'a, 'b>(
-        router: &'a Router,
+        router: &'a mut Router,
         method: &HttpMethod,
         mut params: HashMap<String, String>,
         mut iter: std::slice::Iter<'_, String>
     ) -> RouterResult<'a> {
         if let Some(route) = iter.next() {
-            if let Some(founded_router) = router.subdirs.get(route) {
-                Self::handle_routes(founded_router.as_ref(), method, params, iter)
-            } else if let Some((param_name, founded_router)) = router.param_dir.as_ref() {
-                let param_value = route.split('?').collect::<Vec<&str>>().first().unwrap().to_string();
+            if let Some(founded_router) = router.subdirs.get_mut(route) {
+                Self::handle_routes(founded_router.as_mut(), method, params, iter)
+            } else if let Some((param_name, founded_router)) = router.param_dir.as_mut() {
+                let param_value = route
+                    .split('?')
+                    .collect::<Vec<&str>>()
+                    .first()
+                    .unwrap()
+                    .to_string();
                 params.insert(param_name.clone(), param_value);
                 Self::handle_routes(founded_router, method, params, iter)
             } else {
-                for endpoint in &router.endpoints {
+                for endpoint in &mut router.endpoints {
                     if endpoint.is_method(method) {
                         return Some((endpoint, params.clone()));
                     }
@@ -305,7 +311,7 @@ impl Router {
                 None
             }
         } else {
-            for endpoint in &router.endpoints {
+            for endpoint in &mut router.endpoints {
                 if endpoint.is_method(method) {
                     return Some((endpoint, params.clone()));
                 }
@@ -342,21 +348,21 @@ impl RouteHandler for Router {
         match self.route_handler(request.get_path_array(), request.get_method()) {
             Some((endpoint, params)) => {
                 // TODO: Implement endpoint middleware
-                // while let Some(middleware) = endpoint.middlewares.iter_mut().next() {
-                //     match middleware.middleware(request, response) {
-                //         HandlerResult::End => {
-                //             return HandlerResult::End;
-                //         }
-                //         HandlerResult::Next => (),
-                //     }
-                // }
+                while let Some(middleware) = endpoint.get_middlewares().iter_mut().next() {
+                    match middleware.middleware(request, response) {
+                        HandlerResult::End => {
+                            return HandlerResult::End;
+                        }
+                        HandlerResult::Next => (),
+                    }
+                }
 
                 let mut request = request.clone();
                 request.add_param(params);
 
                 let req = &request;
 
-                endpoint.get_controller()(req, response);
+                endpoint.get_controller()(&request, response);
                 return HandlerResult::Next;
             }
             None => {

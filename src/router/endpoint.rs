@@ -76,4 +76,8 @@ impl Endpoint {
     pub(crate) fn get_controller(&self) -> &Controller {
         &self.controller
     }
+
+    pub(crate) fn get_middlewares(&mut self) -> &mut Vec<Box<dyn Middleware>> {
+        &mut self.middlewares
+    }
 }

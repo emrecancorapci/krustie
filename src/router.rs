@@ -7,11 +7,13 @@ use crate::{
     Response,
     StatusCode,
 };
+use endpoint::Endpoint;
 use regex::Regex;
 
 pub mod methods;
+pub mod endpoint;
 
-type Controller = fn(&Request, &mut Response);
+pub(crate) type Controller = fn(&Request, &mut Response);
 type RouterResult<'a> = Option<(&'a Endpoint, HashMap<String, String>)>;
 
 // TODO: Look at Radix Tree
@@ -170,7 +172,7 @@ impl Router {
                 Self::handle_routes(founded_router, method, params, iter)
             } else {
                 for endpoint in &router.endpoints {
-                    if &endpoint.method == method {
+                    if endpoint.is_method(method) {
                         return Some((endpoint, params.clone()));
                     }
                 }
@@ -179,7 +181,7 @@ impl Router {
             }
         } else {
             for endpoint in &router.endpoints {
-                if &endpoint.method == method {
+                if endpoint.is_method(method) {
                     return Some((endpoint, params.clone()));
                 }
             }
@@ -229,35 +231,6 @@ impl RouteHandler for Router {
                 response.status(StatusCode::NotFound);
                 return HandlerResult::Next;
             }
-        }
-    }
-}
-
-#[derive(Debug)]
-pub struct Endpoint {
-    method: HttpMethod,
-    controller: Controller,
-    middlewares: Vec<Box<dyn Middleware>>,
-}
-
-impl Endpoint {
-    pub fn new(method: HttpMethod, controller: Controller) -> Self {
-        Self {
-            method,
-            controller,
-            middlewares: Vec::new(),
-        }
-    }
-
-    pub fn new_with_middleware(
-        method: HttpMethod,
-        controller: Controller,
-        middlewares: Vec<Box<dyn Middleware>>
-    ) -> Self {
-        Self {
-            method,
-            controller,
-            middlewares,
         }
     }
 }

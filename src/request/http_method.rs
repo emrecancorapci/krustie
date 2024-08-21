@@ -17,6 +17,7 @@ use std::fmt::{Display, Error, Formatter, Result as fResult};
 /// - PATCH
 /// - DELETE
 ///
+#[derive(Clone)]
 pub enum HttpMethod {
     /// GET method is used to request data from a specified resource
     GET,

@@ -15,6 +15,7 @@ impl Request {
 
         let mut buf_reader = BufReader::new(&mut stream);
         let mut http_request = Vec::new();
+        let mut queries = HashMap::new();
 
         // Don't touch this. It's too sensitive :(((.
         for line_result in buf_reader.by_ref().lines() {
@@ -43,6 +44,27 @@ impl Request {
             ));
         }
 
+        if
+            request_line
+                .get_path_array()
+                .last()
+                .is_some_and(|last| last.contains('?'))
+        {
+            let last = request_line.get_path_array().last().unwrap();
+
+            let maybe_queries = last.split('?').skip(1).collect::<Vec<&str>>();
+
+            if maybe_queries.len() != 1 {
+                return Err(Error::new(ErrorKind::InvalidInput, "Invalid query usage".to_string()));
+            }
+
+            maybe_queries[0].split('&').for_each(|kvp| {
+                if let Some((k, v)) = kvp.split_once('=') {
+                    queries.insert(k.to_string(), v.to_string());
+                }
+            });
+        }
+
         let headers: HashMap<String, String> = http_request
             .iter()
             .skip(1)
@@ -56,7 +78,9 @@ impl Request {
             return Ok(Request {
                 request: RequestLine::try_from(http_request[0].as_str()).unwrap(),
                 headers,
+                queries,
                 peer_addr,
+                params: HashMap::new(),
                 body: RequestBody::None,
             });
         }
@@ -72,6 +96,8 @@ impl Request {
         Ok(Request {
             request: request_line,
             headers,
+            queries,
+            params: HashMap::new(),
             peer_addr,
             body,
         })

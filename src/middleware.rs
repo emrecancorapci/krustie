@@ -6,6 +6,8 @@
 //!
 //! It takes itself as `&self`, a `Request` and a `Response` as arguments and returns a `HandlerResult`.
 
+use std::fmt::Debug;
+
 use crate::{
     server::route_handler::{HandlerResult, RouteHandler},
     Request, Response,
@@ -29,6 +31,7 @@ pub use self::{gzip::GzipEncoder, rate_limiter::RateLimiter, statics::ServeStati
 /// ```rust
 /// use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult };
 ///
+/// #[derive(Debug)]
 /// struct AddKrustieHeader;
 ///
 /// impl AddKrustieHeader {
@@ -50,6 +53,7 @@ pub use self::{gzip::GzipEncoder, rate_limiter::RateLimiter, statics::ServeStati
 /// ```rust
 /// use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult };
 ///
+/// #[derive(Debug)]
 /// struct AddHeader {
 ///     server: String,
 ///     value: String,
@@ -69,7 +73,7 @@ pub use self::{gzip::GzipEncoder, rate_limiter::RateLimiter, statics::ServeStati
 /// }
 /// ```
 ///
-pub trait Middleware {
+pub trait Middleware: Debug {
     /// Middleware function to be implemented for the middleware.
     ///
     /// For the middleware to be executed and continue the execution, it should return `HandlerResult::Next`.
@@ -86,7 +90,6 @@ where
         &mut self,
         request: &Request,
         response: &mut Response,
-        _: &[String],
     ) -> HandlerResult {
         T::middleware(self, request, response)
     }

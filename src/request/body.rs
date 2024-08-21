@@ -10,7 +10,7 @@ use std::io::{Error, ErrorKind};
 
 use crate::json::JsonValue;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Represents the body of the HTTP request
 pub enum RequestBody {
     /// Represents a text body. Holds a vector of bytes.

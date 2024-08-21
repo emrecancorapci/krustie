@@ -30,6 +30,7 @@ pub use middleware::Middleware;
 pub use request::http_method::HttpMethod;
 pub use request::Request;
 pub use response::status_code::StatusCode;
+pub use router::endpoint::Endpoint;
 pub use response::Response;
 pub use router::Router;
 pub use server::Server;

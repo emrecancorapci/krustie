@@ -3,7 +3,7 @@
 //! Each method is implemented as a function that takes a controller function and adds it to the router.
 //!
 //! A controller should be defined as `fn(&Request, &mut Response)`
-use super::{Controller, HttpMethod, Router};
+use super::{ Controller, Endpoint, HttpMethod, Router };
 
 impl Router {
     /// Adds a GET endpoint to the router
@@ -20,7 +20,8 @@ impl Router {
     /// });
     /// ```
     pub fn get(&mut self, controller: Controller) -> &mut Self {
-        self.endpoints.insert(HttpMethod::GET, controller);
+        let endpoint = Endpoint::new(HttpMethod::GET, controller);
+        self.use_endpoint("/", endpoint);
         self
     }
 
@@ -38,7 +39,8 @@ impl Router {
     /// });
     /// ```
     pub fn post(&mut self, controller: Controller) -> &mut Self {
-        self.endpoints.insert(HttpMethod::POST, controller);
+        let endpoint = Endpoint::new(HttpMethod::POST, controller);
+        self.use_endpoint("/", endpoint);
         self
     }
 
@@ -56,7 +58,8 @@ impl Router {
     /// });
     /// ```
     pub fn put(&mut self, controller: Controller) -> &mut Self {
-        self.endpoints.insert(HttpMethod::PUT, controller);
+        let endpoint = Endpoint::new(HttpMethod::PUT, controller);
+        self.use_endpoint("/", endpoint);
         self
     }
 
@@ -74,7 +77,8 @@ impl Router {
     /// });
     /// ```
     pub fn delete(&mut self, controller: Controller) -> &mut Self {
-        self.endpoints.insert(HttpMethod::DELETE, controller);
+        let endpoint = Endpoint::new(HttpMethod::DELETE, controller);
+        self.use_endpoint("/", endpoint);
         self
     }
 
@@ -92,7 +96,8 @@ impl Router {
     /// });
     /// ```
     pub fn patch(&mut self, controller: Controller) -> &mut Self {
-        self.endpoints.insert(HttpMethod::PATCH, controller);
+        let endpoint = Endpoint::new(HttpMethod::PATCH, controller);
+        self.use_endpoint("/", endpoint);
         self
     }
 }

@@ -86,11 +86,7 @@ impl<T> RouteHandler for T
 where
     T: Middleware,
 {
-    fn handle(
-        &mut self,
-        request: &Request,
-        response: &mut Response,
-    ) -> HandlerResult {
+    fn handle(&mut self, request: &Request, response: &mut Response) -> HandlerResult {
         T::middleware(self, request, response)
     }
 }

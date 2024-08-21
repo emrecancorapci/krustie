@@ -44,18 +44,20 @@ impl Request {
             ));
         }
 
-        if
-            request_line
-                .get_path_array()
-                .last()
-                .is_some_and(|last| last.contains('?'))
+        if request_line
+            .get_path_array()
+            .last()
+            .is_some_and(|last| last.contains('?'))
         {
             let last = request_line.get_path_array().last().unwrap();
 
             let maybe_queries = last.split('?').skip(1).collect::<Vec<&str>>();
 
             if maybe_queries.len() != 1 {
-                return Err(Error::new(ErrorKind::InvalidInput, "Invalid query usage".to_string()));
+                return Err(Error::new(
+                    ErrorKind::InvalidInput,
+                    "Invalid query usage".to_string(),
+                ));
             }
 
             maybe_queries[0].split('&').for_each(|kvp| {

@@ -13,11 +13,7 @@ use crate::{Request, Response};
 /// This trait is used to define the handler for the routes and middlewares.
 pub trait RouteHandler {
     /// Handles the request and returns the result of the handler. It is used to define the handler for the routes and middlewares.
-    fn handle(
-        &mut self,
-        request: &Request,
-        response: &mut Response,
-    ) -> HandlerResult;
+    fn handle(&mut self, request: &Request, response: &mut Response) -> HandlerResult;
 }
 
 #[derive(Debug, PartialEq, Eq)]

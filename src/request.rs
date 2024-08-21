@@ -157,12 +157,14 @@ impl Default for Request {
 
 impl Debug for Request {
     fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
-        let headers = self.headers
+        let headers = self
+            .headers
             .iter()
             .map(|(k, v)| format!("  {k}: {v}"))
             .collect::<Vec<String>>()
             .join("\r\n");
-        let params = self.params
+        let params = self
+            .params
             .iter()
             .map(|(k, v)| format!("  {k}: {v}"))
             .collect::<Vec<String>>()

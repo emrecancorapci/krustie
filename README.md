@@ -9,7 +9,7 @@ Krustie is a backend library written in Rust. It is currently a work in progress
 
 ## Features
 
-- Stackable Router
+- Stackable Router with parameter and query support
 - Middleware support
 - JSON parsing ([serde_json](https://crates.io/crates/serde_json))
 

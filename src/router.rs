@@ -194,7 +194,7 @@ impl Router {
         let params: HashMap<String, String> = HashMap::new();
         let iter: std::slice::Iter<'_, String> = path_array.iter();
 
-        return Self::handle_routes(self, method, params, iter);
+        Self::handle_routes(self, method, params, iter)
     }
 
     fn add_router<'a>(
@@ -303,9 +303,15 @@ impl Router {
         mut iter: std::slice::Iter<'_, String>
     ) -> RouterResult<'a> {
         if let Some(route) = iter.next() {
+            if route.is_empty() {
+                return Self::handle_routes(router, method, params, iter);
+            }
+            // Iteration Continues
             if let Some(founded_router) = router.subdirs.get_mut(route) {
+                // Router Found
                 Self::handle_routes(founded_router.as_mut(), method, params, iter)
             } else if let Some((param_name, founded_router)) = router.param_dir.as_mut() {
+                // Parameter Found
                 let param_value = route
                     .split('?')
                     .collect::<Vec<&str>>()
@@ -315,21 +321,14 @@ impl Router {
                 params.insert(param_name.clone(), param_value);
                 Self::handle_routes(founded_router, method, params, iter)
             } else {
-                for endpoint in &mut router.endpoints {
-                    if endpoint.is_method(method) {
-                        return Some((endpoint, params.clone()));
-                    }
-                }
-
                 None
             }
         } else {
-            for endpoint in &mut router.endpoints {
-                if endpoint.is_method(method) {
-                    return Some((endpoint, params.clone()));
-                }
+            // Iteration Ends
+            match router.endpoints.iter_mut().find(|endpoint| endpoint.is_method(method)) {
+                Some(endpoint) => Some((endpoint, params)),
+                None => None,
             }
-            None
         }
     }
 

@@ -244,39 +244,52 @@ impl Router {
     ) {
         match iter.next() {
             Some(PathType::Subdirectory(path)) => {
-                if let Some(found_router) = router.subdirs.get_mut(&path) {
-                    // Router Found
-                    if iter.peek().is_some() {
+                if iter.peek().is_some() {
+                    // Iteration Will Continue
+                    if let Some(found_router) = router.subdirs.get_mut(&path) {
+                        // Router Found
                         Self::add_endpoint(found_router, endpoint, iter);
                     } else {
-                        router.endpoints.push(endpoint);
+                        // No Router
+                        let mut inserted_router = Box::new(Router::new());
+                        Self::add_endpoint(inserted_router.as_mut(), endpoint, iter);
+                        router.subdirs.insert(path, inserted_router);
                     }
-                } else if iter.peek().is_some() {
-                    // No Router & Iteration Continues
-                    let mut inserted_router = Box::new(Router::new());
-                    Self::add_endpoint(inserted_router.as_mut(), endpoint, iter);
-                    router.subdirs.insert(path, inserted_router);
                 } else {
-                    // No Router & Iteration Ends
-                    router.endpoints.push(endpoint);
+                    // Iteration Will End
+                    if let Some(found_router) = router.subdirs.get_mut(&path) {
+                        // Router Found
+                        found_router.endpoints.push(endpoint);
+                    } else {
+                        // No Router
+                        let mut inserted_router = Box::new(Router::new());
+                        inserted_router.endpoints.push(endpoint);
+                        router.subdirs.insert(path, inserted_router);
+                    }
                 }
             }
             Some(PathType::Parameter(param)) => {
-                if let Some(found_router) = &mut router.param_dir {
-                    // Router Found
-                    if iter.peek().is_some() {
+                if iter.peek().is_some() {
+                    if let Some(found_router) = &mut router.param_dir {
+                        // Router Found
                         Self::add_endpoint(found_router.1.as_mut(), endpoint, iter);
                     } else {
-                        router.endpoints.push(endpoint);
+                        // No Router & Iteration Continues
+                        let mut inserted_router = Box::new(Router::new());
+                        Self::add_endpoint(inserted_router.as_mut(), endpoint, iter);
+                        router.param_dir = Some((param, inserted_router));
                     }
-                } else if iter.peek().is_some() {
-                    // No Router & Iteration Continues
-                    let mut inserted_router = Box::new(Router::new());
-                    Self::add_endpoint(inserted_router.as_mut(), endpoint, iter);
-                    router.param_dir = Some((param, inserted_router));
                 } else {
-                    // No Router & Iteration Ends
-                    router.endpoints.push(endpoint);
+                    // Iteration Will End
+                    if let Some(found_router) = router.subdirs.get_mut(&param) {
+                        // Router Found
+                        found_router.endpoints.push(endpoint);
+                    } else {
+                        // No Router
+                        let mut inserted_router = Box::new(Router::new());
+                        inserted_router.endpoints.push(endpoint);
+                        router.subdirs.insert(param, inserted_router);
+                    }
                 }
             }
             None => { panic!("Error: Route already exist.") }
@@ -347,7 +360,6 @@ impl RouteHandler for Router {
 
         match self.route_handler(request.get_path_array(), request.get_method()) {
             Some((endpoint, params)) => {
-                // TODO: Implement endpoint middleware
                 while let Some(middleware) = endpoint.get_middlewares().iter_mut().next() {
                     match middleware.middleware(request, response) {
                         HandlerResult::End => {
@@ -359,8 +371,6 @@ impl RouteHandler for Router {
 
                 let mut request = request.clone();
                 request.add_param(params);
-
-                let req = &request;
 
                 endpoint.get_controller()(&request, response);
                 return HandlerResult::Next;

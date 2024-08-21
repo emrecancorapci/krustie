@@ -1,6 +1,6 @@
 [package]
 name = "krustie"
-version = "0.1.9"
+version = "0.1.10"
 description = "Krustie is a backend library written in Rust. Currently, it is a work in progress and not yet ready for production use."
 categories = ["network-programming", "web-programming::http-server"]
 keywords = ["http", "web", "framework"]

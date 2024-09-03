@@ -17,7 +17,7 @@ use crate::{request::Request, response::Response, server::route_handler::Handler
 ///
 /// server.use_handler(GzipEncoder);
 ///
-#[derive(Debug)]
+#[derive(Clone)]
 pub struct GzipEncoder;
 
 impl GzipEncoder {

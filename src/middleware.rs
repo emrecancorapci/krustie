@@ -52,7 +52,7 @@ pub use self::{gzip::GzipEncoder, rate_limiter::RateLimiter, statics::ServeStati
 /// - In this example `AddHeader` should be initialized.
 ///
 /// ```rust
-/// use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult, middleware::DynClone };
+/// use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult };
 ///
 /// #[derive(Clone)]
 /// struct AddHeader {

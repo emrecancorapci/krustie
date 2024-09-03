@@ -126,12 +126,12 @@ impl Server {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::Server;
+    /// use krustie::{Server, Listener};
     ///
     /// let server = Server::create();
     ///
     /// // vvvvvv Uncommment to listen on
-    /// // server.listen((127, 0, 0, 1), 8080)
+    /// // Listener::listen((127, 0, 0, 1), 8080)
     /// ```
     pub fn create() -> Self {
         Self {

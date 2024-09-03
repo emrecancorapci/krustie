@@ -29,7 +29,7 @@ use crate::{
 ///
 /// server.use_handler(statics);
 /// ```
-#[derive(Debug)]
+#[derive(Clone)]
 pub struct ServeStatic {
     folder_path: String,
 }

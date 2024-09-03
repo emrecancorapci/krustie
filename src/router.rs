@@ -31,12 +31,16 @@
 //! ```
 
 use crate::{
-    server::route_handler::{HandlerResult, RouteHandler},
-    HttpMethod, Middleware, Request, Response, StatusCode,
+    server::route_handler::{ HandlerResult, RouteHandler },
+    HttpMethod,
+    Middleware,
+    Request,
+    Response,
+    StatusCode,
 };
 use endpoint::Endpoint;
 use regex::Regex;
-use std::{collections::HashMap, fmt::Display};
+use std::{ collections::HashMap, fmt::Display };
 
 pub mod endpoint;
 pub mod methods;
@@ -185,7 +189,7 @@ impl Router {
     fn route_handler<'a>(
         &'a mut self,
         path_array: &Vec<String>,
-        method: &HttpMethod,
+        method: &HttpMethod
     ) -> RouterResult<'a> {
         let params: HashMap<String, String> = HashMap::new();
         let iter: std::slice::Iter<'_, String> = path_array.iter();
@@ -196,7 +200,7 @@ impl Router {
     fn add_router<'a>(
         router: &'a mut Router,
         new_router: Router,
-        iter: &mut std::iter::Peekable<std::vec::IntoIter<PathType>>,
+        iter: &mut std::iter::Peekable<std::vec::IntoIter<PathType>>
     ) {
         match iter.next() {
             Some(PathType::Subdirectory(path)) => {
@@ -236,7 +240,7 @@ impl Router {
     fn add_endpoint<'a>(
         router: &'a mut Router,
         endpoint: Endpoint,
-        iter: &mut std::iter::Peekable<std::vec::IntoIter<PathType>>,
+        iter: &mut std::iter::Peekable<std::vec::IntoIter<PathType>>
     ) {
         match iter.next() {
             Some(PathType::Subdirectory(path)) => {
@@ -288,9 +292,7 @@ impl Router {
                     }
                 }
             }
-            None => {
-                panic!("Error: Route already exist.")
-            }
+            None => { panic!("Error: Route already exist.") }
         }
     }
 
@@ -298,7 +300,7 @@ impl Router {
         router: &'a mut Router,
         method: &HttpMethod,
         mut params: HashMap<String, String>,
-        mut iter: std::slice::Iter<'_, String>,
+        mut iter: std::slice::Iter<'_, String>
     ) -> RouterResult<'a> {
         if let Some(route) = iter.next() {
             if route.is_empty() {
@@ -323,11 +325,7 @@ impl Router {
             }
         } else {
             // Iteration Ends
-            match router
-                .endpoints
-                .iter_mut()
-                .find(|endpoint| endpoint.is_method(method))
-            {
+            match router.endpoints.iter_mut().find(|endpoint| endpoint.is_method(method)) {
                 Some(endpoint) => Some((endpoint, params)),
                 None => None,
             }
@@ -338,9 +336,11 @@ impl Router {
         path.split('/')
             .into_iter()
             .filter(|path| !path.is_empty())
-            .map(|path| match PathType::try_from(path) {
-                Ok(path_type) => path_type,
-                Err(err) => panic!("Error while adding router: {}", err),
+            .map(|path| {
+                match PathType::try_from(path) {
+                    Ok(path_type) => path_type,
+                    Err(err) => panic!("Error while adding router: {}", err),
+                }
             })
             .collect::<Vec<PathType>>()
     }
@@ -378,6 +378,25 @@ impl RouteHandler for Router {
                 response.status(StatusCode::NotFound);
                 return HandlerResult::Next;
             }
+        }
+    }
+}
+
+impl Clone for Router {
+    fn clone(&self) -> Self {
+        let endpoints: Vec<Endpoint> = self.endpoints.clone();
+        let middlewares: Vec<Box<dyn Middleware>> = self.middlewares.clone();
+        let subdirs: HashMap<String, Box<Router>> = self.subdirs.clone();
+        let param_dir: Option<(String, Box<Router>)> = match &self.param_dir {
+            Some((key, router)) => Some((key.clone(), router.clone())),
+            None => None,
+        };
+
+        Self {
+            endpoints,
+            middlewares,
+            subdirs,
+            param_dir,
         }
     }
 }

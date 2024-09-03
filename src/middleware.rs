@@ -7,6 +7,7 @@
 //! It takes itself as `&self`, a `Request` and a `Response` as arguments and returns a `HandlerResult`.
 
 use std::fmt::Debug;
+use dyn_clone::DynClone;
 
 use crate::{
     server::route_handler::{HandlerResult, RouteHandler},
@@ -31,7 +32,7 @@ pub use self::{gzip::GzipEncoder, rate_limiter::RateLimiter, statics::ServeStati
 /// ```rust
 /// use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult };
 ///
-/// #[derive(Debug)]
+/// #[derive(Clone)]
 /// struct AddKrustieHeader;
 ///
 /// impl AddKrustieHeader {
@@ -51,9 +52,9 @@ pub use self::{gzip::GzipEncoder, rate_limiter::RateLimiter, statics::ServeStati
 /// - In this example `AddHeader` should be initialized.
 ///
 /// ```rust
-/// use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult };
+/// use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult, middleware::DynClone };
 ///
-/// #[derive(Debug)]
+/// #[derive(Clone)]
 /// struct AddHeader {
 ///     server: String,
 ///     value: String,
@@ -73,7 +74,7 @@ pub use self::{gzip::GzipEncoder, rate_limiter::RateLimiter, statics::ServeStati
 /// }
 /// ```
 ///
-pub trait Middleware: Debug {
+pub trait Middleware: DynClone + Send {
     /// Middleware function to be implemented for the middleware.
     ///
     /// For the middleware to be executed and continue the execution, it should return `HandlerResult::Next`.
@@ -90,3 +91,11 @@ where
         T::middleware(self, request, response)
     }
 }
+
+impl Debug for dyn Middleware {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Middleware",)
+    }
+}
+
+dyn_clone::clone_trait_object!(Middleware);

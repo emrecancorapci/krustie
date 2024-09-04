@@ -382,6 +382,25 @@ impl RouteHandler for Router {
     }
 }
 
+impl Clone for Router {
+    fn clone(&self) -> Self {
+        let endpoints: Vec<Endpoint> = self.endpoints.clone();
+        let middlewares: Vec<Box<dyn Middleware>> = self.middlewares.clone();
+        let subdirs: HashMap<String, Box<Router>> = self.subdirs.clone();
+        let param_dir: Option<(String, Box<Router>)> = match &self.param_dir {
+            Some((key, router)) => Some((key.clone(), router.clone())),
+            None => None,
+        };
+
+        Self {
+            endpoints,
+            middlewares,
+            subdirs,
+            param_dir,
+        }
+    }
+}
+
 #[derive(Eq, Hash, PartialEq, Debug)]
 enum PathType {
     Subdirectory(String),

@@ -11,7 +11,7 @@ use crate::{server::route_handler::HandlerResult, Middleware, StatusCode};
 /// A rate limiter middleware
 ///
 /// Limits the number of requests from an IP address based on the token number and token refill time.
-#[derive(Debug)]
+#[derive(Clone)]
 pub struct RateLimiter {
     token_number: u16,
     token_refill_duration: Duration,

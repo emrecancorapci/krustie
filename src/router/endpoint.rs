@@ -26,7 +26,7 @@ use super::Controller;
 ///
 /// server.use_handler(router);
 ///
-/// // server.listen((127, 0, 0, 1), 8080);
+/// // server.listen(8080);
 /// ```
 #[derive(Debug)]
 pub struct Endpoint {
@@ -79,5 +79,15 @@ impl Endpoint {
 
     pub(crate) fn get_middlewares(&mut self) -> &mut Vec<Box<dyn Middleware>> {
         &mut self.middlewares
+    }
+}
+
+impl Clone for Endpoint {
+    fn clone(&self) -> Self {
+        Self {
+            method: self.method.clone(),
+            controller: self.controller.clone(),
+            middlewares: self.middlewares.clone(),
+        }
     }
 }

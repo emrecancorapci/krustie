@@ -6,12 +6,14 @@
 //!
 //! The `HandlerResult` enum is used to define the result of the handler.
 
+use dyn_clone::{clone_trait_object, DynClone};
+
 use crate::{Request, Response};
 
 /// Route handler trait
 ///
 /// This trait is used to define the handler for the routes and middlewares.
-pub trait RouteHandler {
+pub trait RouteHandler: DynClone + Send {
     /// Handles the request and returns the result of the handler. It is used to define the handler for the routes and middlewares.
     fn handle(&mut self, request: &Request, response: &mut Response) -> HandlerResult;
 }
@@ -28,3 +30,5 @@ pub enum HandlerResult {
     /// **Continues** the execution of the handler chain.
     Next,
 }
+
+clone_trait_object!(RouteHandler);

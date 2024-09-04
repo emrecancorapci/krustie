@@ -17,6 +17,7 @@ use crate::{
 pub mod gzip;
 pub mod rate_limiter;
 pub mod statics;
+pub mod helmet;
 
 pub use self::{gzip::GzipEncoder, rate_limiter::RateLimiter, statics::ServeStatic};
 

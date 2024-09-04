@@ -5,12 +5,13 @@
 [<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-krustie-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/krustie)
 [<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/emrecancorapci/krustie/rust.yml?branch=main&style=for-the-badge" height="20">](https://github.com/emrecancorapci/krustie/actions?query=branch%3main)
 
-Krustie is a backend library written in Rust. It is currently a work in progress and not yet ready for production use. This project serves as a personal learning experience, and contributions or feedback are welcome.
+Krustie is a backend library written in Rust. It is currently a work in progress and not yet ready for production use. This project serves as a personal learning experience, and contributions or feedbacks are welcome.
 
 ## Features
 
 - Stackable Router with parameter and query support
-- Middleware support
+- Middleware support for routers and endpoints
+- Multi-threaded server
 - JSON parsing ([serde_json](https://crates.io/crates/serde_json))
 
 ### Builtin Middlewares

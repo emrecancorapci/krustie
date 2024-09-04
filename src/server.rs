@@ -45,7 +45,7 @@
 //! server.use_handler(ServeStatic::new("public"));
 //!
 //! // vvvvvv Uncommment to listen on
-//! // server.listen((127, 0, 0, 1), 8080);
+//! // server.listen(8080);
 //!
 //!
 //! fn post_req(req: &Request, res: &mut Response) {
@@ -65,7 +65,7 @@
 //!   }
 //! }
 //!
-//! #[derive(Debug)]
+//! #[derive(Clone)]
 //! struct AddHeader {
 //!   key: String,
 //!   value: String,
@@ -94,6 +94,7 @@ use std::{
 
 pub mod route_handler;
 use route_handler::{HandlerResult, RouteHandler};
+use std::thread;
 
 /// A server for handling requests
 ///
@@ -112,10 +113,10 @@ use route_handler::{HandlerResult, RouteHandler};
 ///
 /// server.use_handler(router);
 ///
-/// // server.listen((127, 0, 0, 1), 8080);
+/// // server.listen(8080);
 /// ```
 pub struct Server {
-    route_handlers: Vec<Box<dyn RouteHandler>>,
+    route_handlers: Vec<Box<dyn RouteHandler + Send>>,
     address: String,
 }
 
@@ -130,37 +131,12 @@ impl Server {
     /// let server = Server::create();
     ///
     /// // vvvvvv Uncommment to listen on
-    /// // server.listen((127, 0, 0, 1), 8080)
+    /// // server.listen(8080);
     /// ```
     pub fn create() -> Self {
         Self {
             route_handlers: Vec::new(),
             address: String::from(""),
-        }
-    }
-
-    /// Listens for incoming requests on the specified IP and port
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::Server;
-    ///
-    /// let mut server = Server::create();
-    ///
-    /// // vvvvvv Uncommment to listen on
-    /// // server.listen((127, 0, 0, 1), 8080);
-    /// ```
-    pub fn listen(&mut self, ip: (u8, u8, u8, u8), port: u16) {
-        self.address = format!("{}.{}.{}.{}:{}", ip.0, ip.1, ip.2, ip.3, port);
-        let listener = TcpListener::bind(&self.address).unwrap_or_else(|err| panic!("{}", err));
-
-        for stream_result in listener.incoming() {
-            let mut stream = stream_result.unwrap_or_else(|err| {
-                panic!("Error while listening: {}", err);
-            });
-
-            self.handle_stream(&mut stream);
         }
     }
 
@@ -214,10 +190,60 @@ impl Server {
             }
         }
     }
+
+    /// Listens for incoming requests on the specified IP and port
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::Server;
+    ///
+    /// let mut server = Server::create();
+    ///
+    /// // vvvvvv Uncommment to listen on
+    /// // server.listen(8080);
+    /// ```
+    pub fn listen(&self, port: u16) {
+        Listener::listen(port, self.clone());
+    }
+}
+
+impl Clone for Server {
+    fn clone(&self) -> Self {
+        let route_handlers: Vec<Box<dyn RouteHandler + Send>> = self.route_handlers.clone();
+        Self {
+            route_handlers,
+            address: self.address.clone(),
+        }
+    }
 }
 
 impl Debug for Server {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(f, "Server {{ Address: {} }}", self.address)
+    }
+}
+
+#[derive(Debug)]
+struct Listener {}
+
+impl Listener {
+    fn listen(port: u16, handler: Server) {
+        let address = format!("127.0.0.1:{}", port);
+        let listener = TcpListener::bind(address).unwrap_or_else(|err| panic!("{}", err));
+
+        println!("Listening on http://localhost:{port}");
+
+        for stream_result in listener.incoming() {
+            let mut stream = stream_result.unwrap_or_else(|err| {
+                panic!("Error while listening: {}", err);
+            });
+
+            let mut handler = handler.clone();
+
+            thread::spawn(move || {
+                handler.handle_stream(&mut stream);
+            });
+        }
     }
 }

@@ -26,7 +26,7 @@ use super::Controller;
 ///
 /// server.use_handler(router);
 ///
-/// // server.listen((127, 0, 0, 1), 8080);
+/// // server.listen(8080);
 /// ```
 #[derive(Debug)]
 pub struct Endpoint {

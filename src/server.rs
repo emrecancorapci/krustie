@@ -45,7 +45,7 @@
 //! server.use_handler(ServeStatic::new("public"));
 //!
 //! // vvvvvv Uncommment to listen on
-//! // server.listen((127, 0, 0, 1), 8080);
+//! // server.listen(8080);
 //!
 //!
 //! fn post_req(req: &Request, res: &mut Response) {
@@ -65,7 +65,7 @@
 //!   }
 //! }
 //!
-//! #[derive(Debug)]
+//! #[derive(Clone)]
 //! struct AddHeader {
 //!   key: String,
 //!   value: String,
@@ -113,7 +113,7 @@ use std::thread;
 ///
 /// server.use_handler(router);
 ///
-/// // server.listen((127, 0, 0, 1), 8080);
+/// // server.listen(8080);
 /// ```
 pub struct Server {
     route_handlers: Vec<Box<dyn RouteHandler + Send>>,
@@ -126,12 +126,12 @@ impl Server {
     /// # Example
     ///
     /// ```rust
-    /// use krustie::{Server, Listener};
+    /// use krustie::Server;
     ///
     /// let server = Server::create();
     ///
     /// // vvvvvv Uncommment to listen on
-    /// // Listener::listen((127, 0, 0, 1), 8080)
+    /// // server.listen(8080);
     /// ```
     pub fn create() -> Self {
         Self {
@@ -190,6 +190,22 @@ impl Server {
             }
         }
     }
+
+    /// Listens for incoming requests on the specified IP and port
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::Server;
+    ///
+    /// let mut server = Server::create();
+    ///
+    /// // vvvvvv Uncommment to listen on
+    /// // server.listen(8080);
+    /// ```
+    pub fn listen(&self, port: u16) {
+        Listener::listen(port, self.clone());
+    }
 }
 
 impl Clone for Server {
@@ -208,36 +224,15 @@ impl Debug for Server {
     }
 }
 
-/// A listener for handling incoming requests
-///
-/// # Example
-///
-/// ```rust
-/// use krustie::{ Server, Listener };
-///
-/// let mut server = Server::create();
-///
-///
-/// // Listener::listen(8080, &mut server);
 #[derive(Debug)]
-pub struct Listener {}
+struct Listener {}
 
 impl Listener {
-    /// Listens for incoming requests on the specified IP and port
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::{Server, Listener};
-    ///
-    /// let mut server = Server::create();
-    ///
-    /// // vvvvvv Uncommment to listen on
-    /// // Listener::listen((127, 0, 0, 1), 8080);
-    /// ```
-    pub fn listen(port: u16, handler: &mut Server) {
+    fn listen(port: u16, handler: Server) {
         let address = format!("127.0.0.1:{}", port);
         let listener = TcpListener::bind(address).unwrap_or_else(|err| panic!("{}", err));
+
+        println!("Listening on http://localhost:{port}");
 
         for stream_result in listener.incoming() {
             let mut stream = stream_result.unwrap_or_else(|err| {

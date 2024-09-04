@@ -3,7 +3,7 @@
 //! Endpoint is a struct that holds the information about a route in the router. It holds the
 //! information about the method, controller and middlewares that should be applied to the route.
 
-use crate::{HttpMethod, Middleware};
+use crate::{ HttpMethod, Middleware };
 
 use super::Controller;
 
@@ -60,7 +60,7 @@ impl Endpoint {
     fn new_with_middleware(
         method: HttpMethod,
         controller: Controller,
-        middlewares: Vec<Box<dyn Middleware>>,
+        middlewares: Vec<Box<dyn Middleware>>
     ) -> Self {
         Self {
             method,

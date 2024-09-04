@@ -6,7 +6,7 @@
 //!
 //! The `HandlerResult` enum is used to define the result of the handler.
 
-use dyn_clone::{DynClone, clone_trait_object};
+use dyn_clone::{clone_trait_object, DynClone};
 
 use crate::{Request, Response};
 

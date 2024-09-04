@@ -6,8 +6,8 @@
 //!
 //! It takes itself as `&self`, a `Request` and a `Response` as arguments and returns a `HandlerResult`.
 
-use std::fmt::Debug;
 use dyn_clone::DynClone;
+use std::fmt::Debug;
 
 use crate::{
     server::route_handler::{HandlerResult, RouteHandler},

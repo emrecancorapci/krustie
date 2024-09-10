@@ -79,7 +79,7 @@
 //!
 //! impl Middleware for AddHeader {
 //!   fn middleware(&mut self, _: &Request, res: &mut Response) -> HandlerResult {
-//!     res.insert_header(&self.key, &self.value);
+//!     res.set_header(&self.key, &self.value);
 //!     HandlerResult::Next
 //!   }
 //! }

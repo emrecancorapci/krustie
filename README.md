@@ -23,7 +23,7 @@ Krustie is a backend library written in Rust. It is currently a work in progress
 ## Start your server
 
 ```rust
-use krustie::{ Router, Server, Listener, StatusCode };
+use krustie::{ Router, Server, StatusCode };
 
 fn main() {
     let mut server = Server::create();

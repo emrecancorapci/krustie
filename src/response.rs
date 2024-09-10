@@ -21,7 +21,7 @@
 //! }
 //! ```
 //!
-//! But there are other functions such as `insert_header` and `update_body` can be useful especially when creating a middleware.
+//! But there are other functions such as `set_header` and `update_body` can be useful especially when creating a middleware.
 //!
 use self::status_code::StatusCode;
 use std::{
@@ -45,7 +45,7 @@ pub mod utilities;
 ///
 /// - `status` *sets* the status code of the response. It takes [StatusCode] as an argument.
 /// - `headers` *extends* the current headers of the response. It takes a `HashMap<string, string>` as an argument.
-///   - If you want to add just *a single header* there is the `insert_header` function which takes two strings, a key and a value, as an argument.
+///   - If you want to add just *a single header* there is the `set_header` function which takes two strings, a key and a value, as an argument.
 /// - `body`
 ///
 pub struct Response {

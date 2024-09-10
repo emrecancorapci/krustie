@@ -38,7 +38,7 @@ pub use self::{gzip::GzipEncoder, rate_limiter::RateLimiter, statics::ServeStati
 ///
 /// impl AddKrustieHeader {
 ///   fn add_header(res: &mut Response) {
-///     res.insert_header("Server", "Krustie");
+///     res.set_header("Server", "Krustie");
 ///   }
 /// }
 ///
@@ -69,7 +69,7 @@ pub use self::{gzip::GzipEncoder, rate_limiter::RateLimiter, statics::ServeStati
 ///
 /// impl Middleware for AddHeader {
 ///   fn middleware(&mut self, _: &Request, res: &mut Response) -> HandlerResult {
-///     res.insert_header(&self.server, &self.value);
+///     res.set_header(&self.server, &self.value);
 ///     HandlerResult::Next
 ///   }
 /// }

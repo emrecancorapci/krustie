@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use crate::{Response, StatusCode};
+use crate::{ Response, StatusCode };
 
 impl Response {
     /// Gets the headers of the response
@@ -54,11 +54,28 @@ impl Response {
     /// use krustie::{ Response, StatusCode, Request };
     ///
     /// fn get(request: &Request, response: &mut Response) {
-    ///   response.insert_header("Server", "Krustie");
+    ///   response.set_header("Server", "Krustie");
     /// }
     /// ```
-    pub fn insert_header(&mut self, key: &str, value: &str) -> &mut Self {
+    pub fn set_header(&mut self, key: &str, value: &str) -> &mut Self {
         self.headers.insert(key.to_string(), value.to_string());
+        self
+    }
+
+    /// Removes a header from the response
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::{ Response, StatusCode, Request };
+    /// 
+    /// fn get(request: &Request, response: &mut Response) {
+    ///   response.set_header("Server", "Krustie");
+    ///   response.remove_header("Server");
+    /// }
+    /// ```
+    pub fn remove_header(&mut self, key: &str) -> &mut Self {
+        self.headers.remove(key);
         self
     }
 

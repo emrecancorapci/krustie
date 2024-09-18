@@ -4,31 +4,6 @@
 //!
 //! It is used to handle requests and route them to the correct endpoint. Routers support sub-routers and middlewares.
 //!
-//! # Example
-//!
-//! ```rust
-//! use krustie::{ Router, StatusCode };
-//!
-//! let mut main_router = Router::new();
-//! let mut user_router = Router::new();
-//! let mut user_id_router = Router::new();
-//!
-//! user_id_router
-//!   .get(|req, res| {
-//!     res.status(StatusCode::Ok);
-//!   })
-//!   .post(|req, res| {
-//!     res.status(StatusCode::Ok);
-//!   });
-//!
-//! user_router.use_router("/:id", user_id_router);
-//!
-//! let mut deeper_router = Router::new();
-//!
-//! main_router.use_router("/admin/user", deeper_router);
-//!
-//! main_router.use_router("/user", user_router);
-//! ```
 
 use crate::{
     server::route_handler::{HandlerResult, RouteHandler},
@@ -58,10 +33,10 @@ type RouterResult<'a> = Option<(&'a mut Endpoint, HashMap<String, String>)>;
 /// let mut user_id_router = Router::new();
 ///
 /// user_id_router
-///   .get(|req, res| {
+///   .get("/", |req, res| {
 ///     res.status(StatusCode::Ok);
 ///   })
-///   .post(|req, res| {
+///   .post("/", |req, res| {
 ///     res.status(StatusCode::Ok);
 ///   });
 ///
@@ -94,7 +69,7 @@ impl Router {
     /// let mut server = Server::create();
     /// let mut main_router = Router::new();
     ///
-    /// main_router.get(|req, res| {
+    /// main_router.get("/", |req, res| {
     ///   res.status(StatusCode::Ok);
     /// });
     ///
@@ -124,7 +99,7 @@ impl Router {
     /// let mut user_router = Router::new();
     /// let mut comments_router = Router::new();
     ///
-    /// comments_router.post(|req, res| {
+    /// comments_router.post("/", |req, res| {
     ///   res.status(StatusCode::Ok);
     /// });
     ///

@@ -11,7 +11,7 @@ use crate::{
 };
 use endpoint::Endpoint;
 use regex::Regex;
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::HashMap, fmt::Display, iter::Peekable, slice::Iter};
 
 pub mod endpoint;
 pub mod methods;
@@ -157,21 +157,10 @@ impl Router {
         }
     }
 
-    fn route_handler<'a>(
-        &'a mut self,
-        path_array: &Vec<String>,
-        method: &HttpMethod,
-    ) -> RouterResult<'a> {
-        let params: HashMap<String, String> = HashMap::new();
-        let iter: std::slice::Iter<'_, String> = path_array.iter();
-
-        Self::handle_routes(self, method, params, iter)
-    }
-
     fn add_router<'a>(
         router: &'a mut Router,
         new_router: Router,
-        iter: &mut std::iter::Peekable<std::vec::IntoIter<PathType>>,
+        iter: &mut Peekable<std::vec::IntoIter<PathType>>,
     ) {
         match iter.next() {
             Some(PathType::Subdirectory(path)) => {
@@ -211,7 +200,7 @@ impl Router {
     fn add_endpoint<'a>(
         router: &'a mut Router,
         endpoint: Endpoint,
-        iter: &mut std::iter::Peekable<std::vec::IntoIter<PathType>>,
+        iter: &mut Peekable<std::vec::IntoIter<PathType>>,
     ) {
         match iter.next() {
             Some(PathType::Subdirectory(path)) => {
@@ -270,14 +259,30 @@ impl Router {
         }
     }
 
+    fn route_handler<'a>(
+        &'a mut self,
+        path_array: &Vec<String>,
+        method: &HttpMethod,
+    ) -> RouterResult<'a> {
+        let params: HashMap<String, String> = HashMap::new();
+        let iter: Iter<'_, String> = path_array.iter();
+
+        Self::handle_routes(self, method, params, iter)
+    }
+
     fn handle_routes<'a, 'b>(
         router: &'a mut Router,
         method: &HttpMethod,
         mut params: HashMap<String, String>,
-        mut iter: std::slice::Iter<'_, String>,
+        mut iter: Iter<'_, String>,
     ) -> RouterResult<'a> {
         if let Some(route) = iter.next() {
-            let route = route.split('?').collect::<Vec<&str>>().first().unwrap().to_string();
+            let route = route
+                .split('?')
+                .collect::<Vec<&str>>()
+                .first()
+                .unwrap()
+                .to_string();
 
             if route.is_empty() {
                 return Self::handle_routes(router, method, params, iter);

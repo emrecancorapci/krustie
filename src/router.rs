@@ -277,22 +277,18 @@ impl Router {
         mut iter: std::slice::Iter<'_, String>,
     ) -> RouterResult<'a> {
         if let Some(route) = iter.next() {
+            let route = route.split('?').collect::<Vec<&str>>().first().unwrap().to_string();
+
             if route.is_empty() {
                 return Self::handle_routes(router, method, params, iter);
             }
             // Iteration Continues
-            if let Some(founded_router) = router.subdirs.get_mut(route) {
+            if let Some(founded_router) = router.subdirs.get_mut(route.as_str()) {
                 // Router Found
                 Self::handle_routes(founded_router.as_mut(), method, params, iter)
             } else if let Some((param_name, founded_router)) = router.param_dir.as_mut() {
                 // Parameter Found
-                let param_value = route
-                    .split('?')
-                    .collect::<Vec<&str>>()
-                    .first()
-                    .unwrap()
-                    .to_string();
-                params.insert(param_name.clone(), param_value);
+                params.insert(param_name.clone(), route);
                 Self::handle_routes(founded_router, method, params, iter)
             } else {
                 None

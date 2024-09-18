@@ -169,6 +169,12 @@ impl Debug for Request {
             .map(|(k, v)| format!("  {k}: {v}"))
             .collect::<Vec<String>>()
             .join("\r\n");
+        let queries = self
+            .queries
+            .iter()
+            .map(|(k, v)| format!("  {k}: {v}"))
+            .collect::<Vec<String>>()
+            .join("\r\n");
         let body = match &self.body {
             RequestBody::Text(body) => format!("{:?}", body),
             RequestBody::Json(json) => format!("{:?}", json),
@@ -177,11 +183,12 @@ impl Debug for Request {
 
         write!(
             f,
-            "From:\r\n  {}\r\nRequest Line:\r\n  {}\r\nHeaders:\r\n{}\r\nParams:\r\n{}\r\nBody:\r\n{}",
+            "From:\r\n  {}\r\nRequest Line:\r\n  {}\r\nHeaders:\r\n{}\r\nParams:\r\n{}\r\nQueries:\r\n{}\r\nBody:\r\n{}",
             self.peer_addr,
             self.request,
             headers,
             params,
+            queries,
             body
         )
     }

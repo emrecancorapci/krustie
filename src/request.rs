@@ -114,7 +114,21 @@ impl Request {
         &self.queries
     }
 
-    // TODO: Add doctest
+    /// Returns the query parameter of the HTTP request
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::{ Request, Response };
+    /// 
+    /// fn get(request: &Request, response: &mut Response) {
+    ///   let id = request.get_query_param("id");
+    /// }
+    /// ```
+    pub fn get_query_param(&self, key: &str) -> Option<&String> {
+        self.queries.get(key)
+    }
+
     /// Returns the path of the HTTP request as a Vector
     pub fn get_path_array(&self) -> &Vec<String> {
         self.request.get_path_array()

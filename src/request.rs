@@ -1,12 +1,6 @@
 //! # Request
-//! 
+//!
 //! This module contains the `Request` struct and its implementation.
-//!
-//! It has public methods to get the headers, add and get local variables
-//!
-//! All request parameters are non-mutable except for the *local* variables. Local variables can be
-//! used to store data that can be defined in a *middleware* and accessed from the other
-//! *middlewares* or *controllers*.
 
 use self::{http_method::HttpMethod, request_line::RequestLine};
 use std::{
@@ -23,7 +17,7 @@ pub(crate) mod parser;
 mod request_line;
 
 /// Represents the HTTP request
-/// 
+///
 /// The `Request` struct contains the request line, headers, queries, parameters, body and peer address of the HTTP request.
 #[derive(Clone)]
 pub struct Request {
@@ -113,18 +107,18 @@ impl Request {
     }
 
     /// Returns the queries of the HTTP request as a HashMap
-    /// 
+    ///
     /// | The path of the HTTP request | Value |
     /// | -- | -- |
     /// | `/hello` | `[]` |
     /// | `/hello?planet=earth` | `[{ "planet": "earth" }]` |
     /// | `/hello?planet=earth&moon=luna` | `[{ "planet": "earth" }, { "moon": "luna"}]` |
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{ Request, Response };
-    /// 
+    ///
     /// fn get(request: &Request, response: &mut Response) {
     ///   let queries = request
     ///     .get_queries()
@@ -138,18 +132,18 @@ impl Request {
     }
 
     /// Returns the query parameter of the HTTP request
-    /// 
+    ///
     /// | The path of the HTTP request | get_query_param(key: &str) | Returns |
     /// | -- | -- | -- |
     /// | `/hello?planet=earth` | `get_query_param("planet")` | Some("earth") |
     /// | `/hello?planet=earth` | `get_query_param("moon")` | None |
     /// | `/hello?planet=earth&moon=luna` | `get_query_param("moon")` | Some("luna") |
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{ Request, Response };
-    /// 
+    ///
     /// fn get(request: &Request, response: &mut Response) {
     ///   let id = request.get_query_param("id");
     /// }
@@ -159,19 +153,19 @@ impl Request {
     }
 
     /// Returns the path of the HTTP request as a Vector
-    /// 
+    ///
     /// | The path of the HTTP request | `get_path_array()` |
     /// | -- | -- |
     /// | `/` | `vec![]` |
     /// | `/hello` | `vec!["hello"]` |
     /// | `/hello/world` | `vec!["hello", "world"]` |
     /// | `/hello/world?city=istanbul` | `vec!["hello", "world?city=istanbul"]` |
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{ Request, Response };
-    /// 
+    ///
     /// fn get(request: &Request, response: &mut Response) {
     ///   let path: Vec<String> = request.get_path_array();
     /// }
@@ -181,12 +175,12 @@ impl Request {
     }
 
     /// Returns the path of the HTTP request as a String
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{ Request, Response };
-    /// 
+    ///
     /// fn get(request: &Request, response: &mut Response) {
     ///   let path: &String = request.get_path();
     /// }
@@ -196,18 +190,18 @@ impl Request {
     }
 
     /// Returns the requested parameter of the HTTP request
-    /// 
+    ///
     /// | Route | Path | get_param(key: &str) | Returns |
     /// | -- | -- | -- | -- |
     /// | `/hello/:name` | `/hello/marvin` | `get_param("name")` | `Some("marvin")` |
     /// | `/hello/:name` | `/hello/marvin` | `get_param("planet")` | `None` |
     /// | `/hello/:name/:planet` | `/hello/marvin/earth` | `get_param("planet")` | `Some("earth")` |
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{ Request, Response };
-    /// 
+    ///
     /// fn get(request: &Request, response: &mut Response) {
     ///   let sort: Option<&String> = request.get_param("sort");
     /// }

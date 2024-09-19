@@ -15,13 +15,13 @@ impl Router {
     ///
     /// let mut router = Router::new();
     ///
-    /// router.get(|req, res| {
+    /// router.get("/", |req, res| {
     ///    res.status(StatusCode::Ok);
     /// });
     /// ```
-    pub fn get(&mut self, controller: Controller) -> &mut Self {
+    pub fn get(&mut self, path: &str, controller: Controller) -> &mut Self {
         let endpoint = Endpoint::new(HttpMethod::GET, controller);
-        self.use_endpoint("/", endpoint);
+        self.use_endpoint(path, endpoint);
         self
     }
 
@@ -34,13 +34,13 @@ impl Router {
     ///
     /// let mut router = Router::new();
     ///
-    /// router.post(|req, res| {
+    /// router.post("/", |req, res| {
     ///   res.status(StatusCode::Ok);
     /// });
     /// ```
-    pub fn post(&mut self, controller: Controller) -> &mut Self {
+    pub fn post(&mut self, path: &str, controller: Controller) -> &mut Self {
         let endpoint = Endpoint::new(HttpMethod::POST, controller);
-        self.use_endpoint("/", endpoint);
+        self.use_endpoint(path, endpoint);
         self
     }
 
@@ -53,13 +53,13 @@ impl Router {
     ///
     /// let mut router = Router::new();
     ///
-    /// router.put(|req, res| {
+    /// router.put("/", |req, res| {
     ///   res.status(StatusCode::Ok);
     /// });
     /// ```
-    pub fn put(&mut self, controller: Controller) -> &mut Self {
+    pub fn put(&mut self, path: &str, controller: Controller) -> &mut Self {
         let endpoint = Endpoint::new(HttpMethod::PUT, controller);
-        self.use_endpoint("/", endpoint);
+        self.use_endpoint(path, endpoint);
         self
     }
 
@@ -72,13 +72,13 @@ impl Router {
     ///
     /// let mut router = Router::new();
     ///
-    /// router.delete(|req, res| {
+    /// router.delete("/", |req, res| {
     ///   res.status(StatusCode::Ok);
     /// });
     /// ```
-    pub fn delete(&mut self, controller: Controller) -> &mut Self {
+    pub fn delete(&mut self, path: &str, controller: Controller) -> &mut Self {
         let endpoint = Endpoint::new(HttpMethod::DELETE, controller);
-        self.use_endpoint("/", endpoint);
+        self.use_endpoint(path, endpoint);
         self
     }
 
@@ -91,13 +91,13 @@ impl Router {
     ///
     /// let mut router = Router::new();
     ///
-    /// router.patch(|req, res| {
+    /// router.patch("/", |req, res| {
     ///   res.status(StatusCode::Ok);
     /// });
     /// ```
-    pub fn patch(&mut self, controller: Controller) -> &mut Self {
+    pub fn patch(&mut self, path: &str, controller: Controller) -> &mut Self {
         let endpoint = Endpoint::new(HttpMethod::PATCH, controller);
-        self.use_endpoint("/", endpoint);
+        self.use_endpoint(path, endpoint);
         self
     }
 }

@@ -4,31 +4,6 @@
 //!
 //! It is used to handle requests and route them to the correct endpoint. Routers support sub-routers and middlewares.
 //!
-//! # Example
-//!
-//! ```rust
-//! use krustie::{ Router, StatusCode };
-//!
-//! let mut main_router = Router::new();
-//! let mut user_router = Router::new();
-//! let mut user_id_router = Router::new();
-//!
-//! user_id_router
-//!   .get(|req, res| {
-//!     res.status(StatusCode::Ok);
-//!   })
-//!   .post(|req, res| {
-//!     res.status(StatusCode::Ok);
-//!   });
-//!
-//! user_router.use_router("/:id", user_id_router);
-//!
-//! let mut deeper_router = Router::new();
-//!
-//! main_router.use_router("/admin/user", deeper_router);
-//!
-//! main_router.use_router("/user", user_router);
-//! ```
 
 use crate::{
     server::route_handler::{HandlerResult, RouteHandler},
@@ -36,7 +11,7 @@ use crate::{
 };
 use endpoint::Endpoint;
 use regex::Regex;
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::HashMap, fmt::Display, iter::Peekable, slice::Iter};
 
 pub mod endpoint;
 pub mod methods;
@@ -58,10 +33,10 @@ type RouterResult<'a> = Option<(&'a mut Endpoint, HashMap<String, String>)>;
 /// let mut user_id_router = Router::new();
 ///
 /// user_id_router
-///   .get(|req, res| {
+///   .get("/", |req, res| {
 ///     res.status(StatusCode::Ok);
 ///   })
-///   .post(|req, res| {
+///   .post("/", |req, res| {
 ///     res.status(StatusCode::Ok);
 ///   });
 ///
@@ -94,7 +69,7 @@ impl Router {
     /// let mut server = Server::create();
     /// let mut main_router = Router::new();
     ///
-    /// main_router.get(|req, res| {
+    /// main_router.get("/", |req, res| {
     ///   res.status(StatusCode::Ok);
     /// });
     ///
@@ -124,7 +99,7 @@ impl Router {
     /// let mut user_router = Router::new();
     /// let mut comments_router = Router::new();
     ///
-    /// comments_router.post(|req, res| {
+    /// comments_router.post("/", |req, res| {
     ///   res.status(StatusCode::Ok);
     /// });
     ///
@@ -182,21 +157,10 @@ impl Router {
         }
     }
 
-    fn route_handler<'a>(
-        &'a mut self,
-        path_array: &Vec<String>,
-        method: &HttpMethod,
-    ) -> RouterResult<'a> {
-        let params: HashMap<String, String> = HashMap::new();
-        let iter: std::slice::Iter<'_, String> = path_array.iter();
-
-        Self::handle_routes(self, method, params, iter)
-    }
-
     fn add_router<'a>(
         router: &'a mut Router,
         new_router: Router,
-        iter: &mut std::iter::Peekable<std::vec::IntoIter<PathType>>,
+        iter: &mut Peekable<std::vec::IntoIter<PathType>>,
     ) {
         match iter.next() {
             Some(PathType::Subdirectory(path)) => {
@@ -236,7 +200,7 @@ impl Router {
     fn add_endpoint<'a>(
         router: &'a mut Router,
         endpoint: Endpoint,
-        iter: &mut std::iter::Peekable<std::vec::IntoIter<PathType>>,
+        iter: &mut Peekable<std::vec::IntoIter<PathType>>,
     ) {
         match iter.next() {
             Some(PathType::Subdirectory(path)) => {
@@ -266,25 +230,26 @@ impl Router {
             }
             Some(PathType::Parameter(param)) => {
                 if iter.peek().is_some() {
+                    // Iteration Will Continue
                     if let Some(found_router) = &mut router.param_dir {
                         // Router Found
                         Self::add_endpoint(found_router.1.as_mut(), endpoint, iter);
                     } else {
-                        // No Router & Iteration Continues
+                        // No Router
                         let mut inserted_router = Box::new(Router::new());
                         Self::add_endpoint(inserted_router.as_mut(), endpoint, iter);
                         router.param_dir = Some((param, inserted_router));
                     }
                 } else {
                     // Iteration Will End
-                    if let Some(found_router) = router.subdirs.get_mut(&param) {
+                    if let Some(found_router) = &mut router.param_dir {
                         // Router Found
-                        found_router.endpoints.push(endpoint);
+                        found_router.1.endpoints.push(endpoint);
                     } else {
                         // No Router
                         let mut inserted_router = Box::new(Router::new());
                         inserted_router.endpoints.push(endpoint);
-                        router.subdirs.insert(param, inserted_router);
+                        router.param_dir = Some((param, inserted_router));
                     }
                 }
             }
@@ -294,29 +259,41 @@ impl Router {
         }
     }
 
+    fn route_handler<'a>(
+        &'a mut self,
+        path_array: &Vec<String>,
+        method: &HttpMethod,
+    ) -> RouterResult<'a> {
+        let params: HashMap<String, String> = HashMap::new();
+        let iter: Iter<'_, String> = path_array.iter();
+
+        Self::handle_routes(self, method, params, iter)
+    }
+
     fn handle_routes<'a, 'b>(
         router: &'a mut Router,
         method: &HttpMethod,
         mut params: HashMap<String, String>,
-        mut iter: std::slice::Iter<'_, String>,
+        mut iter: Iter<'_, String>,
     ) -> RouterResult<'a> {
         if let Some(route) = iter.next() {
+            let route = route
+                .split('?')
+                .collect::<Vec<&str>>()
+                .first()
+                .unwrap()
+                .to_string();
+
             if route.is_empty() {
                 return Self::handle_routes(router, method, params, iter);
             }
             // Iteration Continues
-            if let Some(founded_router) = router.subdirs.get_mut(route) {
+            if let Some(founded_router) = router.subdirs.get_mut(route.as_str()) {
                 // Router Found
                 Self::handle_routes(founded_router.as_mut(), method, params, iter)
             } else if let Some((param_name, founded_router)) = router.param_dir.as_mut() {
                 // Parameter Found
-                let param_value = route
-                    .split('?')
-                    .collect::<Vec<&str>>()
-                    .first()
-                    .unwrap()
-                    .to_string();
-                params.insert(param_name.clone(), param_value);
+                params.insert(param_name.clone(), route);
                 Self::handle_routes(founded_router, method, params, iter)
             } else {
                 None

@@ -1,3 +1,5 @@
+//! # Request
+//! 
 //! This module contains the `Request` struct and its implementation.
 //!
 //! It has public methods to get the headers, add and get local variables
@@ -21,6 +23,8 @@ pub(crate) mod parser;
 mod request_line;
 
 /// Represents the HTTP request
+/// 
+/// The `Request` struct contains the request line, headers, queries, parameters, body and peer address of the HTTP request.
 #[derive(Clone)]
 pub struct Request {
     request: RequestLine,
@@ -48,7 +52,7 @@ impl Request {
         &self.headers
     }
 
-    /// Returns the value of the header key
+    /// Returns the value of the requested header
     ///
     /// # Example
     ///
@@ -92,7 +96,7 @@ impl Request {
 
     /// Returns the peer address of the HTTP request
     ///
-    /// The peer address is the address of the client that made the request
+    /// The peer address is the ip address of the client that made the request
     ///
     /// # Example
     ///
@@ -108,13 +112,38 @@ impl Request {
         &self.peer_addr
     }
 
-    // TODO: Add doctest
-    /// Returns the queries
+    /// Returns the queries of the HTTP request as a HashMap
+    /// 
+    /// | The path of the HTTP request | Value |
+    /// | -- | -- |
+    /// | `/hello` | `[]` |
+    /// | `/hello?planet=earth` | `[{ "planet": "earth" }]` |
+    /// | `/hello?planet=earth&moon=luna` | `[{ "planet": "earth" }, { "moon": "luna"}]` |
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::{ Request, Response };
+    /// 
+    /// fn get(request: &Request, response: &mut Response) {
+    ///   let queries = request
+    ///     .get_queries()
+    ///     .iter()
+    ///     .map(|(k, v)| format!("{}: {}", k, v))
+    ///     .collect::<Vec<String>>();
+    /// }
+    /// ```
     pub fn get_queries(&self) -> &HashMap<String, String> {
         &self.queries
     }
 
     /// Returns the query parameter of the HTTP request
+    /// 
+    /// | The path of the HTTP request | get_query_param(key: &str) | Returns |
+    /// | -- | -- | -- |
+    /// | `/hello?planet=earth` | `get_query_param("planet")` | Some("earth") |
+    /// | `/hello?planet=earth` | `get_query_param("moon")` | None |
+    /// | `/hello?planet=earth&moon=luna` | `get_query_param("moon")` | Some("luna") |
     /// 
     /// # Example
     /// 
@@ -130,17 +159,59 @@ impl Request {
     }
 
     /// Returns the path of the HTTP request as a Vector
+    /// 
+    /// | The path of the HTTP request | `get_path_array()` |
+    /// | -- | -- |
+    /// | `/` | `vec![]` |
+    /// | `/hello` | `vec!["hello"]` |
+    /// | `/hello/world` | `vec!["hello", "world"]` |
+    /// | `/hello/world?city=istanbul` | `vec!["hello", "world?city=istanbul"]` |
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::{ Request, Response };
+    /// 
+    /// fn get(request: &Request, response: &mut Response) {
+    ///   let path: Vec<String> = request.get_path_array();
+    /// }
+    /// ```
     pub fn get_path_array(&self) -> &Vec<String> {
         self.request.get_path_array()
     }
 
-    // TODO: Add doctest
     /// Returns the path of the HTTP request as a String
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::{ Request, Response };
+    /// 
+    /// fn get(request: &Request, response: &mut Response) {
+    ///   let path: &String = request.get_path();
+    /// }
+    /// ```
     pub fn get_path(&self) -> &String {
         self.request.get_path()
     }
 
-    /// Returns the version of the HTTP request
+    /// Returns the requested parameter of the HTTP request
+    /// 
+    /// | Route | Path | get_param(key: &str) | Returns |
+    /// | -- | -- | -- | -- |
+    /// | `/hello/:name` | `/hello/marvin` | `get_param("name")` | `Some("marvin")` |
+    /// | `/hello/:name` | `/hello/marvin` | `get_param("planet")` | `None` |
+    /// | `/hello/:name/:planet` | `/hello/marvin/earth` | `get_param("planet")` | `Some("earth")` |
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::{ Request, Response };
+    /// 
+    /// fn get(request: &Request, response: &mut Response) {
+    ///   let sort: Option<&String> = request.get_param("sort");
+    /// }
+    /// ```
     pub fn get_param(&self, key: &str) -> Option<&String> {
         self.params.get(key)
     }

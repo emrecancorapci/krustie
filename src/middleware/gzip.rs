@@ -59,9 +59,9 @@ impl Middleware for GzipEncoder {
 
             match Self::encode(body) {
                 Ok(compressed_bytes) => {
-                    response.insert_header("Content-Encoding", "gzip");
+                    response.set_header("Content-Encoding", "gzip");
 
-                    let _ = response.update_body(compressed_bytes);
+                    let _ = response.set_body(compressed_bytes);
                 }
                 Err(err) => {
                     eprintln!("Error while compressing: {}", err);

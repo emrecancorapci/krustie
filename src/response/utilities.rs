@@ -54,10 +54,10 @@ impl Response {
     /// use krustie::{ Response, StatusCode, Request };
     ///
     /// fn get(request: &Request, response: &mut Response) {
-    ///   response.insert_header("Server", "Krustie");
+    ///   response.set_header("Server", "Krustie");
     /// }
     /// ```
-    pub fn insert_header(&mut self, key: &str, value: &str) -> &mut Self {
+    pub fn set_header(&mut self, key: &str, value: &str) -> &mut Self {
         self.headers.insert(key.to_string(), value.to_string());
         self
     }
@@ -108,13 +108,14 @@ impl Response {
     /// fn get(request: &Request, response: &mut Response) {
     ///   response.body(b"Hello, World!".to_vec(), ContentType::Text);
     ///
-    ///   response.update_body(b"Goodbye, Mars!".to_vec());
+    ///   response.set_body(b"Goodbye, Mars!".to_vec());
     /// }
     /// ```
-    pub fn update_body(&mut self, body: Vec<u8>) -> Result<(), String> {
+    pub fn set_body(&mut self, body: Vec<u8>) -> Result<(), String> {
         if self.body.is_empty() {
             return Err("Request has no body.".to_string());
         }
+
         self.body = body;
         return Ok(());
     }
@@ -146,15 +147,30 @@ impl Response {
     /// use krustie::{ Request, Response };
     ///
     /// fn get(request: &Request, response: &mut Response) {
-    ///   response.add_local("user_id", "123");
+    ///   response.set_local("user_id", "123");
     /// }
     /// ```
-    pub fn add_local(&mut self, key: &str, value: &str) {
+    pub fn set_local(&mut self, key: &str, value: &str) {
         self.locals.insert(key.to_string(), value.to_string());
     }
 
+    /// Returns the status code of the response
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{ Response, StatusCode, Request };
+    ///
+    /// fn get(request: &Request, response: Response) {
+    ///   let status_code = response.get_status();
+    /// }
+    /// ```
+    pub fn get_status(&self) -> StatusCode {
+        self.status_code
+    }
+
     /// Returns true if status code is 4xx or 5xx.
-    pub fn is_err(&self) -> bool {
+    pub fn is_error(&self) -> bool {
         match self.status_code {
             StatusCode::BadRequest => true,
             StatusCode::Unauthorized => true,

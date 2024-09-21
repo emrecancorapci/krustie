@@ -42,8 +42,8 @@ impl RequestLine {
         &self.version
     }
 
-    pub(super) fn get_path(&self) -> &String {
-        &self.path
+    pub(super) fn get_path(&self) -> &str {
+        &self.path.as_str()
     }
 }
 

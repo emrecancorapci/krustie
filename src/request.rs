@@ -57,8 +57,8 @@ impl Request {
     ///   let content_type = request.get_header("content-type");
     /// }
     /// ```
-    pub fn get_header(&self, key: &str) -> Option<&String> {
-        self.headers.get(key)
+    pub fn get_header(&self, key: &str) -> Option<&str> {
+        self.headers.get(key).map(|v| v.as_str())
     }
 
     /// Returns the body of the HTTP request
@@ -121,13 +121,13 @@ impl Request {
     ///
     /// fn get(request: &Request, response: &mut Response) {
     ///   let queries = request
-    ///     .get_queries()
+    ///     .get_query_params()
     ///     .iter()
     ///     .map(|(k, v)| format!("{}: {}", k, v))
     ///     .collect::<Vec<String>>();
     /// }
     /// ```
-    pub fn get_queries(&self) -> &HashMap<String, String> {
+    pub fn get_query_params(&self) -> &HashMap<String, String> {
         &self.queries
     }
 
@@ -185,7 +185,7 @@ impl Request {
     ///   let path: &String = request.get_path();
     /// }
     /// ```
-    pub fn get_path(&self) -> &String {
+    pub fn get_path(&self) -> &str {
         self.request.get_path()
     }
 
@@ -211,7 +211,7 @@ impl Request {
     }
 
     /// Returns the method of the HTTP request
-    pub(crate) fn get_method(&self) -> &HttpMethod {
+    pub fn get_method(&self) -> &HttpMethod {
         self.request.get_method()
     }
 
@@ -255,8 +255,9 @@ impl Debug for Request {
             .collect::<Vec<String>>()
             .join("\r\n");
         let body = match &self.body {
-            RequestBody::Text(body) => format!("{:?}", body),
+            RequestBody::Text(string) => format!("{:?}", string),
             RequestBody::Json(json) => format!("{:?}", json),
+            RequestBody::Binary(body) => format!("{:?}", body),
             RequestBody::None => "None".to_string(),
         };
 

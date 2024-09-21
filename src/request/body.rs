@@ -11,10 +11,13 @@ use std::io::{Error, ErrorKind};
 use crate::json::JsonValue;
 
 #[derive(Debug, Clone)]
+// TODO: Add doctests
 /// Represents the body of the HTTP request
 pub enum RequestBody {
+    /// Represents a binary body. Holds a vector of bytes.
+    Binary(Vec<u8>),
     /// Represents a text body. Holds a vector of bytes.
-    Text(Vec<u8>),
+    Text(String),
     /// Represents a json body. Holds a JsonValue.
     Json(JsonValue),
     // Represents a form body. Holds a HashMap of strings. **Not implemented yet.**
@@ -25,20 +28,20 @@ pub enum RequestBody {
 
 impl RequestBody {
     pub(crate) fn parse(body: Vec<u8>, content_type: &str) -> Result<RequestBody, Error> {
-        let body = match content_type {
+        if body.is_empty() {
+            return Ok(RequestBody::None);
+        }
+
+        match content_type {
             "application/json" => match serde_json::from_slice(&body[..]) {
-                Ok(json) => RequestBody::Json(json),
-                Err(_) => RequestBody::None,
+                Ok(json) => Ok(RequestBody::Json(json)),
+                Err(_) => Err(Error::new(
+                    ErrorKind::InvalidData,
+                    "Error while parsing json body",
+                )),
             },
-            "plain/text" => RequestBody::Text(body.to_vec()),
-            _ => {
-                let error = format!(
-                    "Error while parsing body. Content-type not supported: {}",
-                    content_type
-                );
-                return Err(Error::new(ErrorKind::InvalidInput, error));
-            }
-        };
-        Ok(body)
+            "plain/text" => Ok(RequestBody::Text(body.iter().map(|&c| c as char).collect())),
+            _ => Ok(RequestBody::Binary(body)),
+        }
     }
 }

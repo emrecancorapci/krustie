@@ -17,6 +17,7 @@ impl RequestLine {
         version: &str,
     ) -> Result<Self, ParseRequestLineError> {
         let path_array: Vec<String> = path[1..].split('/').map(|str| str.to_string()).collect();
+
         match HttpMethod::try_from(method) {
             Ok(method) => Ok(Self {
                 method,
@@ -58,11 +59,8 @@ impl TryFrom<&str> for RequestLine {
     fn try_from(request_line: &str) -> Result<Self, Self::Error> {
         let request_line: Vec<&str> = request_line.split(' ').collect();
 
-        if request_line.len() != 3 {
-            return Err(ParseRequestLineError);
-        }
-
-        if !HttpMethod::is_valid(request_line[0])
+        if request_line.len() != 3
+            || !HttpMethod::is_valid(request_line[0])
             || !request_line[1].starts_with('/')
             || !request_line[2].starts_with("HTTP/")
         {

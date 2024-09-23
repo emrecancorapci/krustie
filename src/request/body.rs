@@ -27,7 +27,7 @@ pub enum RequestBody {
 }
 
 impl RequestBody {
-    pub(crate) fn parse(body: Vec<u8>, content_type: &str) -> Result<RequestBody, Error> {
+    pub(crate) fn parse(body: &[u8], content_type: &str) -> Result<RequestBody, Error> {
         if body.is_empty() {
             return Ok(RequestBody::None);
         }
@@ -41,7 +41,7 @@ impl RequestBody {
                 )),
             },
             "plain/text" => Ok(RequestBody::Text(body.iter().map(|&c| c as char).collect())),
-            _ => Ok(RequestBody::Binary(body)),
+            _ => Ok(RequestBody::Binary(body.to_vec())),
         }
     }
 }

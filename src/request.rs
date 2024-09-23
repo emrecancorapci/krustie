@@ -167,7 +167,7 @@ impl Request {
     /// use krustie::{ Request, Response };
     ///
     /// fn get(request: &Request, response: &mut Response) {
-    ///   let path: Vec<String> = request.get_path_array();
+    ///   let path: &Vec<String> = request.get_path_array();
     /// }
     /// ```
     pub fn get_path_array(&self) -> &Vec<String> {
@@ -182,7 +182,7 @@ impl Request {
     /// use krustie::{ Request, Response };
     ///
     /// fn get(request: &Request, response: &mut Response) {
-    ///   let path: &String = request.get_path();
+    ///   let path: &str = request.get_path();
     /// }
     /// ```
     pub fn get_path(&self) -> &str {

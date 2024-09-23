@@ -5,31 +5,32 @@
 [<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-krustie-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/krustie)
 [<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/emrecancorapci/krustie/rust.yml?branch=main&style=for-the-badge" height="20">](https://github.com/emrecancorapci/krustie/actions?query=branch%3main)
 
-Krustie is a backend library written in Rust. It is currently a work in progress and not yet ready for production use. This project serves as a personal learning experience, and contributions or feedbacks are welcome.
+Krustie is a simple and easy-to-use backend framework. It is designed to be a simple and easy-to-use web server that can be used for a variety of purposes. Krustie's error-prone design makes it difficult to write incorrect code.
+
+> Krustie is still in the early stages of development and ***is not yet ready for production use***. The API is subject to change and there may be bugs or missing features.
 
 ## Features
 
-- Stackable Router with parameter and query support
+- Router with support for parameter and query string parsing
 - Middleware support for routers and endpoints
-- Multi-threaded server
-- JSON parsing ([serde_json](https://crates.io/crates/serde_json))
+- JSON data parsing and serialization (using the `serde` library)
 
-### Builtin Middlewares
+### Built-in Middlewares
 
 - Static file serving
-- Rate limiter
-- Gzip encoding ([flate2](https://crates.io/crates/flate2))
+- Rate limiting
+- Gzip compression
 
 ## Start your server
 
 ```rust
-use krustie::{ Router, Server, Listener, StatusCode };
+use krustie::{ Router, Server, StatusCode };
 
 fn main() {
     let mut server = Server::create();
     let mut router = Router::new();
 
-    router.get(|_, res| {
+    router.get("/", |_, res| {
         res.status(StatusCode::Ok).body_text("Hello World!");
     });
 

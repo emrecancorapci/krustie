@@ -7,6 +7,7 @@ use crate::{ Request, Response };
 use super::Middleware;
 
 pub mod configs;
+pub mod csp;
 
 #[derive(Clone)]
 struct Helmet;

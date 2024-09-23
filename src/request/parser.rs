@@ -1,6 +1,7 @@
+use core::str;
 use std::{
     collections::HashMap,
-    io::{BufRead, BufReader, Error, ErrorKind, Read},
+    io::{Error, ErrorKind, Read},
     net::TcpStream,
 };
 
@@ -12,21 +13,13 @@ impl Request {
     /// Parses a TcpStream into Request
     pub(crate) fn parse(mut stream: &TcpStream) -> Result<Self, Error> {
         let peer_addr = stream.peer_addr()?;
+        let buffer: &mut [u8] = &mut [0; 1024];
 
-        let mut buf_reader = BufReader::new(&mut stream);
-        let mut http_request = Vec::new();
-        let mut queries = HashMap::new();
+        let stream_length = stream.read(buffer)?;
 
-        // Don't touch this. It's too sensitive :(((.
-        for line_result in buf_reader.by_ref().lines() {
-            let line = line_result.unwrap();
-            if line.is_empty() {
-                break;
-            }
-            http_request.push(line);
-        }
+        let (http_request, body) = Self::split_request(&buffer[..stream_length]);
 
-        let request_line = RequestLine::try_from(http_request[0].as_str());
+        let request_line = RequestLine::try_from(http_request[0]);
 
         if request_line.is_err() {
             return Err(Error::new(
@@ -44,6 +37,8 @@ impl Request {
             ));
         }
 
+        let mut queries = HashMap::new();
+
         if request_line
             .get_path_array()
             .last()
@@ -51,16 +46,16 @@ impl Request {
         {
             let last = request_line.get_path_array().last().unwrap();
 
-            let maybe_queries = last.split('?').skip(1).collect::<Vec<&str>>();
+            let query_params = last.split('?').skip(1).collect::<Vec<&str>>();
 
-            if maybe_queries.len() != 1 {
+            if query_params.len() != 1 {
                 return Err(Error::new(
                     ErrorKind::InvalidInput,
                     "Invalid query usage".to_string(),
                 ));
             }
 
-            maybe_queries[0].split('&').for_each(|kvp| {
+            query_params[0].split('&').for_each(|kvp| {
                 if let Some((k, v)) = kvp.split_once('=') {
                     queries.insert(k.to_string(), v.to_string());
                 }
@@ -78,7 +73,7 @@ impl Request {
 
         if content_length == 0 {
             return Ok(Request {
-                request: RequestLine::try_from(http_request[0].as_str()).unwrap(),
+                request: RequestLine::try_from(http_request[0]).unwrap(),
                 headers,
                 queries,
                 peer_addr,
@@ -86,12 +81,6 @@ impl Request {
                 body: RequestBody::None,
             });
         }
-
-        let mut body = Vec::with_capacity(content_length);
-
-        buf_reader
-            .take(content_length as u64)
-            .read_to_end(&mut body)?;
 
         let body: RequestBody = Self::parse_body(body, &headers)?;
 
@@ -105,8 +94,8 @@ impl Request {
         })
     }
 
-    fn header_parser() -> impl Fn(&String) -> Option<(String, String)> {
-        |line: &String| {
+    fn header_parser() -> impl Fn(&&str) -> Option<(String, String)> {
+        |line: &&str| {
             let header_line: Vec<&str> = line.split(':').collect();
 
             if header_line.len() == 2 {
@@ -120,7 +109,7 @@ impl Request {
         }
     }
 
-    fn parse_length(headers: &[String]) -> Option<usize> {
+    fn parse_length(headers: &[&str]) -> Option<usize> {
         for line in headers.iter() {
             if line.starts_with("Content-Length") {
                 match line.find(':') {
@@ -136,7 +125,7 @@ impl Request {
         return None;
     }
 
-    fn parse_body(body: Vec<u8>, headers: &HashMap<String, String>) -> Result<RequestBody, Error> {
+    fn parse_body(body: &[u8], headers: &HashMap<String, String>) -> Result<RequestBody, Error> {
         if body.is_empty() {
             return Err(Error::new(std::io::ErrorKind::NotFound, "Body is empty."));
         }
@@ -152,5 +141,23 @@ impl Request {
                 ));
             }
         }
+    }
+
+    fn split_request(vec: &[u8]) -> (Vec<&str>, &[u8]) {
+        let mut split = vec.split(|&x| x == b'\n');
+
+        let mut http_request = Vec::new();
+
+        while let Some(line) = split.next() {
+            if line.is_empty() {
+                break;
+            }
+
+            http_request.push(str::from_utf8(line).unwrap());
+        }
+
+        let body = split.next().unwrap_or(&[]);
+
+        (http_request, body)
     }
 }

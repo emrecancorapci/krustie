@@ -5,29 +5,39 @@ use super::http_method::HttpMethod;
 #[derive(Clone)]
 pub(crate) struct RequestLine {
     method: HttpMethod,
-    path: String,
+    request_uri: String,
     version: String,
-    path_array: Vec<String>,
+    request_uri_array: Vec<String>,
 }
 
 impl RequestLine {
     pub(super) fn new(
         method: &str,
-        path: &str,
+        request_uri: &str,
         version: &str,
     ) -> Result<Self, ParseRequestLineError> {
-        let path_array: Vec<String> = path[1..].split('/').map(|str| str.to_string()).collect();
+        println!("{:?}", Self::request_uri_parser(request_uri));
 
         match HttpMethod::try_from(method) {
             Ok(method) => Ok(Self {
                 method,
-                path: path.to_string(),
+                request_uri: request_uri.to_string(),
                 version: version.to_string(),
-                path_array,
+                request_uri_array: Self::request_uri_parser(request_uri),
             }),
             Err(_) => {
                 return Err(ParseRequestLineError);
             }
+        }
+    }
+
+    fn request_uri_parser(uri: &str) -> Vec<String> {
+        if uri.starts_with('/') {
+            uri.split('/').skip(1).map(|str| str.to_string()).collect()
+        } else if uri.starts_with("http") {
+            uri.split('/').skip(3).map(|str| str.to_string()).collect()
+        } else {
+            uri.split('/').skip(1).map(|str| str.to_string()).collect()
         }
     }
 
@@ -36,7 +46,7 @@ impl RequestLine {
     }
 
     pub(super) fn get_path_array(&self) -> &Vec<String> {
-        &self.path_array
+        &self.request_uri_array
     }
 
     pub(super) fn get_version(&self) -> &String {
@@ -44,13 +54,13 @@ impl RequestLine {
     }
 
     pub(super) fn get_path(&self) -> &str {
-        &self.path.as_str()
+        &self.request_uri.as_str()
     }
 }
 
 impl Display for RequestLine {
     fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
-        write!(f, "{} {} {}", self.method, self.path, self.version)
+        write!(f, "{} {} {}", self.method, self.request_uri, self.version)
     }
 }
 
@@ -61,7 +71,6 @@ impl TryFrom<&str> for RequestLine {
 
         if request_line.len() != 3
             || !HttpMethod::is_valid(request_line[0])
-            || !request_line[1].starts_with('/')
             || !request_line[2].starts_with("HTTP/")
         {
             return Err(ParseRequestLineError);

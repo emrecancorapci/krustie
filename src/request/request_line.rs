@@ -46,6 +46,18 @@ impl RequestLine {
     pub(super) fn get_path(&self) -> &str {
         &self.path.as_str()
     }
+
+    pub(crate) fn set_method(&mut self, method: HttpMethod) {
+        self.method = method;
+    }
+
+    pub(crate) fn set_path(&mut self, path: &str) {
+        self.path = String::from(path);
+    }
+
+    pub(crate) fn set_version(&mut self, version: &str) {
+        self.version = String::from(version);
+    }
 }
 
 impl Display for RequestLine {

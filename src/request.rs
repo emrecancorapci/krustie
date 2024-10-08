@@ -13,6 +13,7 @@ pub use body::RequestBody;
 
 pub mod body;
 pub mod http_method;
+pub mod builder;
 pub(crate) mod parser;
 mod request_line;
 

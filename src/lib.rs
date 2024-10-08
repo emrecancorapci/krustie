@@ -2,6 +2,7 @@
     missing_debug_implementations,
     missing_docs,
     rust_2018_idioms,
+    rust_2024_compatibility,
     unreachable_pub,
     clippy::all
 )]
@@ -25,6 +26,8 @@ pub mod request;
 pub mod response;
 pub mod router;
 pub mod server;
+#[cfg(test)]
+mod test;
 
 pub use middleware::Middleware;
 pub use request::http_method::HttpMethod;

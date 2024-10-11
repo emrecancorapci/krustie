@@ -67,7 +67,7 @@ impl TryFrom<&str> for RequestLine {
             return Err(ParseRequestLineError);
         }
 
-        match Self::new(request_line[0], request_line[1], request_line[2]) {
+        match Self::new(request_line[0].trim(), request_line[1].trim(), request_line[2].trim()) {
             Ok(request_line) => Ok(request_line),
             Err(_) => Err(ParseRequestLineError),
         }

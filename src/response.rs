@@ -122,21 +122,29 @@ impl From<Response> for Vec<u8> {
     /// }
     /// ```
     fn from(response: Response) -> Vec<u8> {
+        let mut headers = response.headers;
         let mut headers_string = String::new();
 
-        if !response.headers.is_empty() {
-            response.headers.iter().for_each(|(key, value)| {
-                headers_string.push_str(&format!("{key}: {value}\r\n"));
-            });
+        if !response.body.is_empty() {
+            headers.insert(
+                "Content-Length".to_string(),
+                response.body.len().to_string(),
+            );
+
+            if !headers.contains_key("Content-Type") {
+                eprintln!("Content-Type not found even though body is present");
+                headers.insert("Content-Type".to_string(), "text/plain".to_string());
+            }
         }
 
-        if !response.body.is_empty() {
-            headers_string.push_str(&format!("Content-Length: {}\r\n", response.body.len()));
+        if !headers.is_empty() {
+            let mut headers_vec: Vec<String> = Vec::new();
 
-            if !headers_string.contains("Content-Type") {
-                eprintln!("Content-Type not found even though body is present");
-                headers_string.push_str("Content-Type: text/plain\r\n");
-            }
+            headers.iter().for_each(|(key, value)| {
+                headers_vec.push(format!("{key}: {value}"));
+            });
+
+            headers_string = headers_vec.join("\r\n");
         }
 
         let mut response_bytes: Vec<u8> = format!(
@@ -148,6 +156,7 @@ impl From<Response> for Vec<u8> {
         .into_bytes();
 
         if !response.body.is_empty() {
+            response_bytes.extend_from_slice(b"\r\n");
             response_bytes.extend_from_slice(&response.body);
         }
 

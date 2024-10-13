@@ -37,31 +37,6 @@ impl Request {
             ));
         }
 
-        let mut queries = HashMap::new();
-
-        if request_line
-            .get_path_array()
-            .last()
-            .is_some_and(|last| last.contains('?'))
-        {
-            let last = request_line.get_path_array().last().unwrap();
-
-            let query_params = last.split('?').skip(1).collect::<Vec<&str>>();
-
-            if query_params.len() != 1 {
-                return Err(Error::new(
-                    ErrorKind::InvalidInput,
-                    "Invalid query usage".to_string(),
-                ));
-            }
-
-            query_params[0].split('&').for_each(|kvp| {
-                if let Some((k, v)) = kvp.split_once('=') {
-                    queries.insert(k.to_string(), v.to_string());
-                }
-            });
-        }
-
         let headers: HashMap<String, String> = http_request
             .iter()
             .skip(1)
@@ -70,6 +45,8 @@ impl Request {
             .collect();
 
         let content_length = Self::parse_length(&http_request).unwrap_or(0);
+
+        let queries = Self::parse_queries(&request_line.get_path_array());
 
         if content_length == 0 {
             return Ok(Request {
@@ -92,6 +69,38 @@ impl Request {
             peer_addr,
             body,
         })
+    }
+
+    pub(crate) fn parse_queries(path_array: &Vec<String>) -> HashMap<String, String> {
+        let path_last = path_array.last();
+
+        return match path_last {
+            Some(last) if !last.is_empty() && last.contains('?') => {
+                Self::parse_query_uri(last).unwrap_or(HashMap::new())
+            }
+            _ => HashMap::new(),
+        };
+    }
+
+    fn parse_query_uri(uri_last: &str) -> Result<HashMap<String, String>, Error> {
+        let query_params = uri_last.split('?').skip(1).collect::<Vec<&str>>();
+
+        if query_params.len() != 1 {
+            return Err(Error::new(
+                ErrorKind::InvalidInput,
+                "Invalid query usage".to_string(),
+            ));
+        }
+
+        return Ok(query_params[0]
+            .split('&')
+            .fold(HashMap::new(), |mut queries, kvp| {
+                if let Some((k, v)) = kvp.split_once('=') {
+                    queries.insert(k.to_string(), v.to_string());
+                }
+
+                return queries;
+            }));
     }
 
     fn header_parser() -> impl Fn(&&str) -> Option<(String, String)> {

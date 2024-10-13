@@ -196,16 +196,16 @@ impl RequestBuilder {
 
 impl Request {
     /// Returns a new RequestBuilder instance
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```
     /// use krustie::{Request, HttpMethod};
-    /// 
+    ///
     /// let request = Request::builder()
     ///   .method(HttpMethod::GET)
     ///   .build();
-    /// 
+    ///
     /// assert_eq!(request.get_method(), &HttpMethod::GET);
     /// ```
     pub fn builder() -> RequestBuilder {

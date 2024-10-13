@@ -212,12 +212,12 @@ impl Request {
     }
 
     /// Returns the version of the HTTP request
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{HttpMethod, Request, Response};
-    /// 
+    ///
     /// # let request = Request::builder()
     /// #  .request_line(HttpMethod::GET, "/echo/hello", "HTTP/1.1")
     /// #  .build();
@@ -233,12 +233,12 @@ impl Request {
     }
 
     /// Returns the method of the HTTP request
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use krustie::{HttpMethod, Request, Response};
-    /// 
+    ///
     /// # let request = Request::builder()
     /// #  .request_line(HttpMethod::GET, "/echo/hello", "HTTP/1.1")
     /// #  .build();

@@ -1,6 +1,6 @@
 [package]
 name = "krustie"
-version = "0.1.13"
+version = "0.2.0"
 description = "Krustie is a simple and easy-to-use backend framework."
 categories = ["network-programming", "web-programming::http-server"]
 keywords = ["http", "web", "framework"]

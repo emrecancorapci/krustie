@@ -7,7 +7,8 @@ fn router_parameters() {
     let mut router = Router::new();
 
     router.get("/echo/:param", |req, res| {
-        res.status(StatusCode::Ok).body_text(req.get_param("param").unwrap());
+        res.status(StatusCode::Ok)
+            .body_text(req.get_param("param").unwrap());
     });
 
     server.use_handler(router);
@@ -21,7 +22,6 @@ fn router_parameters() {
         .path("/echo/hello")
         .build();
 
-
     let response = server.mock_request(request);
 
     Response::assert_eq(&expected_response, &response);
@@ -34,7 +34,8 @@ fn query_parameters() {
     let mut router = Router::new();
 
     router.get("/echo", |req, res| {
-        res.status(StatusCode::Ok).body_text(req.get_query_param("query").unwrap());
+        res.status(StatusCode::Ok)
+            .body_text(req.get_query_param("query").unwrap());
     });
 
     server.use_handler(router);
@@ -53,8 +54,6 @@ fn query_parameters() {
     Response::assert_eq(&expected_response, &response);
 }
 
-
-
 #[test]
 fn router_and_query_parameters() {
     // Create a new server instance
@@ -62,14 +61,23 @@ fn router_and_query_parameters() {
     let mut router = Router::new();
 
     router.get("/echo/:param", |req, res| {
-        res.status(StatusCode::Ok).body_text(format!("{} {}", req.get_param("param").unwrap(), req.get_query_param("query").unwrap()).as_str());
+        res.status(StatusCode::Ok).body_text(
+            format!(
+                "{} {}",
+                req.get_param("param").unwrap(),
+                req.get_query_param("query").unwrap()
+            )
+            .as_str(),
+        );
     });
 
     server.use_handler(router);
 
     // Test the router
     let mut expected_response = Response::default();
-    expected_response.status(StatusCode::Ok).body_text("hello world");
+    expected_response
+        .status(StatusCode::Ok)
+        .body_text("hello world");
 
     let request = Request::builder()
         .method(HttpMethod::GET)
@@ -80,4 +88,3 @@ fn router_and_query_parameters() {
 
     Response::assert_eq(&expected_response, &response);
 }
-

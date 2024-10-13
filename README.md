@@ -5,7 +5,7 @@
 [<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-krustie-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/krustie)
 [<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/emrecancorapci/krustie/rust.yml?branch=main&style=for-the-badge" height="20">](https://github.com/emrecancorapci/krustie/actions?query=branch%3main)
 
-Krustie is a simple and easy-to-use backend framework. It is designed to be a simple and easy-to-use web server that can be used for a variety of purposes. Krustie's error-prone design makes it difficult to write incorrect code.
+Krustie is a simple backend framework. It is designed to be a easy-to-use HTTP web server that can be used for a variety of purposes. Krustie's error-proof design aims to make it harder to write bugs.
 
 > Krustie is still in the early stages of development and ***is not yet ready for production use***. The API is subject to change and there may be bugs or missing features.
 
@@ -13,6 +13,7 @@ Krustie is a simple and easy-to-use backend framework. It is designed to be a si
 
 - Router with support for parameter and query string parsing
 - Middleware support for routers and endpoints
+- Minimal testing support
 - JSON data parsing and serialization (using the `serde` library)
 
 ### Built-in Middlewares

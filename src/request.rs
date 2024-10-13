@@ -12,6 +12,7 @@ use std::{
 pub use body::RequestBody;
 
 pub mod body;
+pub mod builder;
 pub mod http_method;
 pub(crate) mod parser;
 mod request_line;

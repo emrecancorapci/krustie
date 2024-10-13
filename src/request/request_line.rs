@@ -7,7 +7,7 @@ pub(crate) struct RequestLine {
     method: HttpMethod,
     uri: String,
     version: String,
-    path_array: Vec<String>,
+    request_uri_array: Vec<String>,
 }
 
 impl RequestLine {
@@ -44,7 +44,7 @@ impl RequestLine {
     }
 
     pub(super) fn get_path_array(&self) -> &Vec<String> {
-        &self.path_array
+        &self.request_uri_array
     }
 
     pub(super) fn get_version(&self) -> &String {

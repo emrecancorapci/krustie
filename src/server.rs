@@ -93,6 +93,7 @@ use std::{
 };
 
 pub mod route_handler;
+pub mod testing;
 use route_handler::{HandlerResult, RouteHandler};
 use std::thread;
 

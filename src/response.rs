@@ -110,24 +110,26 @@ impl Response {
     }
 
     fn export_request_header(&self) -> String {
+        let mut headers = self.headers.clone();
         let mut headers_string = String::new();
 
-        if !self.headers.is_empty() {
-            let mut keys = self.headers.keys().collect::<Vec<&String>>();
-            keys.sort();
+        if !self.body.is_empty() {
+            headers.insert("Content-Length".to_string(), self.body.len().to_string());
 
-            keys.iter().for_each(|key| {
-                headers_string.push_str(&format!("{key}: {}\r\n", self.headers[*key]));
-            });
+            if !headers.contains_key("Content-Type") {
+                eprintln!("Content-Type not found even though body is present");
+
+                headers.insert("Content-Type".to_string(), "text/plain".to_string());
+            }
         }
 
-        if !self.body.is_empty() {
-            headers_string.push_str(&format!("Content-Length: {}\r\n", self.body.len()));
+        if !headers.is_empty() {
+            let mut keys = headers.keys().collect::<Vec<&String>>();
+            keys.sort();
 
-            if !headers_string.contains("Content-Type") {
-                eprintln!("Content-Type not found even though body is present");
-                headers_string.push_str("Content-Type: text/plain\r\n");
-            }
+            headers_string = keys.iter().fold(String::new(), |acc, key| {
+                format!("{acc}{key}: {value}\r\n", value = headers[*key])
+            });
         }
 
         return format!(

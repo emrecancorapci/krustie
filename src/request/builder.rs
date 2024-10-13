@@ -218,6 +218,7 @@ impl Request {
 
     fn set_uri(&mut self, path: &str) {
         self.request.set_uri(path);
+        self.queries = Request::parse_queries(&self.request.get_path_array());
     }
 
     fn set_version(&mut self, version: &str) {

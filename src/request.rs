@@ -211,7 +211,44 @@ impl Request {
         self.params.get(key)
     }
 
+    /// Returns the version of the HTTP request
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::{HttpMethod, Request, Response};
+    /// 
+    /// # let request = Request::builder()
+    /// #  .request_line(HttpMethod::GET, "/echo/hello", "HTTP/1.1")
+    /// #  .build();
+    /// #
+    /// fn get(request: &Request, response: &mut Response) {
+    /// # }
+    ///     assert_eq!(request.get_version(), "HTTP/1.1");
+    /// # {
+    /// }
+    /// ```
+    pub fn get_version(&self) -> &str {
+        &self.request.get_version()
+    }
+
     /// Returns the method of the HTTP request
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::{HttpMethod, Request, Response};
+    /// 
+    /// # let request = Request::builder()
+    /// #  .request_line(HttpMethod::GET, "/echo/hello", "HTTP/1.1")
+    /// #  .build();
+    /// #
+    /// fn get(request: &Request, response: &mut Response) {
+    /// # }
+    ///    assert_eq!(request.get_method(), &HttpMethod::GET);
+    /// # {
+    /// }
+    /// ```
     pub fn get_method(&self) -> &HttpMethod {
         self.request.get_method()
     }
@@ -237,24 +274,17 @@ impl Default for Request {
 
 impl Debug for Request {
     fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
-        let headers = self
-            .headers
-            .iter()
-            .map(|(k, v)| format!("  {k}: {v}"))
-            .collect::<Vec<String>>()
-            .join("\r\n");
-        let params = self
-            .params
-            .iter()
-            .map(|(k, v)| format!("  {k}: {v}"))
-            .collect::<Vec<String>>()
-            .join("\r\n");
-        let queries = self
-            .queries
-            .iter()
-            .map(|(k, v)| format!("  {k}: {v}"))
-            .collect::<Vec<String>>()
-            .join("\r\n");
+        fn format_hashmap(value: &HashMap<String, String>) -> String {
+            value
+                .iter()
+                .map(|(k, v)| format!("  {}: {}", k, v))
+                .collect::<Vec<String>>()
+                .join("\r\n")
+        }
+
+        let headers = format_hashmap(&self.headers);
+        let params = format_hashmap(&self.params);
+        let queries = format_hashmap(&self.queries);
         let body = match &self.body {
             RequestBody::Text(string) => format!("{:?}", string),
             RequestBody::Json(json) => format!("{:?}", json),

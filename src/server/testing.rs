@@ -1,3 +1,5 @@
+//! Testing utilities for the server
+
 use crate::{Request, Response};
 
 use super::{route_handler::HandlerResult, Server};
@@ -35,4 +37,3 @@ impl Server {
         Response::assert_eq(&response, &expected_response);
     }
 }
-

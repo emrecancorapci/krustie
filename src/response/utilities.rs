@@ -73,8 +73,8 @@ impl Response {
     ///   let body = response.get_body();
     /// }
     /// ```
-    pub fn get_body(&mut self) -> &Vec<u8> {
-        &mut self.body
+    pub fn get_body(&self) -> &Vec<u8> {
+        &self.body
     }
 
     /// Gets the body of the response as a **mutable** byte vector reference

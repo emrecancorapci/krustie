@@ -34,6 +34,7 @@ pub use self::content_type::ContentType;
 pub mod body;
 pub mod content_type;
 pub mod status_code;
+pub mod testing;
 pub mod utilities;
 
 /// Represents the HTTP response
@@ -107,6 +108,49 @@ impl Response {
         }
         self
     }
+
+    fn export_request_header(&self) -> String {
+        let mut headers = self.headers.clone();
+        let mut headers_string = String::new();
+
+        if !self.body.is_empty() {
+            headers.insert("Content-Length".to_string(), self.body.len().to_string());
+
+            if !headers.contains_key("Content-Type") {
+                eprintln!("Content-Type not found even though body is present");
+
+                headers.insert("Content-Type".to_string(), "text/plain".to_string());
+            }
+        }
+
+        if !headers.is_empty() {
+            let mut keys = headers.keys().collect::<Vec<&String>>();
+            keys.sort();
+
+            headers_string = keys.iter().fold(String::new(), |acc, key| {
+                format!("{acc}{key}: {value}\r\n", value = headers[*key])
+            });
+        }
+
+        return format!(
+            "{http_version} {status_code} {status_msg}\r\n{headers_string}\r\n",
+            http_version = self.http_version,
+            status_code = self.status_code,
+            status_msg = self.status_code.get_message()
+        );
+    }
+}
+
+impl ToString for Response {
+    fn to_string(&self) -> String {
+        let mut response_string = self.export_request_header();
+
+        if !self.body.is_empty() {
+            response_string.push_str(&String::from_utf8_lossy(&self.body));
+        }
+
+        response_string
+    }
 }
 
 impl From<Response> for Vec<u8> {
@@ -122,30 +166,7 @@ impl From<Response> for Vec<u8> {
     /// }
     /// ```
     fn from(response: Response) -> Vec<u8> {
-        let mut headers_string = String::new();
-
-        if !response.headers.is_empty() {
-            response.headers.iter().for_each(|(key, value)| {
-                headers_string.push_str(&format!("{key}: {value}\r\n"));
-            });
-        }
-
-        if !response.body.is_empty() {
-            headers_string.push_str(&format!("Content-Length: {}\r\n", response.body.len()));
-
-            if !headers_string.contains("Content-Type") {
-                eprintln!("Content-Type not found even though body is present");
-                headers_string.push_str("Content-Type: text/plain\r\n");
-            }
-        }
-
-        let mut response_bytes: Vec<u8> = format!(
-            "{http_version} {status_code} {status_msg}\r\n{headers_string}\r\n",
-            http_version = response.http_version,
-            status_code = response.status_code,
-            status_msg = response.status_code.get_message()
-        )
-        .into_bytes();
+        let mut response_bytes = response.export_request_header().into_bytes();
 
         if !response.body.is_empty() {
             response_bytes.extend_from_slice(&response.body);

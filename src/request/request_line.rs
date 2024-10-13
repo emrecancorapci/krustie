@@ -5,25 +5,23 @@ use super::http_method::HttpMethod;
 #[derive(Clone)]
 pub(crate) struct RequestLine {
     method: HttpMethod,
-    request_uri: String,
+    uri: String,
     version: String,
-    request_uri_array: Vec<String>,
+    path_array: Vec<String>,
 }
 
 impl RequestLine {
     pub(super) fn new(
         method: &str,
-        request_uri: &str,
+        uri: &str,
         version: &str,
     ) -> Result<Self, ParseRequestLineError> {
-        println!("{:?}", Self::request_uri_parser(request_uri));
-
         match HttpMethod::try_from(method) {
             Ok(method) => Ok(Self {
                 method,
-                request_uri: request_uri.to_string(),
+                uri: uri.to_string(),
                 version: version.to_string(),
-                request_uri_array: Self::request_uri_parser(request_uri),
+                path_array: Self::uri_parser(uri),
             }),
             Err(_) => {
                 return Err(ParseRequestLineError);
@@ -31,7 +29,7 @@ impl RequestLine {
         }
     }
 
-    fn request_uri_parser(uri: &str) -> Vec<String> {
+    fn uri_parser(uri: &str) -> Vec<String> {
         if uri.starts_with('/') {
             uri.split('/').skip(1).map(|str| str.to_string()).collect()
         } else if uri.starts_with("http") {
@@ -46,7 +44,7 @@ impl RequestLine {
     }
 
     pub(super) fn get_path_array(&self) -> &Vec<String> {
-        &self.request_uri_array
+        &self.path_array
     }
 
     pub(super) fn get_version(&self) -> &String {
@@ -54,13 +52,26 @@ impl RequestLine {
     }
 
     pub(super) fn get_path(&self) -> &str {
-        &self.request_uri.as_str()
+        &self.uri.as_str()
+    }
+
+    pub(crate) fn set_method(&mut self, method: HttpMethod) {
+        self.method = method;
+    }
+
+    pub(crate) fn set_uri(&mut self, uri: &str) {
+        self.uri = String::from(uri);
+        self.path_array = Self::uri_parser(uri);
+    }
+
+    pub(crate) fn set_version(&mut self, version: &str) {
+        self.version = String::from(version.trim());
     }
 }
 
 impl Display for RequestLine {
     fn fmt(&self, f: &mut Formatter<'_>) -> fResult {
-        write!(f, "{} {} {}", self.method, self.request_uri, self.version)
+        write!(f, "{} {} {}", self.method, self.uri, self.version)
     }
 }
 
@@ -76,9 +87,13 @@ impl TryFrom<&str> for RequestLine {
             return Err(ParseRequestLineError);
         }
 
-        let (method, request_uri, version) = (request_line[0], request_line[1], request_line[2]);
+        let (method, uri, version) = (
+            request_line[0].trim(),
+            request_line[1].trim(),
+            request_line[2].trim(),
+        );
 
-        match Self::new(method, request_uri, version) {
+        match Self::new(method, uri, version) {
             Ok(request_line) => Ok(request_line),
             Err(_) => Err(ParseRequestLineError),
         }

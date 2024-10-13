@@ -1,6 +1,6 @@
 [package]
 name = "krustie"
-version = "0.1.13"
+version = "0.2.0"
 description = "Krustie is a simple and easy-to-use backend framework."
 categories = ["network-programming", "web-programming::http-server"]
 keywords = ["http", "web", "framework"]
@@ -13,7 +13,7 @@ edition = "2021"
 [dependencies]
 dyn-clone = "1.0.17"
 flate2 = "1.0.34"
-regex = "1.10.6"
+regex = "1.11.0"
 serde_json = "1.0.128"
 
 [profile.dev]

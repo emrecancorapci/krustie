@@ -1,58 +1,82 @@
 Trait to be implemented for creating middleware
 
-It can be executed before or after the request is handled depends on order of the middlewares and routers.
-
-To create a middleware, implement the [`Middleware`] trait. Which has a single function called [`Middleware::middleware()`].
-
-It takes itself as `&self`, a [`Request`] and a `HandlerResult`.
-
-If there is no property declared in the struct, struct can be used directly. Or it can be used as a value if it needs to be initialized.
-
-## Example
-
-- In this example `AddKrustieHeader` can be used without initialized: `server.add_handler(AddKrustieHeader)`
+# Middleware
 
 ```rust
-use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult };
-
-#[derive(Clone)]
-struct AddKrustieHeader;
-
-impl AddKrustieHeader {
-  fn add_header(res: &mut Response) {
-    res.set_header("Server", "Krustie");
-  }
-}
-
-impl Middleware for AddKrustieHeader {
-  fn middleware(&mut self, req: &Request, res: &mut Response) -> HandlerResult {
-    AddKrustieHeader::add_header(res);
-    HandlerResult::Next
-  }
-}
+# use krustie::{HandlerResult, Request, Response};
+# struct Middleware {};
+# impl Middleware {
+fn middleware(&mut self, request: &Request, response: &mut Response) -> HandlerResult
+# {HandlerResult::Next}
+# }
 ```
 
-- In this example `AddHeader` need to be initialized.
+Middleware is some kind of handler that is executed before or after the request is processed by the route handler. It is a function that has access to the [Request] and [Response] objects and returns [HandlerResult] which is determines if the request should be processed further or not.
+
+## Creating Middleware
+
+In order to create a middleware, first you need to define a struct that derives the [Clone] trait and implements the [Middleware] trait:
 
 ```rust
-use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult };
+use krustie::{HandlerResult, Middleware, Request, Response, Router, Server, StatusCode};
 
 #[derive(Clone)]
-struct AddHeader {
-    server: String,
-    value: String,
-}
+struct Logger;
 
-impl AddHeader {
-    fn new(server: &str, value: &str) -> Self {
-        Self { server: server.to_string(), value: value.to_string() }
+impl Middleware for Logger {
+    fn middleware(&mut self, request: &Request, response: &mut Response) -> HandlerResult {
+        println!(
+            "Request received from {}",
+            request.get_peer_addr().to_string()
+        );
+        HandlerResult::Next
     }
 }
 
-impl Middleware for AddHeader {
-  fn middleware(&mut self, _: &Request, res: &mut Response) -> HandlerResult {
-    res.set_header(&self.server, &self.value);
-    HandlerResult::Next
-  }
+// Then you can use the middleware as a handler in the server:
+
+fn main() {
+    let mut server = Server::create();
+    let mut router = Router::new();
+
+    router.get("/", |req, res| {
+        res.status(StatusCode::Ok).body_text("Hello World!");
+    });
+
+    server.use_handler(Logger);
+    server.use_handler(router);
+}
+
+```
+
+In the example above, the `Logger` struct implements the [Middleware] trait and the [Middleware::middleware()] method. The method prints the IP address of the client that made the request. The `Logger` struct is then used as a handler in the server.
+
+## Controlling the Flow of Execution
+
+To control the flow of execution, the `middleware` method should return a enum value of `HandlerResult`.
+
+- By returning [HandlerResult::Next], the request *will* be processed further by the next middleware or route handler.
+
+- By returning [HandlerResult::End], the request *will not* be processed further and the response will be sent back to the client.
+
+```rust
+use krustie::{HandlerResult, Middleware, Request, Response, StatusCode};
+
+#[derive(Clone)]
+struct Auth;
+
+impl Middleware for Auth {
+    fn middleware(&mut self, request: &Request, response: &mut Response) -> HandlerResult {
+        if request.get_headers().get("Authorization").is_none() {
+            response
+                .status(StatusCode::Unauthorized)
+                .body_text("Unauthorized");
+            return HandlerResult::End;
+        }
+
+        return HandlerResult::Next;
+    }
 }
 ```
+
+In the example above, the `Auth` middleware checks if the request has an `Authorization` header. If the header is not present, the middleware sets the status code to `401 Unauthorized` and sends a response back to the client. The [HandlerResult::End] enum value is returned to stop the request from being processed further.

@@ -9,13 +9,9 @@ fn get(req: &Request, res: &mut Response) {
   res.status(StatusCode::Ok).body_text("Hello, World!");
 }
 
-let mut server = Server::create();
-let mut router = Router::new();
+# let mut router = Router::new();
 let endpoint = Endpoint::new(HttpMethod::GET, get);
 
 router.use_endpoint("/hello", endpoint);
 
-server.use_handler(router);
-
-// server.listen(8080);
 ```

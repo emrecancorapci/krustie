@@ -1,11 +1,3 @@
-//! Middleware module for Krustie.
-//!
-//! Middleware is a function that can be executed before or after the request is handled.
-//!
-//! To create a middleware, implement the `Middleware` trait. Which has a single function called `middleware`.
-//!
-//! It takes itself as `&self`, a `Request` and a `Response` as arguments and returns a `HandlerResult`.
-
 use dyn_clone::DynClone;
 use std::fmt::Debug;
 
@@ -20,60 +12,7 @@ pub mod statics;
 
 pub use self::{gzip::GzipEncoder, rate_limiter::RateLimiter, statics::ServeStatic};
 
-/// Middleware trait to be implemented for creating middleware.
-///
-/// If there is no property declared in the struct, struct can be used directly.
-/// Or it can be used as a value if it needs to be initialized.
-///
-/// # Example
-///
-/// - In this example `AddKrustieHeader` can be used as `server.add_handler(AddKrustieHeader)`
-///
-/// ```rust
-/// use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult };
-///
-/// #[derive(Clone)]
-/// struct AddKrustieHeader;
-///
-/// impl AddKrustieHeader {
-///   fn add_header(res: &mut Response) {
-///     res.set_header("Server", "Krustie");
-///   }
-/// }
-///
-/// impl Middleware for AddKrustieHeader {
-///   fn middleware(&mut self, req: &Request, res: &mut Response) -> HandlerResult {
-///     AddKrustieHeader::add_header(res);
-///     HandlerResult::Next
-///   }
-/// }
-/// ```
-///
-/// - In this example `AddHeader` should be initialized.
-///
-/// ```rust
-/// use krustie::{ Request, Response, Middleware, server::route_handler::HandlerResult };
-///
-/// #[derive(Clone)]
-/// struct AddHeader {
-///     server: String,
-///     value: String,
-/// }
-///
-/// impl AddHeader {
-///     fn new(server: &str, value: &str) -> Self {
-///         Self { server: server.to_string(), value: value.to_string() }
-///     }
-/// }
-///
-/// impl Middleware for AddHeader {
-///   fn middleware(&mut self, _: &Request, res: &mut Response) -> HandlerResult {
-///     res.set_header(&self.server, &self.value);
-///     HandlerResult::Next
-///   }
-/// }
-/// ```
-///
+#[doc = include_str!("../docs/core/middleware.md")]
 pub trait Middleware: DynClone + Send {
     /// Middleware function to be implemented for the middleware.
     ///

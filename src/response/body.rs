@@ -1,6 +1,3 @@
-//! Body module for the Response struct. Contains functions for setting the body of the
-//! response.
-
 use super::{content_type::ContentType, Response};
 use serde_json::Value as JsonValue;
 

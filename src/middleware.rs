@@ -1,10 +1,7 @@
 use dyn_clone::DynClone;
 use std::fmt::Debug;
 
-use crate::{
-    server::route_handler::{HandlerResult, RouteHandler},
-    Request, Response,
-};
+use crate::{HandlerResult, Request, Response, RouteHandler};
 
 pub mod gzip;
 pub mod rate_limiter;
@@ -14,11 +11,11 @@ pub use self::{gzip::GzipEncoder, rate_limiter::RateLimiter, statics::ServeStati
 
 #[doc = include_str!("../docs/core/middleware.md")]
 pub trait Middleware: DynClone + Send {
-    /// Middleware function to be implemented for the middleware.
+    /// This function has to be implemented for the created [Middleware]. Function will return a [HandlerResult] to determine if the middleware should continue the execution or stop it.
     ///
-    /// For the middleware to be executed and continue the execution, it should return `HandlerResult::Next`.
+    /// For the middleware to be executed and continue the execution, it should return [HandlerResult::Next].
     ///
-    /// If the middleware should stop the execution (e.g. return 404), it should return `HandlerResult::Stop`.
+    /// If the middleware should stop the execution (e.g. return 404), it should return [HandlerResult::End].
     fn middleware(&mut self, request: &Request, response: &mut Response) -> HandlerResult;
 }
 

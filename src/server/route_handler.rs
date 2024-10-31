@@ -1,11 +1,3 @@
-//! Route handler module
-//!
-//! This module contains the `RouteHandler` trait and `HandlerResult` enum.
-//!
-//! The `RouteHandler` trait is used to define the handler for the routes and middlewares.
-//!
-//! The `HandlerResult` enum is used to define the result of the handler.
-
 use dyn_clone::{clone_trait_object, DynClone};
 
 use crate::{Request, Response};

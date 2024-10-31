@@ -1,24 +1,22 @@
-//! This module contains the RequestBody enum and its implementation.
-//!
-//! RequestBody can be a `Text`, a `Json` or `None`.
-//!
-//! - Text returns a `Vec<u8>`
-//!
-//! - Json returns a `JsonValue` (it's json_verde::Value)
-
 use std::io::{Error, ErrorKind};
 
 use crate::json::JsonValue;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
 // TODO: Add doctests
+#[derive(Debug, Clone, PartialEq, Eq)]
 /// Represents the body of the HTTP request
+/// 
+/// The body can be of different types:
+/// - Binary: Represents a binary body.
+/// - Text: Represents a text body.
+/// - Json: Represents a json body.
+/// - None: Represents that there is no body or a body that is not supported.
 pub enum RequestBody {
-    /// Represents a binary body. Holds a vector of bytes.
+    /// Represents a binary body.
     Binary(Vec<u8>),
-    /// Represents a text body. Holds a vector of bytes.
+    /// Represents a text body.
     Text(String),
-    /// Represents a json body. Holds a JsonValue.
+    /// Represents a json body.
     Json(JsonValue),
     // Represents a form body. Holds a HashMap of strings. **Not implemented yet.**
     // Form(HashMap<String, String>),

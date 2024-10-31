@@ -1,5 +1,3 @@
-//! A middleware for compressing response body using gzip
-
 use flate2::{write::GzEncoder, Compression};
 use std::io::Write;
 
@@ -8,7 +6,7 @@ use crate::{request::Request, response::Response, server::route_handler::Handler
 
 /// A middleware for compressing response body using gzip.
 ///
-/// # ExampleF
+/// # Example
 ///
 /// ```rust
 /// use krustie::{server::Server, middleware::gzip::GzipEncoder};
@@ -17,7 +15,7 @@ use crate::{request::Request, response::Response, server::route_handler::Handler
 ///
 /// server.use_handler(GzipEncoder);
 ///
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GzipEncoder;
 
 impl GzipEncoder {

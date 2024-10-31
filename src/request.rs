@@ -1,7 +1,3 @@
-//! # Request
-//!
-//! This module contains the `Request` struct and its implementation.
-
 use self::{http_method::HttpMethod, request_line::RequestLine};
 use std::{
     collections::HashMap,
@@ -17,9 +13,7 @@ pub mod http_method;
 pub(crate) mod parser;
 mod request_line;
 
-/// Represents the HTTP request
-///
-/// The `Request` struct contains the request line, headers, queries, parameters, body and peer address of the HTTP request.
+#[doc = include_str!("../docs/core/request.md")]
 #[derive(Clone)]
 pub struct Request {
     request: RequestLine,

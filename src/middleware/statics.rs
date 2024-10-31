@@ -1,15 +1,3 @@
-//! Static files middleware.
-//!
-//! This middleware serves static files from a specified folder.
-//!
-//! ## Supported Content Types
-//!
-//! - **Document:** `html`, `css`, `js`, `json`, `xml`
-//! - **Image:** `png`, `jpg`, `jpeg`, `gif`, `svg`, `ico`
-//! - **File:** `pdf`, `zip`, `gzip`
-//! - **Media:** `mp3`, `wav`, `mp4`, `mpeg`, `webm`
-//! - **Font:** `woff`, `woff2`, `ttf`, `otf`, `eot`
-
 use std::{fs, path::PathBuf};
 
 use crate::{
@@ -18,6 +6,16 @@ use crate::{
 };
 
 /// Serve static files from a specified folder.
+/// 
+/// This middleware serves static files from a specified folder.
+///
+/// ## Supported Content Types
+///
+/// - **Document:** `html`, `css`, `js`, `json`, `xml`
+/// - **Image:** `png`, `jpg`, `jpeg`, `gif`, `svg`, `ico`
+/// - **File:** `pdf`, `zip`, `gzip`
+/// - **Media:** `mp3`, `wav`, `mp4`, `mpeg`, `webm`
+/// - **Font:** `woff`, `woff2`, `ttf`, `otf`, `eot`
 ///
 /// # Example
 ///
@@ -29,7 +27,7 @@ use crate::{
 ///
 /// server.use_handler(statics);
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ServeStatic {
     folder_path: String,
 }

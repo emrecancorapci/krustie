@@ -25,7 +25,7 @@
 //!
 //! Here is an example of how to create a basic web server using Krustie:
 //!
-//! ```rust
+//! ```no_run
 //! use krustie::{Router, Server, StatusCode};
 //!
 //! fn main() {
@@ -38,7 +38,7 @@
 //!
 //!     server.use_handler(main_router);
 //!
-//!     // server.listen(8080);
+//!     server.listen(8080);
 //! }
 //! ```
 //!

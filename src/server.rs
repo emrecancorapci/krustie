@@ -21,13 +21,12 @@ impl Server {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```no_run
     /// use krustie::Server;
     ///
     /// let server = Server::create();
     ///
-    /// // vvvvvv Uncommment to listen on
-    /// // server.listen(8080);
+    /// server.listen(8080);
     /// ```
     pub fn create() -> Self {
         Self {
@@ -50,7 +49,6 @@ impl Server {
     ///
     /// let mut server = Server::create();
     /// let mut router = Router::new();
-    ///
     ///
     /// server.use_handler(router);
     /// server.use_handler(GzipEncoder);
@@ -91,13 +89,12 @@ impl Server {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```no_run
     /// use krustie::Server;
     ///
     /// let mut server = Server::create();
     ///
-    /// // vvvvvv Uncommment to listen on
-    /// // server.listen(8080);
+    /// server.listen(8080);
     /// ```
     pub fn listen(&self, port: u16) {
         Listener::listen(port, self.clone());

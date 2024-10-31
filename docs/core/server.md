@@ -2,7 +2,7 @@ Represents the server instance
 
 ## A Complete Example
 
-```rust
+```no_run
 use krustie::{
   Server,
   Router,
@@ -17,39 +17,40 @@ use krustie::{
   response::ContentType,
 };
 
-let mut server = Server::create();
-let mut router = Router::new();
+fn main(){
+  let mut server = Server::create();
+  let mut router = Router::new();
 
-router.get("/", |_, res| {
-  res.status(StatusCode::Ok).body(
-    b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(),
-    ContentType::Html
-  );
-});
+  router.get("/", |_, res| {
+    res.status(StatusCode::Ok).body(
+      b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(),
+      ContentType::Html
+    );
+  });
 
-let mut sub_router = Router::new();
+  let mut sub_router = Router::new();
 
-sub_router
-  .get("/", |_, res| {
-    let body = json!({"message": "Hello, World!"});
-    res.status(StatusCode::Ok).body_json(body);
-  })
-  .post("/", post_req);
+  sub_router
+    .get("/", |_, res| {
+      let body = json!({"message": "Hello, World!"});
+      res.status(StatusCode::Ok).body_json(body);
+    })
+    .post("/", post_req);
 
-router.use_router("/home", sub_router);
+  router.use_router("/home", sub_router);
 
-server.use_handler(router);
+  server.use_handler(router);
 
-// Middlewares
+  // Middlewares
 
-let krustie_middleware = AddHeader::new("Server", "Krustie");
+  let krustie_middleware = AddHeader::new("Server", "Krustie");
 
-server.use_handler(krustie_middleware);
-server.use_handler(GzipEncoder);
-server.use_handler(ServeStatic::new("public"));
+  server.use_handler(krustie_middleware);
+  server.use_handler(GzipEncoder);
+  server.use_handler(ServeStatic::new("public"));
 
-// vvvvvv Uncommment to listen on
-// server.listen(8080);
+  server.listen(8080);
+}
 
 fn post_req(req: &Request, res: &mut Response) {
   match req.get_body() {

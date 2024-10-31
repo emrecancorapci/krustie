@@ -32,7 +32,33 @@ impl Endpoint {
         }
     }
 
-    fn new_with_middleware(
+    /// Creates a new Endpoint instance with middleware
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use krustie::{ Endpoint, HttpMethod, Request, Response, Router, StatusCode, Middleware, HandlerResult };
+    /// 
+    /// let mut router = Router::new();
+    /// 
+    /// fn get(req: &Request, res: &mut Response) {
+    ///   res.status(StatusCode::Ok).body_text("Hello, World!");
+    /// }
+    /// 
+    /// #[derive(Clone)]
+    /// struct MyMiddleware;
+    /// 
+    /// impl Middleware for MyMiddleware {
+    ///   fn middleware(&mut self, req: &Request, res: &mut Response) -> HandlerResult {
+    ///     HandlerResult::Next
+    ///   }
+    /// }
+    /// 
+    /// let endpoint = Endpoint::new_with_middleware(HttpMethod::GET, get, vec![Box::new(MyMiddleware)]);
+    /// 
+    /// router.use_endpoint("/", endpoint);
+    /// ```
+    pub fn new_with_middleware(
         method: HttpMethod,
         controller: Controller,
         middlewares: Vec<Box<dyn Middleware>>,

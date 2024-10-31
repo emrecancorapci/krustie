@@ -1,5 +1,3 @@
-//! Contains the `StatusCode` enum and its implementations.
-
 use std::fmt::{self, Display, Formatter};
 
 /// Represents the status code of an HTTP response

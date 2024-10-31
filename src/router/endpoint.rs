@@ -1,33 +1,8 @@
-//! # Endpoint
-//!
-//! Endpoint is a struct that holds the information about a route in the router. It holds the
-//! information about the method, controller and middlewares that should be applied to the route.
-
 use crate::{HttpMethod, Middleware};
 
 use super::Controller;
 
-/// Endpoint struct that holds the information about a route in the router
-///
-/// # Example
-///
-/// ```rust
-/// use krustie::{ Server, Router, Endpoint, HttpMethod, StatusCode, Request, Response };
-///
-/// fn get(req: &Request, res: &mut Response) {
-///   res.status(StatusCode::Ok).body_text("Hello, World!");
-/// }
-///
-/// let mut server = Server::create();
-/// let mut router = Router::new();
-/// let endpoint = Endpoint::new(HttpMethod::GET, get);
-///
-/// router.use_endpoint("/hello", endpoint);
-///
-/// server.use_handler(router);
-///
-/// // server.listen(8080);
-/// ```
+#[doc = include_str!("../../docs/core/endpoint.md")]
 #[derive(Debug)]
 pub struct Endpoint {
     method: HttpMethod,

@@ -1,10 +1,3 @@
-//! # Router
-//!
-//! A router for handling requests
-//!
-//! It is used to handle requests and route them to the correct endpoint. Routers support sub-routers and middlewares.
-//!
-
 use crate::{
     server::route_handler::{HandlerResult, RouteHandler},
     HttpMethod, Middleware, Request, Response, StatusCode,
@@ -21,33 +14,7 @@ type RouterResult<'a> = Option<(&'a mut Endpoint, HashMap<String, String>)>;
 
 // TODO: Look at Radix Tree
 
-/// A router for handling requests
-///
-/// # Example
-///
-/// ```rust
-/// use krustie::{ Router, StatusCode };
-///
-/// let mut main_router = Router::new();
-/// let mut user_router = Router::new();
-/// let mut user_id_router = Router::new();
-///
-/// user_id_router
-///   .get("/", |req, res| {
-///     res.status(StatusCode::Ok);
-///   })
-///   .post("/", |req, res| {
-///     res.status(StatusCode::Ok);
-///   });
-///
-/// user_router.use_router("/:id", user_id_router);
-///
-/// let mut deeper_router = Router::new();
-///
-/// main_router.use_router("/admin/user", deeper_router);
-///
-/// main_router.use_router("/user", user_router);
-/// ```
+#[doc = include_str!("../docs/core/router.md")]
 #[derive(Debug)]
 pub struct Router {
     endpoints: Vec<Endpoint>,

@@ -20,17 +20,30 @@
 //! performance. So it is **not recommended** to use it in production.
 
 pub mod json;
+#[doc(hidden)]
 pub mod middleware;
+#[doc(hidden)]
 pub mod request;
+#[doc(hidden)]
 pub mod response;
+#[doc(hidden)]
 pub mod router;
+#[doc(hidden)]
 pub mod server;
 
+#[doc(inline)]
 pub use middleware::Middleware;
+#[doc(inline)]
 pub use request::http_method::HttpMethod;
+#[doc(inline)]
 pub use request::Request;
+#[doc(inline)]
 pub use response::status_code::StatusCode;
+#[doc(inline)]
 pub use response::Response;
+#[doc(inline)]
 pub use router::endpoint::Endpoint;
+#[doc(inline)]
 pub use router::Router;
+#[doc(inline)]
 pub use server::Server;

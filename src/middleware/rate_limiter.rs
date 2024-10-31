@@ -1,5 +1,3 @@
-//! A middleware for rate limiting requests based on IP address
-
 use std::{
     collections::HashMap,
     net::IpAddr,
@@ -11,7 +9,7 @@ use crate::{server::route_handler::HandlerResult, Middleware, StatusCode};
 /// A rate limiter middleware
 ///
 /// Limits the number of requests from an IP address based on the token number and token refill time.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RateLimiter {
     token_number: u16,
     token_refill_duration: Duration,

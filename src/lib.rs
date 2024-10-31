@@ -3,10 +3,14 @@
     missing_docs,
     rust_2018_idioms,
     unreachable_pub,
-    clippy::all
+    clippy::all,
+    rustdoc::missing_crate_level_docs,
+    rustdoc::private_doc_tests,
+    rustdoc::unescaped_backticks
 )]
 #![allow(clippy::needless_return)]
 #![forbid(unsafe_code)]
+#![doc(issue_tracker_base_url = "https://github.com/emrecancorapci/krustie/issues")]
 
 //! # Krustie
 //!
@@ -19,7 +23,11 @@
 //! Biggest flaws it has right now is that it is *not async* and it is *not optimized* for
 //! performance.
 //!
-//! > Krustie is still in the early stages of development and is not yet ready for production use. The API is subject to change and there may be bugs or missing features.
+//! <div class="warning">
+//!
+//! Krustie is still in the early stages of development and is not yet ready for production use. The API is subject to change and there may be bugs or missing features.
+//!
+//! </div>
 //!
 //! ## Hello World Example
 //!
@@ -78,6 +86,12 @@ pub mod response;
 pub mod router;
 #[doc(hidden)]
 pub mod server;
+/// Contains built-in middlewares that can be used with Krustie.
+pub mod middlewares {
+    pub use crate::middleware::GzipEncoder;
+    pub use crate::middleware::RateLimiter;
+    pub use crate::middleware::ServeStatic;
+}
 
 #[doc(inline)]
 pub use middleware::Middleware;

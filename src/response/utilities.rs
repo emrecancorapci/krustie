@@ -85,7 +85,7 @@ impl Response {
     /// use krustie::{ Response, StatusCode, Request, json::json };
     ///
     /// fn get(request: &Request, response: &mut Response) {
-    ///   let body = response.get_body();
+    ///   let body = response.get_body_mut();
     /// }
     /// ```
     pub fn get_body_mut(&mut self) -> &mut Vec<u8> {

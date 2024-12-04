@@ -8,7 +8,7 @@ Krustie provides the perfect router that allows you to define routes and associa
 
 ## Basic Usage
 
-To create a new router, use the `Router::new()` function:
+To create a new router, use the [Router::new()] function:
 
 ```rust
 use krustie::{Server, Router, StatusCode};
@@ -88,9 +88,9 @@ router.get("/", |req, res| {
 
 ## Route Parameters
 
-Routes can contain parameters that are extracted from the path of the **Request**.
+Routes can contain parameters that are extracted from the path of the **[Request]**.
 
-Parameters are defined using a colon `:` followed by the parameter name in the route path such as `/:id`, `/:user_id`. You can access the parameter values using the `get_query_param` or `get_params` method of the **Request** object:
+Parameters are defined using a colon `:` followed by the parameter name in the route path such as `/:id`, `/:user_id`. You can access the parameter values using the [Request::get_query_param] or [Request::get_param] method of the **[Request]** object:
 
 ```rust
 # use krustie::{Router, StatusCode};
@@ -125,9 +125,9 @@ router.use_router("/user", user_router);
 
 ## Query String Parameters
 
-Routes can also contain query string parameters that are extracted from the query string of the **Request**.
+Routes can also contain query string parameters that are extracted from the query string of the **[Request]**.
 
-You don't need to define the query string parameters in the route path. You can access them using the `get_query_params` and `get_query_param` methods of the **Request** object:
+You don't need to define the query string parameters in the route path. You can access them using the [Request::get_query_params] and [Request::get_query_param] methods of the **[Request]** object.
 
 ```rust
 # use krustie::{Router, StatusCode};
@@ -150,7 +150,7 @@ router.get("/users", |req, res| {
 
 ## Creating Sub-Routers
 
-You can create a router as a sub-router of another router by calling the `use_router` method:
+You can create a router as a sub-router of another router by calling the [Router::use_router] method:
 
 ```rust
 # use krustie::{Router, StatusCode};

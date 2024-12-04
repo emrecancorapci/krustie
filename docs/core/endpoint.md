@@ -3,7 +3,7 @@ Holds the route data and the controller function
 # Example
 
 ```rust
-use krustie::{ Server, Router, Endpoint, HttpMethod, StatusCode, Request, Response };
+use krustie::{Server, Router, Endpoint, HttpMethod, StatusCode, Request, Response};
 
 fn get(req: &Request, res: &mut Response) {
   res.status(StatusCode::Ok).body_text("Hello, World!");

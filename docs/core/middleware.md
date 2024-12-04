@@ -46,14 +46,13 @@ fn main() {
     server.use_handler(Logger);
     server.use_handler(router);
 }
-
 ```
 
 In the example above, the `Logger` struct implements the [Middleware] trait and the [Middleware::middleware()] method. The method prints the IP address of the client that made the request. The `Logger` struct is then used as a handler in the server.
 
 ## Controlling the Flow of Execution
 
-To control the flow of execution, the `middleware` method should return a enum value of `HandlerResult`.
+To control the flow of execution, the [Middleware::middleware()] method should return a enum value of [HandlerResult].
 
 - By returning [HandlerResult::Next], the request *will* be processed further by the next middleware or route handler.
 

@@ -57,7 +57,40 @@ impl Server {
         self.route_handlers.push(Box::new(handler));
     }
 
-    fn handle_stream(&mut self, stream: &mut TcpStream) {
+    /// Listens for incoming requests on the specified IP and port
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use krustie::Server;
+    ///
+    /// let mut server = Server::create();
+    ///
+    /// server.listen(8080);
+    /// ```
+    pub fn listen(self, port: u16) {
+        Listener::listen(port, self);
+    }
+
+    /// Handles data stream comes from TcpListener
+    /// 
+    /// Use this if you to use your own listener for the server
+    /// 
+    /// # Example
+    /// 
+    /// ```no_run
+    /// use krustie::Server;
+    /// use std::net::TcpListener;
+    ///
+    /// let mut server = Server::create();
+    /// let listener = TcpListener::bind("127.0.0.1:3000").unwrap();
+    /// 
+    /// for stream in listener.incoming() {
+    ///   server.handle_stream(&mut stream.unwrap());
+    /// }
+    /// 
+    /// ```
+    pub fn handle_stream(&mut self, stream: &mut TcpStream) {
         let mut response = Response::default();
 
         match Request::parse(stream) {
@@ -83,21 +116,6 @@ impl Server {
                 eprintln!("error: {}", e);
             }
         }
-    }
-
-    /// Listens for incoming requests on the specified IP and port
-    ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// use krustie::Server;
-    ///
-    /// let mut server = Server::create();
-    ///
-    /// server.listen(8080);
-    /// ```
-    pub fn listen(&self, port: u16) {
-        Listener::listen(port, self.clone());
     }
 }
 

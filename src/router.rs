@@ -131,32 +131,42 @@ impl Router {
     ) {
         match iter.next() {
             Some(PathType::Subdirectory(path)) => {
-                match router.subdirs.get_mut(&path) { Some(found_router) => {
-                    // Router Found
-                    Self::add_router(found_router, new_router, iter);
-                } _ => if iter.peek().is_some() {
-                    // No Router & Iteration Continues
-                    let mut inserted_router = Box::new(Router::new());
-                    Self::add_router(inserted_router.as_mut(), new_router, iter);
-                    router.subdirs.insert(path, inserted_router);
-                } else {
-                    // No Router & Iteration Ends
-                    router.subdirs.insert(path, Box::new(new_router));
-                }}
+                match router.subdirs.get_mut(&path) {
+                    Some(found_router) => {
+                        // Router Found
+                        Self::add_router(found_router, new_router, iter);
+                    }
+                    _ => {
+                        if iter.peek().is_some() {
+                            // No Router & Iteration Continues
+                            let mut inserted_router = Box::new(Router::new());
+                            Self::add_router(inserted_router.as_mut(), new_router, iter);
+                            router.subdirs.insert(path, inserted_router);
+                        } else {
+                            // No Router & Iteration Ends
+                            router.subdirs.insert(path, Box::new(new_router));
+                        }
+                    }
+                }
             }
             Some(PathType::Parameter(param)) => {
-                match &mut router.param_dir { Some(found_router) => {
-                    // Router Found
-                    Self::add_router(found_router.1.as_mut(), new_router, iter);
-                } _ => if iter.peek().is_some() {
-                    // No Router & Iteration Continues
-                    let mut inserted_router = Box::new(Router::new());
-                    Self::add_router(inserted_router.as_mut(), new_router, iter);
-                    router.param_dir = Some((param, Box::new(Router::new())));
-                } else {
-                    // No Router & Iteration Ends
-                    router.param_dir = Some((param, Box::new(new_router)));
-                }}
+                match &mut router.param_dir {
+                    Some(found_router) => {
+                        // Router Found
+                        Self::add_router(found_router.1.as_mut(), new_router, iter);
+                    }
+                    _ => {
+                        if iter.peek().is_some() {
+                            // No Router & Iteration Continues
+                            let mut inserted_router = Box::new(Router::new());
+                            Self::add_router(inserted_router.as_mut(), new_router, iter);
+                            router.param_dir = Some((param, Box::new(Router::new())));
+                        } else {
+                            // No Router & Iteration Ends
+                            router.param_dir = Some((param, Box::new(new_router)));
+                        }
+                    }
+                }
             }
             None => {
                 panic!("Route already exist. (Merging routers is not allowed for now.)");
@@ -173,51 +183,63 @@ impl Router {
             Some(PathType::Subdirectory(path)) => {
                 if iter.peek().is_some() {
                     // Iteration Will Continue
-                    match router.subdirs.get_mut(&path) { Some(found_router) => {
-                        // Router Found
-                        Self::add_endpoint(found_router, endpoint, iter);
-                    } _ => {
-                        // No Router
-                        let mut inserted_router = Box::new(Router::new());
-                        Self::add_endpoint(inserted_router.as_mut(), endpoint, iter);
-                        router.subdirs.insert(path, inserted_router);
-                    }}
+                    match router.subdirs.get_mut(&path) {
+                        Some(found_router) => {
+                            // Router Found
+                            Self::add_endpoint(found_router, endpoint, iter);
+                        }
+                        _ => {
+                            // No Router
+                            let mut inserted_router = Box::new(Router::new());
+                            Self::add_endpoint(inserted_router.as_mut(), endpoint, iter);
+                            router.subdirs.insert(path, inserted_router);
+                        }
+                    }
                 } else {
                     // Iteration Will End
-                    match router.subdirs.get_mut(&path) { Some(found_router) => {
-                        // Router Found
-                        found_router.endpoints.push(endpoint);
-                    } _ => {
-                        // No Router
-                        let mut inserted_router = Box::new(Router::new());
-                        inserted_router.endpoints.push(endpoint);
-                        router.subdirs.insert(path, inserted_router);
-                    }}
+                    match router.subdirs.get_mut(&path) {
+                        Some(found_router) => {
+                            // Router Found
+                            found_router.endpoints.push(endpoint);
+                        }
+                        _ => {
+                            // No Router
+                            let mut inserted_router = Box::new(Router::new());
+                            inserted_router.endpoints.push(endpoint);
+                            router.subdirs.insert(path, inserted_router);
+                        }
+                    }
                 }
             }
             Some(PathType::Parameter(param)) => {
                 if iter.peek().is_some() {
                     // Iteration Will Continue
-                    match &mut router.param_dir { Some(found_router) => {
-                        // Router Found
-                        Self::add_endpoint(found_router.1.as_mut(), endpoint, iter);
-                    } _ => {
-                        // No Router
-                        let mut inserted_router = Box::new(Router::new());
-                        Self::add_endpoint(inserted_router.as_mut(), endpoint, iter);
-                        router.param_dir = Some((param, inserted_router));
-                    }}
+                    match &mut router.param_dir {
+                        Some(found_router) => {
+                            // Router Found
+                            Self::add_endpoint(found_router.1.as_mut(), endpoint, iter);
+                        }
+                        _ => {
+                            // No Router
+                            let mut inserted_router = Box::new(Router::new());
+                            Self::add_endpoint(inserted_router.as_mut(), endpoint, iter);
+                            router.param_dir = Some((param, inserted_router));
+                        }
+                    }
                 } else {
                     // Iteration Will End
-                    match &mut router.param_dir { Some(found_router) => {
-                        // Router Found
-                        found_router.1.endpoints.push(endpoint);
-                    } _ => {
-                        // No Router
-                        let mut inserted_router = Box::new(Router::new());
-                        inserted_router.endpoints.push(endpoint);
-                        router.param_dir = Some((param, inserted_router));
-                    }}
+                    match &mut router.param_dir {
+                        Some(found_router) => {
+                            // Router Found
+                            found_router.1.endpoints.push(endpoint);
+                        }
+                        _ => {
+                            // No Router
+                            let mut inserted_router = Box::new(Router::new());
+                            inserted_router.endpoints.push(endpoint);
+                            router.param_dir = Some((param, inserted_router));
+                        }
+                    }
                 }
             }
             None => {
@@ -255,16 +277,22 @@ impl Router {
                 return Self::handle_routes(router, method, params, iter);
             }
             // Iteration Continues
-            match router.subdirs.get_mut(route.as_str()) { Some(founded_router) => {
-                // Router Found
-                Self::handle_routes(founded_router.as_mut(), method, params, iter)
-            } _ => { match router.param_dir.as_mut() { Some((param_name, founded_router)) => {
-                // Parameter Found
-                params.insert(param_name.clone(), route);
-                Self::handle_routes(founded_router, method, params, iter)
-            } _ => {
-                None
-            }}}}
+            match router.subdirs.get_mut(route.as_str()) {
+                Some(founded_router) => {
+                    // Router Found
+                    Self::handle_routes(founded_router.as_mut(), method, params, iter)
+                }
+                _ => {
+                    match router.param_dir.as_mut() {
+                        Some((param_name, founded_router)) => {
+                            // Parameter Found
+                            params.insert(param_name.clone(), route);
+                            Self::handle_routes(founded_router, method, params, iter)
+                        }
+                        _ => None,
+                    }
+                }
+            }
         } else {
             // Iteration Ends
             match router

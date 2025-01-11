@@ -73,22 +73,22 @@ impl Server {
     }
 
     /// Handles data stream comes from TcpListener
-    /// 
+    ///
     /// Use this if you to use your own listener for the server
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```no_run
     /// use krustie::Server;
     /// use std::net::TcpListener;
     ///
     /// let mut server = Server::create();
     /// let listener = TcpListener::bind("127.0.0.1:3000").unwrap();
-    /// 
+    ///
     /// for stream in listener.incoming() {
     ///   server.handle_stream(&mut stream.unwrap());
     /// }
-    /// 
+    ///
     /// ```
     pub fn handle_stream(&mut self, stream: &mut TcpStream) {
         let mut response = Response::default();

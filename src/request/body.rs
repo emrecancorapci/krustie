@@ -5,7 +5,7 @@ use crate::json::JsonValue;
 // TODO: Add doctests
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Represents the body of the HTTP request
-/// 
+///
 /// The body can be of different types:
 /// - Binary: Represents a binary body.
 /// - Text: Represents a text body.

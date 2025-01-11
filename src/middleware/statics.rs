@@ -6,7 +6,7 @@ use crate::{
 };
 
 /// Serve static files from a specified folder.
-/// 
+///
 /// This middleware serves static files from a specified folder.
 ///
 /// ## Supported Content Types

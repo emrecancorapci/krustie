@@ -30,6 +30,34 @@ impl Response {
         self
     }
 
+    /// Sets the body of the response. Function sets `Content-Length` automatically but needs `Content-Type` to be set manually.
+    ///
+    /// If `Content-Type` is not set, it defaults to `text/plain`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::{ Response, StatusCode, Request, response::ContentType, json::json };
+    ///
+    /// fn get(request: &Request, response: &mut Response) {
+    ///     response.body(b"Hello, World!".to_vec(), ContentType::Text);
+    /// }
+    /// ```
+    ///
+    /// ```rust
+    /// use krustie::{ Response, StatusCode, Request, response::ContentType, json::json };
+    ///
+    /// fn get(request: &Request, response: &mut Response) {
+    ///    response.status(StatusCode::Ok).body_raw(b"<html><body><h1>Hello, World!</h1></body></html>".to_vec(), "text/html");
+    /// }
+    /// ```
+    pub fn body_raw(&mut self, body: Vec<u8>, mime: &str) -> &mut Self {
+        self.headers
+            .insert(String::from("Content-Type"), mime.to_string());
+        self.body = body;
+        self
+    }
+
     /// Sets the body of the response to a Text value.
     ///
     /// # Example

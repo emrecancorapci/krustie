@@ -1,7 +1,8 @@
 #![warn(
     missing_debug_implementations,
     missing_docs,
-    rust_2018_idioms,
+    rust_2024_compatibility,
+    rust_2024_guarded_string_incompatible_syntax,
     unreachable_pub,
     clippy::all,
     rustdoc::missing_crate_level_docs,

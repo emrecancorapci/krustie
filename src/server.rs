@@ -121,9 +121,8 @@ impl Server {
 
 impl Clone for Server {
     fn clone(&self) -> Self {
-        let route_handlers: Vec<Box<dyn RouteHandler + Send>> = self.route_handlers.clone();
         Self {
-            route_handlers,
+            route_handlers: self.route_handlers.clone(),
             address: self.address.clone(),
         }
     }

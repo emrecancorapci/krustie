@@ -150,8 +150,8 @@ impl Response {
     ///   response.set_local("user_id", "123");
     /// }
     /// ```
-    pub fn set_local(&mut self, key: &str, value: &str) {
-        self.locals.insert(key.to_string(), value.to_string());
+    pub fn set_local(&mut self, key: &str, value: &str) -> Option<std::string::String> {
+        self.locals.insert(key.to_string(), value.to_string())
     }
 
     /// Returns the status code of the response

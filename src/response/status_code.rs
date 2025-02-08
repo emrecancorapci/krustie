@@ -75,54 +75,6 @@ impl Default for StatusCode {
     }
 }
 
-impl TryFrom<&u16> for StatusCode {
-    type Error = ParseStatusCodeError;
-    /// Converts a `u16` to a `StatusCode`
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if the `status_code` is invalid
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use krustie::StatusCode;
-    ///
-    /// match StatusCode::try_from(&200) {
-    ///   Ok(status_code) => assert_eq!(status_code, StatusCode::Ok),
-    ///   Err(_) => panic!("Invalid status code"),
-    /// }
-    /// match StatusCode::try_from(&418) {
-    ///   Ok(status_code) => assert_eq!(status_code, StatusCode::IAmATeapot),
-    ///   Err(_) => panic!("Invalid status code"),
-    /// }
-    /// ```
-    fn try_from(status_code: &u16) -> Result<Self, Self::Error> {
-        match status_code {
-            200 => Ok(Self::Ok),
-            201 => Ok(Self::Created),
-            202 => Ok(Self::Accepted),
-            204 => Ok(Self::NoContent),
-            400 => Ok(Self::BadRequest),
-            401 => Ok(Self::Unauthorized),
-            403 => Ok(Self::Forbidden),
-            404 => Ok(Self::NotFound),
-            405 => Ok(Self::MethodNotAllowed),
-            408 => Ok(Self::RequestTimeout),
-            411 => Ok(Self::LengthRequired),
-            415 => Ok(Self::UnsupportedMediaType),
-            418 => Ok(Self::IAmATeapot),
-            429 => Ok(Self::TooManyRequests),
-            500 => Ok(Self::InternalServerError),
-            501 => Ok(Self::NotImplemented),
-            503 => Ok(Self::ServiceUnavailable),
-            504 => Ok(Self::GatewayTimeout),
-            505 => Ok(Self::HttpVersionNotSupported),
-            _ => Err(ParseStatusCodeError),
-        }
-    }
-}
-
 impl TryFrom<&str> for StatusCode {
     type Error = ParseStatusCodeError;
     /// Converts a `string` to a `StatusCode`
@@ -195,6 +147,54 @@ impl From<&StatusCode> for u16 {
     /// ```
     fn from(code: &StatusCode) -> u16 {
         *code as u16
+    }
+}
+
+impl TryFrom<&u16> for StatusCode {
+    type Error = ParseStatusCodeError;
+    /// Converts a `u16` to a `StatusCode`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the `status_code` is invalid
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use krustie::StatusCode;
+    ///
+    /// match StatusCode::try_from(&200) {
+    ///   Ok(status_code) => assert_eq!(status_code, StatusCode::Ok),
+    ///   Err(_) => panic!("Invalid status code"),
+    /// }
+    /// match StatusCode::try_from(&418) {
+    ///   Ok(status_code) => assert_eq!(status_code, StatusCode::IAmATeapot),
+    ///   Err(_) => panic!("Invalid status code"),
+    /// }
+    /// ```
+    fn try_from(status_code: &u16) -> Result<Self, Self::Error> {
+        match status_code {
+            200 => Ok(Self::Ok),
+            201 => Ok(Self::Created),
+            202 => Ok(Self::Accepted),
+            204 => Ok(Self::NoContent),
+            400 => Ok(Self::BadRequest),
+            401 => Ok(Self::Unauthorized),
+            403 => Ok(Self::Forbidden),
+            404 => Ok(Self::NotFound),
+            405 => Ok(Self::MethodNotAllowed),
+            408 => Ok(Self::RequestTimeout),
+            411 => Ok(Self::LengthRequired),
+            415 => Ok(Self::UnsupportedMediaType),
+            418 => Ok(Self::IAmATeapot),
+            429 => Ok(Self::TooManyRequests),
+            500 => Ok(Self::InternalServerError),
+            501 => Ok(Self::NotImplemented),
+            503 => Ok(Self::ServiceUnavailable),
+            504 => Ok(Self::GatewayTimeout),
+            505 => Ok(Self::HttpVersionNotSupported),
+            _ => Err(ParseStatusCodeError),
+        }
     }
 }
 

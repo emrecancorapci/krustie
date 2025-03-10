@@ -1,6 +1,6 @@
 [package]
 name = "krustie"
-version = "0.2.1"
+version = "0.3.0"
 description = "Krustie is a simple and easy-to-use backend framework."
 categories = ["network-programming", "web-programming::http-server"]
 keywords = ["http", "web", "framework"]
@@ -11,24 +11,7 @@ license = "MIT"
 edition = "2021"
 
 [dependencies]
-dyn-clone = "1.0.17"
+async-trait = "0.1.86"
 flate2 = "1.0.35"
-regex = "1.11.1"
-serde_json = "1.0.135"
+tokio = { version = "1.43", features = ["full"] }
 
-[profile.dev]
-opt-level = 0
-debug = true
-panic = "abort"
-
-[profile.test]
-opt-level = 0
-debug = true
-
-[profile.release]
-opt-level = 3
-debug = false
-panic = "unwind"
-lto = true
-codegen-units = 1
-strip = true

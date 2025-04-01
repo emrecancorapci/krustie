@@ -22,10 +22,10 @@ pub enum HttpMethod {
 }
 
 #[async_trait]
-pub trait HttpRequest: Send + Sized {
+pub trait HttpRequest: Send + Sized + Sync {
     async fn new(msg: &[u8], peer_addr: SocketAddr) -> Result<Self>;
 
-    fn get_method(&self) -> HttpMethod;
+    fn get_method(&self) -> &HttpMethod;
     fn get_path(&self) -> &str;
     fn get_version(&self) -> &str;
     fn get_body(&self) -> &[u8];
@@ -37,7 +37,7 @@ pub trait HttpRequest: Send + Sized {
     fn get_query_param(&self, key: &str) -> Option<&str>;
     fn get_param(&self, key: &str) -> Option<&str>;
 
-    fn get_cookies(&self) -> HashMap<String, String>;
+    fn get_cookies(&self) -> &HashMap<String, String>;
     fn get_cookie(&self, key: &str) -> Option<&str>;
     fn get_content_type(&self) -> Option<&str>;
     fn get_user_agent(&self) -> Option<&str>;

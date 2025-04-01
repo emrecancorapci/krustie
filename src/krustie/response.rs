@@ -17,7 +17,7 @@ impl HttpResponse for Response {
     fn new() -> Self {
         Self {
             version: String::from("HTTP/1.1"),
-            status: StatusCode::NotSet,
+            status: StatusCode::Ok,
             headers: HashMap::new(),
             body: Vec::new(),
             locals: HashMap::new(),
@@ -41,7 +41,7 @@ impl HttpResponse for Response {
     }
 
     fn set_body_text(&mut self, text: &str) -> &mut Self {
-        self.set_body(text.as_bytes().to_vec(), "text/plain");
+        self.body = text.as_bytes().to_vec();
         self
     }
 
@@ -145,6 +145,12 @@ impl Response {
 
                 headers.insert("Content-Type".to_string(), "text/plain".to_string());
             }
+        } else {
+            headers.insert("Content-Length".to_string(), "0".to_string());
+
+            if !headers.contains_key("Content-Type") {
+                headers.insert("Content-Type".to_string(), "text/plain".to_string());
+            }
         }
 
         if !headers.is_empty() {
@@ -158,8 +164,9 @@ impl Response {
             response.extend_from_slice(headers_string.as_bytes());
         }
 
+        response.extend_from_slice(b"\r\n");
+
         if !self.body.is_empty() {
-            response.extend_from_slice(b"\r\n");
             response.extend_from_slice(&self.body);
         }
 

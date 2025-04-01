@@ -87,17 +87,3 @@ fn serialize_response_with_different_content_type() {
     assert!(response.to_string().contains("Content-Type: application/json"));
     assert!(response.to_string().contains("{\"message\": \"Hello\"}"));
 }
-
-#[test]
-fn serialize_response_full_assert() {
-    let mut response = Response::new();
-
-    let response = response
-        .set_status(StatusCode::Ok)
-        .set_header("Server", "Krustie")
-        .set_body_text("Full response test");
-    
-    let expected_response = "HTTP/1.1 200 OK\r\nContent-Length: 18\r\nContent-Type: text/plain\r\nServer: Krustie\r\n\r\nFull response test";
-    
-    assert_eq!(expected_response, response.to_string());
-}

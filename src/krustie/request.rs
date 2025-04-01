@@ -96,7 +96,9 @@ impl HttpRequest for Request {
             .unwrap_or(Ok(0 as usize))
             .map_err(|err| Error::new(ErrorKind::InvalidInput, err.to_string()))?;
 
-        let queries = if let Some((_, queries)) = uri.split_once('?') {
+        let (path, queries) = uri.split_once('?').or_else(|| Some((uri, ""))).unwrap();
+
+        let queries = if !queries.is_empty() {
             if queries.contains('?') {
                 Err(Error::new(
                     ErrorKind::InvalidInput,
@@ -117,7 +119,7 @@ impl HttpRequest for Request {
 
         if content_length == 0 {
             return Ok(Self {
-                path: String::from(uri),
+                path: String::from(path),
                 method,
                 http_version: String::from(version),
                 params: HashMap::new(),
@@ -240,7 +242,7 @@ fn split_request(vec: &[u8]) -> (Vec<&str>, &[u8]) {
     let mut http_request = Vec::new();
 
     while let Some(line) = split.next() {
-        if line.is_empty() {
+        if line == b"\r" || line == b"\r\n" {
             break;
         }
 

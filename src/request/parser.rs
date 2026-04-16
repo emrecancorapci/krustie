@@ -1,9 +1,9 @@
 use core::str;
 use std::{
     collections::HashMap,
-    io::{Error, ErrorKind, Read},
-    net::TcpStream,
-};
+    io::{Error, ErrorKind},};
+
+use tokio::{io::AsyncReadExt, net::TcpStream};
 
 use super::{request_line::RequestLine, ParseHttpRequestError, Request, RequestBody};
 
@@ -11,11 +11,11 @@ const MAX_HEADER: usize = 100;
 
 impl Request {
     /// Parses a TcpStream into Request
-    pub(crate) fn parse(mut stream: &TcpStream) -> Result<Self, Error> {
+    pub(crate) async fn parse(stream: &mut TcpStream) -> Result<Self, Error> {
         let peer_addr = stream.peer_addr()?;
         let buffer: &mut [u8] = &mut [0; 1024];
 
-        let stream_length = stream.read(buffer)?;
+        let stream_length = stream.read(buffer).await?;
 
         let (http_request, body) = Self::split_request(&buffer[..stream_length]);
 

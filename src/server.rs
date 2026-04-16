@@ -1,14 +1,14 @@
 use crate::{Request, Response, StatusCode};
-use std::{
-    fmt::{Debug, Formatter},
-    io::Write,
+use std::fmt::{Debug, Formatter};
+
+use tokio::{
+    io::AsyncWriteExt,
     net::{TcpListener, TcpStream},
 };
 
 pub mod route_handler;
 pub mod testing;
 use route_handler::{HandlerResult, RouteHandler};
-use std::thread;
 
 #[doc = include_str!("../docs/core/server.md")]
 pub struct Server {
@@ -68,8 +68,8 @@ impl Server {
     ///
     /// server.listen(8080);
     /// ```
-    pub fn listen(self, port: u16) {
-        Listener::listen(port, self);
+    pub async fn listen(self, port: u16) {
+        Listener::listen(port, self).await;
     }
 
     /// Handles data stream comes from TcpListener
@@ -80,23 +80,28 @@ impl Server {
     ///
     /// ```no_run
     /// use krustie::Server;
-    /// use std::net::TcpListener;
+    /// use tokio::net::TcpListener;
     ///
-    /// let mut server = Server::create();
-    /// let listener = TcpListener::bind("127.0.0.1:3000").unwrap();
+    /// #[tokio::main]
+    /// async fn main() {
+    ///   let mut server = Server::create();
+    ///   let listener = TcpListener::bind("127.0.0.1:3000").await.unwrap();
     ///
-    /// for stream in listener.incoming() {
-    ///   server.handle_stream(&mut stream.unwrap());
+    ///   for (mut stream, _) in listener.accept().await {
+    ///     server.handle_stream(&mut stream).await;
+    ///   }
     /// }
     ///
     /// ```
-    pub fn handle_stream(&mut self, stream: &mut TcpStream) {
+    pub async fn handle_stream(&mut self, stream: &mut TcpStream) {
         let mut response = Response::default();
+        let request_result = Request::parse(stream).await;
 
-        match Request::parse(stream) {
+        match request_result {
             Ok(request) => {
                 for handler in &mut self.route_handlers {
                     let result = handler.handle(&request, &mut response);
+
                     if result == HandlerResult::End {
                         break;
                     }
@@ -110,7 +115,7 @@ impl Server {
         }
         let response_stream: Vec<u8> = response.into();
 
-        match stream.write_all(&response_stream) {
+        match stream.write_all(&response_stream).await {
             Ok(_) => {}
             Err(e) => {
                 eprintln!("error: {}", e);
@@ -138,21 +143,24 @@ impl Debug for Server {
 struct Listener {}
 
 impl Listener {
-    fn listen(port: u16, handler: Server) {
+    async fn listen(port: u16, handler: Server) {
         let address = format!("127.0.0.1:{}", port);
-        let listener = TcpListener::bind(address).unwrap_or_else(|err| panic!("{}", err));
+        let listener = TcpListener::bind(address).await.unwrap_or_else(|err| {
+            panic!("Error while binding to port {}: {}", port, err);
+        });
 
         println!("Listening on http://localhost:{port}");
 
-        for stream_result in listener.incoming() {
-            let mut stream = stream_result.unwrap_or_else(|err| {
-                panic!("Error while listening: {}", err);
-            });
-
+        while let Ok((mut stream_result, _)) = listener.accept().await {
             let mut handler = handler.clone();
 
-            thread::spawn(move || {
-                handler.handle_stream(&mut stream);
+            tokio::spawn(async move {
+                dbg!(
+                    "Handling stream from {}",
+                    stream_result.peer_addr().unwrap()
+                );
+
+                handler.handle_stream(&mut stream_result).await;
             });
         }
     }

@@ -25,19 +25,18 @@ Krustie is a simple backend framework. It is designed to be a easy-to-use HTTP w
 ## Start your server
 
 ```rust
-use krustie::{ Router, Server, StatusCode };
-
-fn main() {
-    let mut server = Server::create();
-    let mut router = Router::new();
+#[tokio::main]
+async fn main() {
+    let mut server = krustie::Server::create();
+    let mut router = krustie::Router::new();
 
     router.get("/", |_, res| {
-        res.status(StatusCode::Ok).body_text("Hello World!");
+        res.status(krustie::StatusCode::Ok).body_text("Hello World!");
     });
 
     server.use_handler(router);
 
-    server.listen(8080);
+    server.listen(8080).await;
 }
 ```
 

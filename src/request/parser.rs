@@ -1,34 +1,35 @@
 use core::str;
 use std::{
-    collections::HashMap,
-    io::{Error, ErrorKind, Read},
-    net::TcpStream,
+    collections::HashMap, io::{Error, ErrorKind}, str::Utf8Error,
 };
 
-use super::{request_line::RequestLine, ParseHttpRequestError, Request, RequestBody};
+use tokio::{io::AsyncReadExt, net::TcpStream};
+
+use super::{ParseHttpRequestError, Request, RequestBody, request_line::RequestLine};
 
 const MAX_HEADER: usize = 100;
 
 impl Request {
     /// Parses a TcpStream into Request
-    pub(crate) fn parse(mut stream: &TcpStream) -> Result<Self, Error> {
+    pub(crate) async fn parse(stream: &mut TcpStream) -> Result<Self, Error> {
         let peer_addr = stream.peer_addr()?;
         let buffer: &mut [u8] = &mut [0; 1024];
 
-        let stream_length = stream.read(buffer)?;
+        let stream_length = stream.read(buffer).await?;
 
-        let (http_request, body) = Self::split_request(&buffer[..stream_length]);
+        let (http_request, body) = Self::split_request(&buffer[..stream_length])?;
 
-        let request_line = RequestLine::try_from(http_request[0]);
+        let request_line_str = http_request.get(0).ok_or(Error::new(
+            ErrorKind::InvalidInput,
+            "Error while parsing request line".to_string(),
+        ))?;
 
-        if request_line.is_err() {
-            return Err(Error::new(
+        let request_line = RequestLine::try_from(*request_line_str).map_err(|_err| {
+            Error::new(
                 ErrorKind::InvalidInput,
                 "Error while parsing request line".to_string(),
-            ));
-        }
-
-        let request_line = request_line.unwrap();
+            )
+        })?;
 
         if request_line.get_version() != "HTTP/1.1" {
             return Err(Error::new(
@@ -50,7 +51,7 @@ impl Request {
 
         if content_length == 0 {
             return Ok(Request {
-                request: RequestLine::try_from(http_request[0]).unwrap(),
+                request: request_line,
                 headers,
                 queries,
                 peer_addr,
@@ -152,21 +153,22 @@ impl Request {
         }
     }
 
-    fn split_request(vec: &[u8]) -> (Vec<&str>, &[u8]) {
-        let mut split = vec.split(|&x| x == b'\n');
+    fn split_request(vec: &[u8]) -> Result<(Vec<&str>, &[u8]), Error> {
+        let head_end = vec
+            .windows(4)
+            .position(|w| w == b"\r\n\r\n")
+            .map(|pos| pos + 4)
+            .or_else(|| vec.windows(2).position(|w| w == b"\n\n").map(|pos| pos + 2))
+            .unwrap_or(vec.len());
 
-        let mut http_request = Vec::new();
+        let http_request: Vec<&str> = vec[..head_end]
+            .split(|&x| x == b'\n')
+            .map(|line| line.strip_suffix(b"\r").unwrap_or(line))
+            .filter(|line| !line.is_empty())
+            .map(str::from_utf8)
+            .collect::<Result<Vec<&str>, Utf8Error>>()
+            .map_err(|_| Error::new(ErrorKind::InvalidData, ParseHttpRequestError.to_string()))?;
 
-        while let Some(line) = split.next() {
-            if line.is_empty() {
-                break;
-            }
-
-            http_request.push(str::from_utf8(line).unwrap());
-        }
-
-        let body = split.next().unwrap_or(&[]);
-
-        (http_request, body)
+        Ok((http_request, &vec[head_end..]))
     }
 }

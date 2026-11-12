@@ -1,6 +1,5 @@
 use crate::{
-    server::route_handler::{HandlerResult, RouteHandler},
-    HttpMethod, Middleware, Request, Response, StatusCode,
+    HttpMethod, Middleware, Request, Response, StatusCode, server::route_handler::{HandlerResult, RouteHandler},
 };
 use endpoint::Endpoint;
 use regex::Regex;
@@ -320,7 +319,7 @@ impl Router {
 
 impl RouteHandler for Router {
     fn handle(&mut self, request: &Request, response: &mut Response) -> HandlerResult {
-        while let Some(middleware) = self.middlewares.iter_mut().next() {
+        for middleware in self.middlewares.iter_mut() {
             match middleware.middleware(request, response) {
                 HandlerResult::End => {
                     return HandlerResult::End;
@@ -331,7 +330,7 @@ impl RouteHandler for Router {
 
         match self.route_handler(request.get_path_array(), request.get_method()) {
             Some((endpoint, params)) => {
-                while let Some(middleware) = endpoint.get_middlewares().iter_mut().next() {
+                for middleware in endpoint.get_middlewares() {
                     match middleware.middleware(request, response) {
                         HandlerResult::End => {
                             return HandlerResult::End;

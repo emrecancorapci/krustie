@@ -38,7 +38,11 @@ impl RequestBody {
                     "Error while parsing json body",
                 )),
             },
-            "plain/text" => Ok(RequestBody::Text(body.iter().map(|&c| c as char).collect())),
+            "text/plain" => Ok(RequestBody::Text(
+                String::from_utf8(body.to_vec()).map_err(|_| {
+                    Error::new(ErrorKind::InvalidData, "Error while parsing text body")
+                })?,
+            )),
             _ => Ok(RequestBody::Binary(body.to_vec())),
         }
     }

@@ -155,11 +155,6 @@ impl Listener {
             let mut handler = handler.clone();
 
             tokio::spawn(async move {
-                dbg!(
-                    "Handling stream from {}",
-                    stream_result.peer_addr().unwrap()
-                );
-
                 handler.handle_stream(&mut stream_result).await;
             });
         }
